@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="sk">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Menu hier</title>
+    <style>
+        body { font-family: sans-serif; text-align: center; background: #f0f8ff; margin: 0; padding: 20px; }
+        #app-container { max-width: 500px; margin: 0 auto; padding-top: 50px; }
+        h1 { color: #333; margin-bottom: 40px; }
+        .menu-container { display: flex; flex-direction: column; gap: 20px; }
+        a { text-decoration: none; }
+        button { 
+            width: 100%; font-size: 28px; padding: 40px; cursor: pointer; border: none; 
+            border-radius: 20px; color: white; font-weight: bold; transition: 0.3s;
+        }
+        .btn-makke { background-color: #4682b4; }
+        .btn-obojake { background-color: #32cd32; }
+        button:active { transform: scale(0.98); }
+    </style>
+</head>
+<body>
+    <div id="app-container">
+        <h1>Vyber si hru:</h1>
+        <div class="menu-container">
+            <a href="yi.html">
+                <button class="btn-makke">Mäkké / Tvrdé (I / Y)</button>
+            </a>
+            <a href="obojake.html">
+                <button class="btn-obojake">Obojaké</button>
+            </a>
+        </div>
+    </div>
+</body>
+</html>
