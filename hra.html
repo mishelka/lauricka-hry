@@ -59,4 +59,116 @@
         novaUloha();
     </script>
 </body>
-</html>
+</html<!DOCTYPE html>
+<html lang="sk">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Hra: Mäkké alebo Tvrdé? (Mobil)</title>
+    <style>
+        body { font-family: sans-serif; text-align: center; padding: 20px; background: linear-gradient(180deg, #f0f8ff, #d9e7f5); margin: 0; overflow-x: hidden; }
+        #app-container { max-width: 400px; margin: 0 auto; padding-top: 10px; }
+        h1 { font-size: 24px; color: #333; margin-top: 5px; }
+        #pismeno { font-size: 100px; margin: 30px 0; font-weight: bold; color: #1a1a1a; }
+        .button-container { display: flex; justify-content: center; gap: 15px; margin-bottom: 20px; }
+        button { font-size: 22px; padding: 25px 0; flex: 1; cursor: pointer; border: none; border-radius: 15px; font-weight: bold; position: relative; }
+        .tvrde { background-color: #ff6347; color: white; }
+        .makke { background-color: #4682b4; color: white; }
+        /* Explicitly styling the large Y and I text inside the button */
+        .klavesa-lg { font-size: 80px; display: block; margin-top: 10px; opacity: 1; text-decoration: none;}
+        #vysledok { min-height: 100px; }
+        #napoveda { margin-top: 15px; color: #666; font-size: 14px; padding: 0 10px; }
+        
+        /* New Fireworks Styles */
+        #fireworks-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 1000; overflow: hidden; }
+        .particle { position: absolute; width: 6px; height: 6px; border-radius: 50%; opacity: 0; animation: explode 1s ease-out forwards; }
+        @keyframes explode {
+            0% { transform: scale(1); opacity: 1; }
+            100% { transform: scale(0) translateY(100px) translateX(var(--dx)); opacity: 0; }
+        }
+    </style>
+</head>
+<body>
+    <div id="app-container">
+        <h1>Je táto spoluhláska mäkká alebo tvrdá?</h1>
+        <div id="pismeno">?</div>
+        
+        <div class="button-container">
+            <button class="tvrde" onclick="check('tvrde')">Tvrdá <span class="klavesa-lg">Y</span></button>
+            <button class="makke" onclick="check('makke')">Mäkká <span class="klavesa-lg">I</span></button>
+        </div>
+        
+        <div id="vysledok">
+            <h2 id="feedback"></h2>
+        </div>
+        <div id="napoveda">Ťukni na Y pre tvrdú alebo I pre mäkkú. (Reaguje aj na klávesnicu Y/I)</div>
+    </div>
+
+    <!-- Fireworks Overlay -->
+    <div id="fireworks-overlay"></div>
+
+    <script>
+        const ulohy = [
+            {char: 'D', type: 'tvrde'}, {char: 'T', type: 'tvrde'}, {char: 'N', type: 'tvrde'},
+            {char: 'L', type: 'tvrde'}, {char: 'K', type: 'tvrde'}, {char: 'H', type: 'tvrde'},
+            {char: 'CH', type: 'tvrde'}, {char: 'C', type: 'makke'}, {char: 'Č', type: 'makke'},
+            {char: 'Š', type: 'makke'}, {char: 'Ž', type: 'makke'}, {char: 'Ď', type: 'makke'}
+        ];
+        let aktualna = 0;
+
+        function novaUloha() {
+            aktualna = Math.floor(Math.random() * ulohy.length);
+            document.getElementById('pismeno').innerText = ulohy[aktualna].char;
+            document.getElementById('feedback').innerText = "";
+        }
+
+        function triggerFireworks() {
+            const overlay = document.getElementById('fireworks-overlay');
+            const colors = ['#ff6347', '#4682b4', '#FFD700', '#32CD32', '#FF69B4'];
+            for (let i = 0; i < 50; i++) {
+                const particle = document.createElement('div');
+                particle.classList.add('particle');
+                particle.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
+                
+                // Set random explosion direction
+                const dx = (Math.random() - 0.5) * 400 + 'px';
+                particle.style.setProperty('--dx', dx);
+                
+                // Center the burst on screen
+                particle.style.left = '50%';
+                particle.style.top = '40%';
+                
+                // Add a randomized delay
+                particle.style.animationDelay = (Math.random() * 0.3) + 's';
+
+                overlay.appendChild(particle);
+                
+                // Remove particle after animation ends
+                setTimeout(() => { particle.remove(); }, 1500);
+            }
+        }
+
+        function check(typ) {
+            const feedbackElem = document.getElementById('feedback');
+            if (typ === ulohy[aktualna].type) {
+                feedbackElem.innerText = "Správne! :)";
+                feedbackElem.style.color = "green";
+                triggerFireworks(); // Trigger the effect here
+            } else {
+                feedbackElem.innerText = "Skús znova! :(";
+                feedbackElem.style.color = "red";
+            }
+            // Delay before next question to show effect and feedback
+            setTimeout(novaUloha, 1500);
+        }
+
+        // Reakcia na klávesnicu (stays the same, still useful for testing)
+        document.addEventListener('keydown', function(event) {
+            if (event.key.toLowerCase() === 'y') check('tvrde');
+            if (event.key.toLowerCase() === 'i') check('makke');
+        });
+
+        novaUloha();
+    </script>
+</body>
+</html>>
