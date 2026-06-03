@@ -3,33 +3,29 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Hra: Spoluhlásky</title>
+    <title>Hra: Doplň i/y</title>
     <style>
         body { font-family: sans-serif; text-align: center; background: #f0f8ff; margin: 0; padding: 10px; }
         #app-container { max-width: 500px; margin: 0 auto; }
-        #pismeno { font-size: 100px; font-weight: bold; margin: 20px 0; }
-        .button-container { display: flex; flex-direction: column; gap: 10px; padding: 0 10px; }
-        button { font-size: 22px; padding: 25px; cursor: pointer; border: none; border-radius: 15px; color: white; font-weight: bold; transition: 0.2s; position: relative; }
-        
+        #slovo { font-size: 50px; font-weight: bold; margin: 40px 0; letter-spacing: 5px; }
+        .button-container { display: flex; flex-direction: column; gap: 15px; padding: 0 10px; }
+        button { font-size: 28px; padding: 30px; cursor: pointer; border: none; border-radius: 20px; color: white; font-weight: bold; transition: 0.2s; position: relative; }
         .btn-tvrde { background-color: #5d6d7e; }
         .btn-makke { background-color: #5499c7; }
-        .btn-obojake { background-color: #7d3c98; }
-        
         button:disabled { opacity: 0.9; cursor: not-allowed; }
-        .icon { position: absolute; right: 15px; top: 50%; transform: translateY(-50%); font-size: 30px; }
+        .icon { position: absolute; right: 20px; top: 50%; transform: translateY(-50%); font-size: 40px; }
         #fireworks-overlay { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; pointer-events: none; z-index: 1000; }
         .particle { position: absolute; width: 15px; height: 15px; border-radius: 50%; opacity: 0; }
     </style>
 </head>
 <body>
     <div id="app-container">
-        <h1>Aká je to spoluhláska?</h1>
-        <div id="pismeno">?</div>
+        <h1>Doplň správne i/y:</h1>
+        <div id="slovo">?</div>
         
         <div class="button-container">
-            <button id="btn-tvrde" class="btn-tvrde" onclick="check('tvrde')">Tvrdá</button>
-            <button id="btn-makke" class="btn-makke" onclick="check('makke')">Mäkká</button>
-            <button id="btn-obojake" class="btn-obojake" onclick="check('obojake')">Obojaká I Y</button>
+            <button id="btn-tvrde" class="btn-tvrde" onclick="check('tvrde')">Tvrdé Y</button>
+            <button id="btn-makke" class="btn-makke" onclick="check('makke')">Mäkké I</button>
         </div>
     </div>
 
@@ -37,16 +33,18 @@
 
     <script>
         const originalneUlohy = [
-            {char: 'D', type: 'tvrde'}, {char: 'T', type: 'tvrde'}, {char: 'N', type: 'tvrde'},
-            {char: 'L', type: 'tvrde'}, {char: 'K', type: 'tvrde'}, {char: 'G', type: 'tvrde'},
-            {char: 'H', type: 'tvrde'}, {char: 'CH', type: 'tvrde'},
-            {char: 'C', type: 'makke'}, {char: 'Č', type: 'makke'}, {char: 'Š', type: 'makke'},
-            {char: 'Ž', type: 'makke'}, {char: 'Ď', type: 'makke'}, {char: 'Ť', type: 'makke'},
-            {char: 'Ň', type: 'makke'}, {char: 'Ľ', type: 'makke'}, {char: 'J', type: 'makke'},
-            {char: 'DZ', type: 'makke'}, {char: 'DŽ', type: 'makke'},
-            {char: 'B', type: 'obojake'}, {char: 'M', type: 'obojake'}, {char: 'P', type: 'obojake'},
-            {char: 'R', type: 'obojake'}, {char: 'S', type: 'obojake'}, {char: 'V', type: 'obojake'},
-            {char: 'Z', type: 'obojake'}, {char: 'F', type: 'obojake'}
+            {vypis: "D_vadlo", odpoved: "makke", cele: "Divadlo"},
+            {vypis: "T_žba", odpoved: "makke", cele: "Ťažba"},
+            {vypis: "L_pka", odpoved: "makke", cele: "Lipka"},
+            {vypis: "K_no", odpoved: "makke", cele: "Kino"},
+            {vypis: "Č_ta", odpoved: "makke", cele: "Číta"},
+            {vypis: "Š_pka", odpoved: "makke", cele: "Šípka"},
+            {vypis: "D_m", odpoved: "tvrde", cele: "Dym"},
+            {vypis: "T_k", odpoved: "tvrde", cele: "Tyk"},
+            {vypis: "N_tka", odpoved: "tvrde", cele: "Nytka"},
+            {vypis: "H_dra", odpoved: "tvrde", cele: "Hydra"},
+            {vypis: "L_ko", odpoved: "tvrde", cele: "Lyko"},
+            {vypis: "K_tka", odpoved: "tvrde", cele: "Kytka"}
         ];
 
         let poradie = [];
@@ -62,7 +60,8 @@
             if (index >= poradie.length) {
                 zamiesajSadu();
             }
-            document.getElementById('pismeno').innerText = poradie[index].char;
+            const uloha = poradie[index];
+            document.getElementById('slovo').innerText = uloha.vypis;
             const buttons = document.querySelectorAll('button');
             buttons.forEach(b => {
                 b.disabled = false;
@@ -71,9 +70,8 @@
             blokovane = false;
         }
 
-        document.getElementById('btn-tvrde').setAttribute('data-text', 'Tvrdá Y');
-        document.getElementById('btn-makke').setAttribute('data-text', 'Mäkká I');
-        document.getElementById('btn-obojake').setAttribute('data-text', 'Obojaká');
+        document.getElementById('btn-tvrde').setAttribute('data-text', 'Tvrdé Y');
+        document.getElementById('btn-makke').setAttribute('data-text', 'Mäkké I');
 
         function triggerFireworks() {
             const overlay = document.getElementById('fireworks-overlay');
@@ -94,9 +92,10 @@
             blokovane = true;
             const btn = document.getElementById('btn-' + typ);
             
-            if (typ === poradie[index].type) {
+            if (typ === poradie[index].odpoved) {
                 btn.innerHTML += '<span class="icon">✅</span>';
                 document.querySelectorAll('button').forEach(b => b.disabled = true);
+                setTimeout(() => { document.getElementById('slovo').innerText = poradie[index].cele; }, 500);
                 triggerFireworks();
                 index++;
                 setTimeout(novaUloha, 2500);

@@ -3,62 +3,67 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Hra: Mäkké alebo Tvrdé?</title>
+    <title>Hra: Mäkká alebo Tvrdá spoluhláska?</title>
     <style>
         body { font-family: sans-serif; text-align: center; background: #f0f8ff; margin: 0; padding: 10px; }
         #app-container { max-width: 500px; margin: 0 auto; }
-        #pismeno { font-size: 120px; font-weight: bold; margin: 30px 0; }
+        #score-board { font-size: 20px; margin-bottom: 15px; }
+        #pismeno { font-size: 120px; font-weight: bold; margin: 20px 0; }
+        #vysledok-box { display: none; padding: 20px; }
         .button-container { display: flex; flex-direction: column; gap: 15px; padding: 0 20px; }
         button { font-size: 28px; padding: 40px; cursor: pointer; border: none; border-radius: 20px; color: white; font-weight: bold; transition: 0.2s; position: relative; }
         .tvrde { background-color: #ffc107; color: #333; }
         .makke { background-color: #4682b4; }
+        .nova-hra { background-color: #28a745; margin-top: 20px; }
         button:disabled { opacity: 0.9; cursor: not-allowed; }
-        .klavesa-lg { font-size: 70px; display: block; }
         .icon { position: absolute; right: 20px; top: 50%; transform: translateY(-50%); font-size: 40px; }
+        /* Hviezdy štýl */
+        .stars { font-size: 50px; margin: 20px 0; }
+        .star-gold { color: #FFD700; }
+        .star-grey { color: #ccc; }
+        .chyby-list { font-size: 20px; color: #d9534f; margin: 20px 0; }
         #fireworks-overlay { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; pointer-events: none; z-index: 1000; }
         .particle { position: absolute; width: 15px; height: 15px; border-radius: 50%; opacity: 0; }
     </style>
 </head>
 <body>
     <div id="app-container">
-        <h1>Mäkká alebo Tvrdé?</h1>
-        <div id="pismeno">?</div>
-        
-        <div class="button-container">
-            <button id="btn-tvrde" class="tvrde" onclick="check('tvrde')">Tvrdá <span class="klavesa-lg">Y</span></button>
-            <button id="btn-makke" class="makke" onclick="check('makke')">Mäkká <span class="klavesa-lg">I</span></button>
+        <div id="game-ui">
+            <h1>Mäkká alebo Tvrdá spoluhláska?</h1>
+            <div id="score-board">
+                Správne: <span id="hit" style="color: #28a745; font-weight: bold;">0</span> | 
+                Chyby: <span id="miss" style="color: #d9534f; font-weight: bold;">0</span>
+            </div>
+            <div id="pismeno">?</div>
+            <div class="button-container">
+                <button id="btn-tvrde" class="tvrde" onclick="check('tvrde')">Tvrdá Y</button>
+                <button id="btn-makke" class="makke" onclick="check('makke')">Mäkká I</button>
+            </div>
+        </div>
+
+        <div id="vysledok-box">
+            <h2>Koniec hry!</h2>
+            <div class="stars" id="hviezdy"></div>
+            <div class="chyby-list" id="chyby-text"></div>
+            <button class="nova-hra" onclick="restart()">Nová hra</button>
         </div>
     </div>
 
     <div id="fireworks-overlay"></div>
 
     <script>
-        const ulohy = [
-            // Tvrdé: D, T, N, L, K, G, H, CH
+        const originalneUlohy = [
             {char: 'D', type: 'tvrde'}, {char: 'T', type: 'tvrde'}, {char: 'N', type: 'tvrde'},
             {char: 'L', type: 'tvrde'}, {char: 'K', type: 'tvrde'}, {char: 'G', type: 'tvrde'},
             {char: 'H', type: 'tvrde'}, {char: 'CH', type: 'tvrde'},
-            // Mäkké: C, Č, Š, Ž, Ď, Ť, Ň, Ľ, J, DZ, DŽ
             {char: 'C', type: 'makke'}, {char: 'Č', type: 'makke'}, {char: 'Š', type: 'makke'},
             {char: 'Ž', type: 'makke'}, {char: 'Ď', type: 'makke'}, {char: 'Ť', type: 'makke'},
             {char: 'Ň', type: 'makke'}, {char: 'Ľ', type: 'makke'}, {char: 'J', type: 'makke'},
             {char: 'DŽ', type: 'makke'}, {char: 'DZ', type: 'makke'}
         ];
-        let aktualna = 0;
-        let blokovane = false;
 
-        function novaUloha() {
-            aktualna = Math.floor(Math.random() * ulohy.length);
-            document.getElementById('pismeno').innerText = ulohy[aktualna].char;
-            const b1 = document.getElementById('btn-tvrde');
-            const b2 = document.getElementById('btn-makke');
-            b1.disabled = b2.disabled = false;
-            b1.style.backgroundColor = '#ffc107'; b1.style.color = '#333';
-            b2.style.backgroundColor = '#4682b4'; b2.style.color = 'white';
-            b1.innerHTML = 'Tvrdá <span class="klavesa-lg">Y</span>';
-            b2.innerHTML = 'Mäkká <span class="klavesa-lg">I</span>';
-            blokovane = false;
-        }
+        let poradie = [], index = 0, hit = 0, miss = 0, chybnePismena = new Set();
+        let blokovane = false;
 
         function triggerFireworks() {
             const overlay = document.getElementById('fireworks-overlay');
@@ -74,6 +79,50 @@
             }
         }
 
+        function zamiesajSadu() {
+            poradie = [...originalneUlohy].sort(() => Math.random() - 0.5);
+            index = 0; hit = 0; miss = 0; chybnePismena.clear();
+            document.getElementById('hit').innerText = '0';
+            document.getElementById('miss').innerText = '0';
+            document.getElementById('game-ui').style.display = 'block';
+            document.getElementById('vysledok-box').style.display = 'none';
+        }
+
+        function novaUloha() {
+            if (index >= poradie.length) {
+                zobrazVysledky();
+                return;
+            }
+            document.getElementById('pismeno').innerText = poradie[index].char;
+            const bTvrde = document.getElementById('btn-tvrde');
+            const bMakke = document.getElementById('btn-makke');
+            bTvrde.disabled = bMakke.disabled = false;
+            bTvrde.innerHTML = 'Tvrdá Y';
+            bMakke.innerHTML = 'Mäkká I';
+            blokovane = false;
+        }
+
+        function zobrazVysledky() {
+            document.getElementById('game-ui').style.display = 'none';
+            document.getElementById('vysledok-box').style.display = 'block';
+            
+            let pocetHviezd = 0;
+            if (miss === 0) pocetHviezd = 5;
+            else if (miss <= 2) pocetHviezd = 4;
+            else if (miss <= 4) pocetHviezd = 3;
+            else if (miss <= 6) pocetHviezd = 2;
+            else pocetHviezd = 1;
+
+            let htmlStars = "";
+            for (let i = 0; i < 5; i++) {
+                htmlStars += `<span class="${i < pocetHviezd ? 'star-gold' : 'star-grey'}">★</span>`;
+            }
+            document.getElementById('hviezdy').innerHTML = htmlStars;
+            document.getElementById('chyby-text').innerText = chybnePismena.size > 0 
+                ? "Precvič si: " + Array.from(chybnePismena).join(', ') 
+                : "Výborne, žiadne chyby!";
+        }
+
         function check(typ) {
             if (blokovane) return;
             blokovane = true;
@@ -81,25 +130,26 @@
             const bMakke = document.getElementById('btn-makke');
             const btn = (typ === 'tvrde') ? bTvrde : bMakke;
             
-            if (typ === ulohy[aktualna].type) {
+            if (typ === poradie[index].type) {
+                hit++;
+                document.getElementById('hit').innerText = hit;
                 btn.innerHTML += '<span class="icon">✅</span>';
                 bTvrde.disabled = bMakke.disabled = true;
                 triggerFireworks();
+                index++;
                 setTimeout(novaUloha, 2500);
             } else {
-                btn.style.backgroundColor = '#ff0000';
-                btn.style.color = 'white';
+                miss++;
+                document.getElementById('miss').innerText = miss;
+                chybnePismena.add(poradie[index].char);
                 btn.innerHTML += '<span class="icon">❌</span>';
-                setTimeout(novaUloha, 1000);
+                setTimeout(() => { blokovane = false; novaUloha(); }, 1000);
             }
         }
 
-        document.addEventListener('keydown', (e) => {
-            const k = e.key.toLowerCase();
-            if (k === 'y') check('tvrde');
-            if (k === 'i') check('makke');
-        });
+        function restart() { zamiesajSadu(); novaUloha(); }
 
+        zamiesajSadu();
         novaUloha();
     </script>
 </body>
