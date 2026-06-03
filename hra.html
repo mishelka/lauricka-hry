@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="sk">
+<head>
+    <meta charset="UTF-8">
+    <title>Hra: Mäkké alebo Tvrdé?</title>
+    <style>
+        body { font-family: sans-serif; text-align: center; padding: 50px; background: #f0f8ff; }
+        #pismeno { font-size: 120px; margin: 20px; font-weight: bold; color: #333; }
+        .klavesa { font-weight: bold; text-decoration: underline; }
+        button { font-size: 24px; padding: 15px 30px; margin: 10px; cursor: pointer; border: none; border-radius: 10px; }
+        .tvrde { background-color: #ff6347; color: white; }
+        .makke { background-color: #4682b4; color: white; }
+        #napoveda { margin-top: 20px; color: #666; }
+    </style>
+</head>
+<body>
+    <h1>Je táto spoluhláska mäkká alebo tvrdá?</h1>
+    <div id="pismeno">?</div>
+    
+    <button class="tvrde" onclick="check('tvrde')">Tvrdá (<span class="klavesa">Y</span>)</button>
+    <button class="makke" onclick="check('makke')">Mäkká (<span class="klavesa">I</span>)</button>
+    
+    <h2 id="vysledok"></h2>
+    <div id="napoveda">Stlač <b>Y</b> na klávesnici pre tvrdú alebo <b>I</b> pre mäkkú.</div>
+
+    <script>
+        const ulohy = [
+            {char: 'D', type: 'tvrde'}, {char: 'T', type: 'tvrde'}, {char: 'N', type: 'tvrde'},
+            {char: 'L', type: 'tvrde'}, {char: 'K', type: 'tvrde'}, {char: 'H', type: 'tvrde'},
+            {char: 'CH', type: 'tvrde'}, {char: 'C', type: 'makke'}, {char: 'Č', type: 'makke'},
+            {char: 'Š', type: 'makke'}, {char: 'Ž', type: 'makke'}, {char: 'Ď', type: 'makke'}
+        ];
+        let aktualna = 0;
+
+        function novaUloha() {
+            aktualna = Math.floor(Math.random() * ulohy.length);
+            document.getElementById('pismeno').innerText = ulohy[aktualna].char;
+            document.getElementById('vysledok').innerText = "";
+        }
+
+        function check(typ) {
+            if (typ === ulohy[aktualna].type) {
+                document.getElementById('vysledok').innerText = "Správne! :)";
+                document.getElementById('vysledok').style.color = "green";
+            } else {
+                document.getElementById('vysledok').innerText = "Skús znova! :(";
+                document.getElementById('vysledok').style.color = "red";
+            }
+            setTimeout(novaUloha, 1000);
+        }
+
+        // Reakcia na klávesnicu
+        document.addEventListener('keydown', function(event) {
+            if (event.key.toLowerCase() === 'y') check('tvrde');
+            if (event.key.toLowerCase() === 'i') check('makke');
+        });
+
+        novaUloha();
+    </script>
+</body>
+</html>
