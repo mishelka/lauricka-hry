@@ -1,4 +1,4 @@
-<!DOCTY<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="sk">
 <head>
     <meta charset="UTF-8">
@@ -9,84 +9,95 @@
         #app-container { max-width: 500px; margin: 0 auto; }
         #pismeno { font-size: 120px; font-weight: bold; margin: 30px 0; }
         .button-container { display: flex; flex-direction: column; gap: 15px; padding: 0 20px; }
-        button { font-size: 28px; padding: 40px; cursor: pointer; border: none; border-radius: 20px; color: white; font-weight: bold; }
-        .tvrde { background-color: #ff6347; }
+        button { font-size: 28px; padding: 40px; cursor: pointer; border: none; border-radius: 20px; color: white; font-weight: bold; transition: 0.2s; position: relative; }
+        .tvrde { background-color: #ffc107; color: #333; }
         .makke { background-color: #4682b4; }
+        button:disabled { opacity: 0.9; cursor: not-allowed; }
         .klavesa-lg { font-size: 70px; display: block; }
-        #feedback { font-size: 35px; height: 60px; margin: 20px 0; font-weight: bold; }
-        
-        /* Fullscreen Fireworks Overlay */
+        .icon { position: absolute; right: 20px; top: 50%; transform: translateY(-50%); font-size: 40px; }
         #fireworks-overlay { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; pointer-events: none; z-index: 1000; }
         .particle { position: absolute; width: 15px; height: 15px; border-radius: 50%; opacity: 0; }
     </style>
 </head>
 <body>
     <div id="app-container">
-        <h1>Mäkká alebo Tvrdá?</h1>
+        <h1>Mäkká alebo Tvrdé?</h1>
         <div id="pismeno">?</div>
         
         <div class="button-container">
-            <button class="tvrde" onclick="check('tvrde')">Tvrdá <span class="klavesa-lg">Y</span></button>
-            <button class="makke" onclick="check('makke')">Mäkká <span class="klavesa-lg">I</span></button>
+            <button id="btn-tvrde" class="tvrde" onclick="check('tvrde')">Tvrdá <span class="klavesa-lg">Y</span></button>
+            <button id="btn-makke" class="makke" onclick="check('makke')">Mäkká <span class="klavesa-lg">I</span></button>
         </div>
-        
-        <div id="feedback"></div>
     </div>
 
     <div id="fireworks-overlay"></div>
 
     <script>
         const ulohy = [
+            // Tvrdé: D, T, N, L, K, G, H, CH, DZ
             {char: 'D', type: 'tvrde'}, {char: 'T', type: 'tvrde'}, {char: 'N', type: 'tvrde'},
-            {char: 'L', type: 'tvrde'}, {char: 'K', type: 'tvrde'}, {char: 'H', type: 'tvrde'},
-            {char: 'CH', type: 'tvrde'}, {char: 'C', type: 'makke'}, {char: 'Č', type: 'makke'},
-            {char: 'Š', type: 'makke'}, {char: 'Ž', type: 'makke'}, {char: 'Ď', type: 'makke'}
+            {char: 'L', type: 'tvrde'}, {char: 'K', type: 'tvrde'}, {char: 'G', type: 'tvrde'},
+            {char: 'H', type: 'tvrde'}, {char: 'CH', type: 'tvrde'}, {char: 'DZ', type: 'tvrde'},
+            // Mäkké: C, Č, Š, Ž, Ď, Ť, Ň, Ľ, J, DŽ
+            {char: 'C', type: 'makke'}, {char: 'Č', type: 'makke'}, {char: 'Š', type: 'makke'},
+            {char: 'Ž', type: 'makke'}, {char: 'Ď', type: 'makke'}, {char: 'Ť', type: 'makke'},
+            {char: 'Ň', type: 'makke'}, {char: 'Ľ', type: 'makke'}, {char: 'J', type: 'makke'},
+            {char: 'DŽ', type: 'makke'}
         ];
         let aktualna = 0;
+        let blokovane = false;
 
         function novaUloha() {
             aktualna = Math.floor(Math.random() * ulohy.length);
             document.getElementById('pismeno').innerText = ulohy[aktualna].char;
-            document.getElementById('feedback').innerText = "";
+            const b1 = document.getElementById('btn-tvrde');
+            const b2 = document.getElementById('btn-makke');
+            b1.disabled = b2.disabled = false;
+            b1.style.backgroundColor = '#ffc107'; b1.style.color = '#333';
+            b2.style.backgroundColor = '#4682b4'; b2.style.color = 'white';
+            b1.innerHTML = 'Tvrdá <span class="klavesa-lg">Y</span>';
+            b2.innerHTML = 'Mäkká <span class="klavesa-lg">I</span>';
+            blokovane = false;
         }
 
         function triggerFireworks() {
             const overlay = document.getElementById('fireworks-overlay');
-            // Zvýšený počet častíc pre lepší efekt
             for (let i = 0; i < 40; i++) {
                 const p = document.createElement('div');
                 p.className = 'particle';
                 p.style.backgroundColor = `hsl(${Math.random()*360}, 80%, 60%)`;
                 p.style.left = '50%'; p.style.top = '50%';
                 overlay.appendChild(p);
-                
                 const angle = Math.random() * Math.PI * 2;
-                const dist = Math.random() * 400 + 100; // Väčší rozptyl
-                // Spomalená animácia na 2.5 sekundy
-                p.animate([
-                    { transform: 'translate(0,0) scale(1)', opacity: 1 },
-                    { transform: `translate(${Math.cos(angle)*dist}px, ${Math.sin(angle)*dist}px) scale(0)`, opacity: 0 }
-                ], { duration: 2500, easing: 'ease-out' }).onfinish = () => p.remove();
+                const dist = Math.random() * 400 + 100;
+                p.animate([{ transform: 'translate(0,0) scale(1)', opacity: 1 }, { transform: `translate(${Math.cos(angle)*dist}px, ${Math.sin(angle)*dist}px) scale(0)`, opacity: 0 }], { duration: 2500, easing: 'ease-out' }).onfinish = () => p.remove();
             }
         }
 
         function check(typ) {
-            const feedback = document.getElementById('feedback');
+            if (blokovane) return;
+            blokovane = true;
+            const bTvrde = document.getElementById('btn-tvrde');
+            const bMakke = document.getElementById('btn-makke');
+            const btn = (typ === 'tvrde') ? bTvrde : bMakke;
+            
             if (typ === ulohy[aktualna].type) {
-                feedback.innerText = "Správne! :)";
-                feedback.style.color = "green";
+                btn.innerHTML += '<span class="icon">✅</span>';
+                bTvrde.disabled = bMakke.disabled = true;
                 triggerFireworks();
+                setTimeout(novaUloha, 2500);
             } else {
-                feedback.innerText = "Skús znova! :(";
-                feedback.style.color = "red";
+                btn.style.backgroundColor = '#ff0000';
+                btn.style.color = 'white';
+                btn.innerHTML += '<span class="icon">❌</span>';
+                setTimeout(novaUloha, 1000);
             }
-            // Predĺžený čas pred zmenou na novú úlohu, aby si dieťa stihlo užiť efekt
-            setTimeout(novaUloha, 2500);
         }
 
         document.addEventListener('keydown', (e) => {
-            if (e.key.toLowerCase() === 'y') check('tvrde');
-            if (e.key.toLowerCase() === 'i') check('makke');
+            const k = e.key.toLowerCase();
+            if (k === 'y') check('tvrde');
+            if (k === 'i') check('makke');
         });
 
         novaUloha();
