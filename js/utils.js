@@ -56,4 +56,6 @@ function showResults({ miss, wrongItems, gameUiId = 'game-ui', resultBoxId = 'vy
     wrongText.innerText = wrongList.length > 0
         ? 'Precvič si: ' + wrongList.join(', ')
         : 'Výborne, žiadne chyby!';
+
+    return pocetHviezd;
 }

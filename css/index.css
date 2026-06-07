@@ -6,7 +6,28 @@ a { text-decoration: none; }
 button {
     width: 100%; font-size: 28px; padding: 40px; cursor: pointer; border: none;
     border-radius: 20px; color: white; font-weight: bold; transition: 0.3s;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    text-align: left;
 }
+.menu-title,
+.menu-stars {
+    display: inline-block;
+    vertical-align: middle;
+}
+.menu-title {
+    flex: 1;
+}
+.menu-stars {
+    margin-left: 16px;
+    font-size: 22px;
+    opacity: 0.95;
+    text-align: right;
+    white-space: nowrap;
+}
+.menu-stars .star-gold { color: #FFD700; }
+.menu-stars .star-grey { color: #ccc; }
 .btn-makke { background-color: #4682b4; }
 .btn-obojake { background-color: #32cd32; }
 .btn-slova { background-color: #8430ce; }

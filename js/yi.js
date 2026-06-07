@@ -1,8 +1,17 @@
 const originalneUlohy = window.YI_TASKS || [];
 const GAME_UTILS = window.GAME_UTILS;
+const PLAYER = window.PLAYER;
 
 let poradie = [], index = 0, hit = 0, miss = 0, chybnePismena = new Set();
 let blokovane = false;
+let bestStars = PLAYER ? PLAYER.getBestStars('yi') : 0;
+let mistakesOnCurrent = 0;
+
+function renderBestStars() {
+    const best = document.getElementById('best-stars');
+    if (!best) return;
+    best.innerText = `Najviac hviezd: ${bestStars}/5 ★`;
+}
 
 function zamiesajSadu() {
     poradie = [...originalneUlohy].sort(() => Math.random() - 0.5);
@@ -25,10 +34,13 @@ function novaUloha() {
     bTvrde.innerHTML = 'Tvrdá Y';
     bMakke.innerHTML = 'Mäkká I';
     blokovane = false;
+    mistakesOnCurrent = 0;
 }
 
 function zobrazVysledky() {
-    GAME_UTILS.showResults({ miss, wrongItems: chybnePismena });
+    const stars = GAME_UTILS.showResults({ miss, wrongItems: chybnePismena });
+    bestStars = PLAYER ? PLAYER.updateBestStars('yi', stars) : Math.max(bestStars, stars);
+    renderBestStars();
 }
 
 function check(typ) {
@@ -39,23 +51,28 @@ function check(typ) {
     const btn = (typ === 'tvrde') ? bTvrde : bMakke;
 
     if (typ === poradie[index].type) {
-        hit++;
-        document.getElementById('hit').innerText = hit;
+        if (mistakesOnCurrent === 0) {
+            hit++;
+            document.getElementById('hit').innerText = hit;
+        }
         btn.innerHTML += '<span class="icon">✅</span>';
         bTvrde.disabled = bMakke.disabled = true;
         GAME_UTILS.triggerFireworks();
         index++;
         setTimeout(novaUloha, 2500);
     } else {
+        mistakesOnCurrent++;
         miss++;
         document.getElementById('miss').innerText = miss;
         chybnePismena.add(poradie[index].char);
         btn.innerHTML += '<span class="icon">❌</span>';
-        setTimeout(() => { blokovane = false; novaUloha(); }, 1000);
+        btn.disabled = true;
+        blokovane = false;
     }
 }
 
 function restart() { zamiesajSadu(); novaUloha(); }
 
+renderBestStars();
 zamiesajSadu();
 novaUloha();
