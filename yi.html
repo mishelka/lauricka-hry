@@ -4,6 +4,16 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Hra: Mäkká alebo Tvrdá spoluhláska?</title>
+    <script>
+        (function redirectToReactYi() {
+            var path = window.location.pathname || '';
+            if (path.indexOf('/plain-legacy/') !== -1) return;
+
+            var basePath = path.replace(/yi\.html$/, '');
+            if (!/\/$/.test(basePath)) basePath += '/';
+            window.location.replace(window.location.origin + basePath + 'public/#/yi');
+        })();
+    </script>
     <link rel="stylesheet" href="css/yi.css">
 </head>
 <body>

@@ -51,11 +51,27 @@
         (function redirectToReact() {
             var path = window.location.pathname || '';
             var isLegacyCopy = path.indexOf('/plain-legacy/') !== -1;
-            var hasHashRoute = !!(window.location.hash && window.location.hash.indexOf('#/') === 0);
+            var isPublicApp = /\/public\/?$/.test(path) || /\/public\/index\.html$/.test(path);
 
-            if (isLegacyCopy || hasHashRoute) return;
+            if (isLegacyCopy || isPublicApp) return;
 
-            var target = window.location.origin + path.replace(/index\.html$/, '') + '#/';
+            var routeFromHash = (window.location.hash && window.location.hash.indexOf('#/') === 0)
+                ? window.location.hash.slice(1)
+                : '';
+            var fileName = path.split('/').pop();
+            var routeMap = {
+                'index.html': '/',
+                'yi.html': '/yi',
+                'obojake.html': '/obojake',
+                'slova-yi.html': '/slova',
+                'ratanie.html': '/ratanie'
+            };
+            var route = routeFromHash || routeMap[fileName] || '/';
+
+            var basePath = path.replace(/(?:index|yi|obojake|slova-yi|ratanie)\.html$/, '');
+            if (!/\/$/.test(basePath)) basePath += '/';
+
+            var target = window.location.origin + basePath + 'public/#' + route;
             window.location.replace(target);
         })();
     </script>

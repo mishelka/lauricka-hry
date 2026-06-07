@@ -4,6 +4,16 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Hra: Rátanie</title>
+    <script>
+        (function redirectToReactRatanie() {
+            var path = window.location.pathname || '';
+            if (path.indexOf('/plain-legacy/') !== -1) return;
+
+            var basePath = path.replace(/ratanie\.html$/, '');
+            if (!/\/$/.test(basePath)) basePath += '/';
+            window.location.replace(window.location.origin + basePath + 'public/#/ratanie');
+        })();
+    </script>
     <link rel="stylesheet" href="css/ratanie.css">
 </head>
 <body>
