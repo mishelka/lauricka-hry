@@ -10,6 +10,7 @@ export default function QuizGame({
   getCorrectOption,
   getWrongLabel,
   onCorrectReveal,
+  onRestartGame,
   promptClassName = ''
 }) {
   const [order, setOrder] = useState(() => shuffleArray(tasks));
@@ -29,6 +30,11 @@ export default function QuizGame({
   const wrongItemsArray = useMemo(() => Array.from(wrongItems), [wrongItems]);
 
   function restart() {
+    if (onRestartGame) {
+      onRestartGame();
+      return;
+    }
+
     setOrder(shuffleArray(tasks));
     setIndex(0);
     setHit(0);
