@@ -8,6 +8,10 @@ let miss = 0;
 let chybnePismena = new Set();
 let blokovane = false;
 
+function getAnswerButtons() {
+    return document.querySelectorAll('#game-ui .button-container button');
+}
+
 function zamiesajSadu() {
     poradie = [...originalneUlohy].sort(() => Math.random() - 0.5);
     index = 0;
@@ -26,7 +30,7 @@ function novaUloha() {
         return;
     }
     document.getElementById('pismeno').innerText = poradie[index].char;
-    const buttons = document.querySelectorAll('button');
+    const buttons = getAnswerButtons();
     buttons.forEach(b => {
         b.disabled = false;
         b.innerHTML = b.getAttribute('data-text');
@@ -51,7 +55,7 @@ function check(typ) {
         hit++;
         document.getElementById('hit').innerText = hit;
         btn.innerHTML += '<span class="icon">✅</span>';
-        document.querySelectorAll('button').forEach(b => b.disabled = true);
+        getAnswerButtons().forEach(b => b.disabled = true);
         GAME_UTILS.triggerFireworks();
         index++;
         setTimeout(novaUloha, 2500);
