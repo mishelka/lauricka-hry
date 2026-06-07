@@ -1,6 +1,15 @@
 const STORAGE_KEY = 'laurickaPlayerV1';
 const MAX_STARS = 5;
 
+const LEGACY_BEST_STAR_KEYS = {
+  yi: ['yiBestStarsV1', 'yiBestStars'],
+  obojake: ['obojakeBestStarsV1', 'obojakeBestStars'],
+  ratanie: ['ratanieBestStarsV1', 'ratanieBestStars']
+};
+
+const LEGACY_SLOVA_LEVEL_KEYS = ['slovaYiLevelStarsV1', 'slovaYiLevelStars'];
+const LEGACY_SLOVA_STATE_KEYS = ['slovaYiGameStateV1', 'slovaYiGameState'];
+
 function clampStars(value) {
   const n = Number(value);
   if (!Number.isFinite(n)) return 0;
@@ -41,47 +50,56 @@ function mergeLevelStars(state, gameId, starsArray, levelCount) {
     rec.levelStars = levels;
     rec.bestStars = Math.max(rec.bestStars, levels.reduce((a, b) => Math.max(a, b), 0));
   }
+
+  return changed;
 }
 
 function migrateLegacyIfNeeded(state) {
-  if (state.migratedLegacyV1) return;
+  let changed = false;
 
-  const yi = clampStars(localStorage.getItem('yiBestStarsV1'));
-  const obojake = clampStars(localStorage.getItem('obojakeBestStarsV1'));
+  Object.entries(LEGACY_BEST_STAR_KEYS).forEach(([gameId, keys]) => {
+    keys.forEach(key => {
+      const value = clampStars(localStorage.getItem(key));
+      if (value <= 0) return;
 
-  if (yi > 0) {
-    const rec = getRecord(state, 'yi');
-    rec.bestStars = Math.max(rec.bestStars, yi);
-  }
-
-  if (obojake > 0) {
-    const rec = getRecord(state, 'obojake');
-    rec.bestStars = Math.max(rec.bestStars, obojake);
-  }
-
-  try {
-    const slovaLegacyRaw = localStorage.getItem('slovaYiLevelStarsV1');
-    if (slovaLegacyRaw) {
-      mergeLevelStars(state, 'slovaYi', JSON.parse(slovaLegacyRaw), 8);
-    }
-  } catch {
-    // Ignore malformed legacy values.
-  }
-
-  try {
-    const slovaStateRaw = localStorage.getItem('slovaYiGameStateV1');
-    if (slovaStateRaw) {
-      const parsed = JSON.parse(slovaStateRaw);
-      if (parsed && Array.isArray(parsed.levelStars)) {
-        mergeLevelStars(state, 'slovaYi', parsed.levelStars, 8);
+      const rec = getRecord(state, gameId);
+      if (value > rec.bestStars) {
+        rec.bestStars = value;
+        changed = true;
       }
-    }
-  } catch {
-    // Ignore malformed legacy values.
-  }
+    });
+  });
 
+  LEGACY_SLOVA_LEVEL_KEYS.forEach(key => {
+    try {
+      const raw = localStorage.getItem(key);
+      if (raw && mergeLevelStars(state, 'slovaYi', JSON.parse(raw), 8)) {
+        changed = true;
+      }
+    } catch {
+      // Ignore malformed legacy values.
+    }
+  });
+
+  LEGACY_SLOVA_STATE_KEYS.forEach(key => {
+    try {
+      const raw = localStorage.getItem(key);
+      if (raw) {
+        const parsed = JSON.parse(raw);
+        if (parsed && Array.isArray(parsed.levelStars) && mergeLevelStars(state, 'slovaYi', parsed.levelStars, 8)) {
+          changed = true;
+        }
+      }
+    } catch {
+      // Ignore malformed legacy values.
+    }
+  });
+
+  const wasMigrated = Boolean(state.migratedLegacyV1);
   state.migratedLegacyV1 = true;
-  saveState(state);
+  if (changed || !wasMigrated) {
+    saveState(state);
+  }
 }
 
 function getRecord(state, gameId) {
