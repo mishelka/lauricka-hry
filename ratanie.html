@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="sk">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Hra: Rátanie</title>
+    <link rel="stylesheet" href="css/ratanie.css">
+</head>
+<body>
+    <div id="app-container">
+        <div id="game-ui">
+            <h1>Rátanie</h1>
+            <div id="score-board">
+                Správne: <span id="hit" style="color: #28a745; font-weight: bold;">0</span> |
+                Chyby: <span id="miss" style="color: #d9534f; font-weight: bold;">0</span>
+            </div>
+            <div id="best-stars">Najviac hviezd: 0/5 ★</div>
+            <div id="progress">Príklad 1/10</div>
+            <div id="example">12 + 34 = ?</div>
+            <div id="answer-display">?</div>
+            <div id="status-line"></div>
+
+            <div class="keyboard">
+                <button onclick="pressDigit('1')">1</button>
+                <button onclick="pressDigit('2')">2</button>
+                <button onclick="pressDigit('3')">3</button>
+                <button onclick="pressDigit('4')">4</button>
+                <button onclick="pressDigit('5')">5</button>
+                <button onclick="pressDigit('6')">6</button>
+                <button onclick="pressDigit('7')">7</button>
+                <button onclick="pressDigit('8')">8</button>
+                <button onclick="pressDigit('9')">9</button>
+                <button class="util" onclick="backspace()">⌫</button>
+                <button onclick="pressDigit('0')">0</button>
+                <button class="ok" onclick="submitAnswer()">OK</button>
+            </div>
+        </div>
+
+        <div id="vysledok-box">
+            <h2>Koniec hry!</h2>
+            <div class="stars" id="hviezdy"></div>
+            <div class="chyby-list" id="chyby-text"></div>
+            <button class="nova-hra" onclick="restart()">Nová hra</button>
+        </div>
+    </div>
+
+    <div id="fireworks-overlay"></div>
+
+    <script src="js/player.js"></script>
+    <script src="js/utils.js"></script>
+    <script src="js/ratanie.js"></script>
+</body>
+</html>

@@ -18,6 +18,7 @@ function setBestStarsText(elementId, gameId) {
 
 setBestStarsText('yi-best-stars', 'yi');
 setBestStarsText('obojake-best-stars', 'obojake');
+setBestStarsText('ratanie-best-stars', 'ratanie');
 
 function setFinishedLevelsText(elementId, gameId, totalLevels) {
     const el = document.getElementById(elementId);

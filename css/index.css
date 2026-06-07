@@ -2,7 +2,44 @@ body { font-family: sans-serif; text-align: center; background: #f0f8ff; margin:
 #app-container { max-width: 500px; margin: 0 auto; padding-top: 50px; }
 h1 { color: #333; margin-bottom: 40px; }
 .menu-container { display: flex; flex-direction: column; gap: 20px; }
+.menu-divider {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #5a6b7b;
+    font-size: 14px;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+}
+.menu-divider::before,
+.menu-divider::after {
+    content: '';
+    height: 1px;
+    background: #bfd0e0;
+    flex: 1;
+}
+.menu-divider span {
+    padding: 0 10px;
+}
 a { text-decoration: none; }
+.menu-divider {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin: 2rem 0 2px 0;
+    color: #5f6f80;
+    font-size: 14px;
+    font-weight: bold;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+}
+.menu-divider::before,
+.menu-divider::after {
+    content: '';
+    height: 1px;
+    flex: 1;
+    background: #c7d4e1;
+}
 button {
     width: 100%; font-size: 28px; padding: 40px; cursor: pointer; border: none;
     border-radius: 20px; color: white; font-weight: bold; transition: 0.3s;
@@ -30,6 +67,7 @@ button {
 .menu-stars .star-grey { color: #ccc; }
 .btn-makke { background-color: #4682b4; }
 .btn-obojake { background-color: #32cd32; }
+.btn-ratanie { background-color: #f08c00; }
 .btn-slova { background-color: #8430ce; }
 button:active { transform: scale(0.98); }
 
@@ -44,5 +82,13 @@ button:active { transform: scale(0.98); }
     .menu-stars {
         margin-left: 0;
         text-align: left;
+    }
+
+    .menu-divider {
+        margin: -2px 0;
+    }
+
+    .menu-divider {
+        font-size: 12px;
     }
 }
