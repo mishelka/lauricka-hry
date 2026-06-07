@@ -76,6 +76,7 @@ function MenuPage() {
             <span className="menu-title">Mäkké a Tvrdé</span>
             <span className="menu-stars">{renderStars(yiStars)}</span>
           </button>
+          <br/> {yiStars} - {yiStars >= 5} <br/>
           {yiStars >= 5 && (
             <AudioTalePlayer
               taleUrl={AUDIO_TALES.yi}
