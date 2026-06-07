@@ -1,4 +1,5 @@
 const originalneUlohy = window.SLOVA_YI_TASKS || [];
+const GAME_UTILS = window.GAME_UTILS;
 
 let poradie = [];
 let index = 0;
@@ -38,38 +39,7 @@ document.getElementById('btn-tvrde').setAttribute('data-text', 'Tvrdé Y');
 document.getElementById('btn-makke').setAttribute('data-text', 'Mäkké I');
 
 function zobrazVysledky() {
-    document.getElementById('game-ui').style.display = 'none';
-    document.getElementById('vysledok-box').style.display = 'block';
-
-    let pocetHviezd = 0;
-    if (miss === 0) pocetHviezd = 5;
-    else if (miss <= 2) pocetHviezd = 4;
-    else if (miss <= 4) pocetHviezd = 3;
-    else if (miss <= 6) pocetHviezd = 2;
-    else pocetHviezd = 1;
-
-    let htmlStars = "";
-    for (let i = 0; i < 5; i++) {
-        htmlStars += `<span class="${i < pocetHviezd ? 'star-gold' : 'star-grey'}">★</span>`;
-    }
-    document.getElementById('hviezdy').innerHTML = htmlStars;
-    document.getElementById('chyby-text').innerText = chybneSlova.size > 0
-        ? 'Precvič si: ' + Array.from(chybneSlova).join(', ')
-        : 'Výborne, žiadne chyby!';
-}
-
-function triggerFireworks() {
-    const overlay = document.getElementById('fireworks-overlay');
-    for (let i = 0; i < 40; i++) {
-        const p = document.createElement('div');
-        p.className = 'particle';
-        p.style.backgroundColor = `hsl(${Math.random()*360}, 80%, 60%)`;
-        p.style.left = '50%'; p.style.top = '50%';
-        overlay.appendChild(p);
-        const angle = Math.random() * Math.PI * 2;
-        const dist = Math.random() * 400 + 100;
-        p.animate([{ transform: 'translate(0,0) scale(1)', opacity: 1 }, { transform: `translate(${Math.cos(angle)*dist}px, ${Math.sin(angle)*dist}px) scale(0)`, opacity: 0 }], { duration: 2500, easing: 'ease-out' }).onfinish = () => p.remove();
-    }
+    GAME_UTILS.showResults({ miss, wrongItems: chybneSlova });
 }
 
 function check(typ) {
@@ -83,7 +53,7 @@ function check(typ) {
         btn.innerHTML += '<span class="icon">✅</span>';
         document.querySelectorAll('button').forEach(b => b.disabled = true);
         setTimeout(() => { document.getElementById('slovo').innerText = poradie[index].cele; }, 500);
-        triggerFireworks();
+        GAME_UTILS.triggerFireworks();
         index++;
         setTimeout(novaUloha, 2500);
     } else {
