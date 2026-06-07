@@ -75,7 +75,7 @@ export default function RatanieGame() {
 
   function backspace() {
     if (locked) return;
-    setInputValue(prev => prev.slice(1));
+    setInputValue(prev => prev.slice(0, -1));
   }
 
   function submit() {

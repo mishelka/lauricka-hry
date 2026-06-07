@@ -96,7 +96,7 @@ function pressDigit(digit) {
 
 function backspace() {
     if (locked) return;
-    inputValue = inputValue.slice(1);
+    inputValue = inputValue.slice(0, -1);
     renderInput();
 }
 
