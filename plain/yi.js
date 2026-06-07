@@ -1,0 +1,99 @@
+const originalneUlohy = [
+    {char: 'D', type: 'tvrde'}, {char: 'T', type: 'tvrde'}, {char: 'N', type: 'tvrde'},
+    {char: 'L', type: 'tvrde'}, {char: 'K', type: 'tvrde'}, {char: 'G', type: 'tvrde'},
+    {char: 'H', type: 'tvrde'}, {char: 'CH', type: 'tvrde'},
+    {char: 'C', type: 'makke'}, {char: 'Č', type: 'makke'}, {char: 'Š', type: 'makke'},
+    {char: 'Ž', type: 'makke'}, {char: 'Ď', type: 'makke'}, {char: 'Ť', type: 'makke'},
+    {char: 'Ň', type: 'makke'}, {char: 'Ľ', type: 'makke'}, {char: 'J', type: 'makke'},
+    {char: 'DŽ', type: 'makke'}, {char: 'DZ', type: 'makke'}
+];
+
+let poradie = [], index = 0, hit = 0, miss = 0, chybnePismena = new Set();
+let blokovane = false;
+
+function triggerFireworks() {
+    const overlay = document.getElementById('fireworks-overlay');
+    for (let i = 0; i < 40; i++) {
+        const p = document.createElement('div');
+        p.className = 'particle';
+        p.style.backgroundColor = `hsl(${Math.random()*360}, 80%, 60%)`;
+        p.style.left = '50%'; p.style.top = '50%';
+        overlay.appendChild(p);
+        const angle = Math.random() * Math.PI * 2;
+        const dist = Math.random() * 400 + 100;
+        p.animate([{ transform: 'translate(0,0) scale(1)', opacity: 1 }, { transform: `translate(${Math.cos(angle)*dist}px, ${Math.sin(angle)*dist}px) scale(0)`, opacity: 0 }], { duration: 2500, easing: 'ease-out' }).onfinish = () => p.remove();
+    }
+}
+
+function zamiesajSadu() {
+    poradie = [...originalneUlohy].sort(() => Math.random() - 0.5);
+    index = 0; hit = 0; miss = 0; chybnePismena.clear();
+    document.getElementById('hit').innerText = '0';
+    document.getElementById('miss').innerText = '0';
+    document.getElementById('game-ui').style.display = 'block';
+    document.getElementById('vysledok-box').style.display = 'none';
+}
+
+function novaUloha() {
+    if (index >= poradie.length) {
+        zobrazVysledky();
+        return;
+    }
+    document.getElementById('pismeno').innerText = poradie[index].char;
+    const bTvrde = document.getElementById('btn-tvrde');
+    const bMakke = document.getElementById('btn-makke');
+    bTvrde.disabled = bMakke.disabled = false;
+    bTvrde.innerHTML = 'Tvrdá Y';
+    bMakke.innerHTML = 'Mäkká I';
+    blokovane = false;
+}
+
+function zobrazVysledky() {
+    document.getElementById('game-ui').style.display = 'none';
+    document.getElementById('vysledok-box').style.display = 'block';
+
+    let pocetHviezd = 0;
+    if (miss === 0) pocetHviezd = 5;
+    else if (miss <= 2) pocetHviezd = 4;
+    else if (miss <= 4) pocetHviezd = 3;
+    else if (miss <= 6) pocetHviezd = 2;
+    else pocetHviezd = 1;
+
+    let htmlStars = "";
+    for (let i = 0; i < 5; i++) {
+        htmlStars += `<span class="${i < pocetHviezd ? 'star-gold' : 'star-grey'}">★</span>`;
+    }
+    document.getElementById('hviezdy').innerHTML = htmlStars;
+    document.getElementById('chyby-text').innerText = chybnePismena.size > 0
+        ? "Precvič si: " + Array.from(chybnePismena).join(', ')
+        : "Výborne, žiadne chyby!";
+}
+
+function check(typ) {
+    if (blokovane) return;
+    blokovane = true;
+    const bTvrde = document.getElementById('btn-tvrde');
+    const bMakke = document.getElementById('btn-makke');
+    const btn = (typ === 'tvrde') ? bTvrde : bMakke;
+
+    if (typ === poradie[index].type) {
+        hit++;
+        document.getElementById('hit').innerText = hit;
+        btn.innerHTML += '<span class="icon">✅</span>';
+        bTvrde.disabled = bMakke.disabled = true;
+        triggerFireworks();
+        index++;
+        setTimeout(novaUloha, 2500);
+    } else {
+        miss++;
+        document.getElementById('miss').innerText = miss;
+        chybnePismena.add(poradie[index].char);
+        btn.innerHTML += '<span class="icon">❌</span>';
+        setTimeout(() => { blokovane = false; novaUloha(); }, 1000);
+    }
+}
+
+function restart() { zamiesajSadu(); novaUloha(); }
+
+zamiesajSadu();
+novaUloha();
