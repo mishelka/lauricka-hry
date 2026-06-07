@@ -65,6 +65,27 @@ button {
 }
 .menu-stars .star-gold { color: #FFD700; }
 .menu-stars .star-grey { color: #ccc; }
+
+.menu-play-btn {
+    margin-left: 12px;
+    width: 42px;
+    height: 42px;
+    border-radius: 50%;
+    border: 2px solid rgba(255, 255, 255, 0.8);
+    background: rgba(0, 0, 0, 0.2);
+    color: #fff;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 24px;
+    line-height: 1;
+    font-weight: bold;
+}
+
+.menu-play-btn:focus {
+    outline: 2px solid #fff;
+    outline-offset: 2px;
+}
 .btn-makke { background-color: #4682b4; }
 .btn-obojake { background-color: #32cd32; }
 .btn-ratanie { background-color: #f08c00; }
@@ -82,6 +103,12 @@ button:active { transform: scale(0.98); }
     .menu-stars {
         margin-left: 0;
         text-align: left;
+    }
+
+    .menu-play-btn {
+        width: 38px;
+        height: 38px;
+        font-size: 20px;
     }
 
     .menu-divider {
