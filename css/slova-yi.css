@@ -29,6 +29,10 @@ body { font-family: sans-serif; text-align: center; background: #f0f8ff; margin:
 	background: #9aa6b2;
 	opacity: 0.9;
 }
+.level-btn.completed.locked {
+	background: linear-gradient(135deg, #1e8f51, #2fb96c);
+	opacity: 1;
+}
 #game-ui { display: none; }
 #score-board { font-size: 20px; margin-bottom: 15px; }
 #current-level { font-size: 20px; margin-bottom: 10px; color: #3d566e; font-weight: bold; }

@@ -139,7 +139,7 @@ function renderLevelMenu() {
         const button = document.createElement('button');
         button.className = 'level-btn';
         if (best === MAX_STARS) button.classList.add('completed');
-        if (!unlocked) button.classList.add('locked');
+        if (!unlocked && best < MAX_STARS) button.classList.add('locked');
         button.disabled = !unlocked;
         button.innerHTML = `Level ${i + 1}<small>${starsText}</small>`;
 
