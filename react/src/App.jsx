@@ -1,6 +1,6 @@
-import { Navigate, Route, Routes, useNavigate } from 'react-router-dom';
+import { Navigate, Route, Routes, useLocation, useNavigate } from 'react-router-dom';
 import { getBestStars, getLevelStars } from './utils/player';
-import { useMemo } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import YiGame from './components/YiGame';
 import ObojakeGame from './components/ObojakeGame';
 import SlovaYiGame from './components/SlovaYiGame';
@@ -16,10 +16,56 @@ function renderStars(starsCount) {
 
 function MenuPage() {
   const navigate = useNavigate();
-  const yiStars = useMemo(() => getBestStars('yi'), []);
-  const obojakeStars = useMemo(() => getBestStars('obojake'), []);
-  const ratanieStars = useMemo(() => getBestStars('ratanie'), []);
-  const slovaFinished = useMemo(() => getLevelStars('slovaYi', 8).filter(stars => stars === 5).length, []);
+  const location = useLocation();
+  const [menuStars, setMenuStars] = useState(() => ({
+    yi: getBestStars('yi'),
+    obojake: getBestStars('obojake'),
+    ratanie: getBestStars('ratanie'),
+    slovaLevels: getLevelStars('slovaYi', 8)
+  }));
+
+  function refreshMenuStars() {
+    setMenuStars({
+      yi: getBestStars('yi'),
+      obojake: getBestStars('obojake'),
+      ratanie: getBestStars('ratanie'),
+      slovaLevels: getLevelStars('slovaYi', 8)
+    });
+  }
+
+  useEffect(() => {
+    refreshMenuStars();
+  }, [location.pathname]);
+
+  useEffect(() => {
+    function onFocus() {
+      refreshMenuStars();
+    }
+
+    function onStorage() {
+      refreshMenuStars();
+    }
+
+    window.addEventListener('focus', onFocus);
+    window.addEventListener('storage', onStorage);
+    return () => {
+      window.removeEventListener('focus', onFocus);
+      window.removeEventListener('storage', onStorage);
+    };
+  }, []);
+
+  const yiStars = menuStars.yi;
+  const obojakeStars = menuStars.obojake;
+  const ratanieStars = menuStars.ratanie;
+  const slovaFinished = useMemo(() => menuStars.slovaLevels.filter(stars => stars === 5).length, [menuStars.slovaLevels]);
+  const firstCompletedSlovaLevel = useMemo(
+    () => menuStars.slovaLevels.findIndex(stars => stars === 5),
+    [menuStars.slovaLevels]
+  );
+  const slovaTaleUrl =
+    firstCompletedSlovaLevel >= 0
+      ? (AUDIO_TALES.slovaYiLevels[firstCompletedSlovaLevel] || AUDIO_TALES.slovaYiLevels[0])
+      : null;
 
   return (
     <>
@@ -30,7 +76,7 @@ function MenuPage() {
             <span className="menu-title">Mäkké a Tvrdé</span>
             <span className="menu-stars">{renderStars(yiStars)}</span>
           </button>
-          {yiStars === 5 && (
+          {yiStars >= 5 && (
             <AudioTalePlayer
               taleUrl={AUDIO_TALES.yi}
               className="menu-play-btn"
@@ -45,7 +91,7 @@ function MenuPage() {
             <span className="menu-title">Obojaké</span>
             <span className="menu-stars">{renderStars(obojakeStars)}</span>
           </button>
-          {obojakeStars === 5 && (
+          {obojakeStars >= 5 && (
             <AudioTalePlayer
               taleUrl={AUDIO_TALES.obojake}
               className="menu-play-btn"
@@ -55,10 +101,20 @@ function MenuPage() {
           )}
         </div>
 
-        <button className="btn-menu-slova" onClick={() => navigate('/slova')}>
-          <span className="menu-title">Slová</span>
-          <span className="menu-stars">{`${slovaFinished} z 8`}</span>
-        </button>
+        <div className="menu-row">
+          <button className="btn-menu-slova" onClick={() => navigate('/slova')}>
+            <span className="menu-title">Slová</span>
+            <span className="menu-stars">{`${slovaFinished} z 8`}</span>
+          </button>
+          {slovaFinished > 0 && (
+            <AudioTalePlayer
+              taleUrl={slovaTaleUrl}
+              className="menu-play-btn"
+              playLabel="▶"
+              pauseLabel="⏸"
+            />
+          )}
+        </div>
 
         <div className="menu-divider" role="separator" aria-label="Oddelovač kategórií">
           <span>Matematické hry</span>
@@ -69,7 +125,7 @@ function MenuPage() {
             <span className="menu-title">Rátanie</span>
             <span className="menu-stars">{renderStars(ratanieStars)}</span>
           </button>
-          {ratanieStars === 5 && (
+          {ratanieStars >= 5 && (
             <AudioTalePlayer
               taleUrl={AUDIO_TALES.ratanie}
               className="menu-play-btn"
