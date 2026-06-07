@@ -5,6 +5,8 @@ import YiGame from './components/YiGame';
 import ObojakeGame from './components/ObojakeGame';
 import SlovaYiGame from './components/SlovaYiGame';
 import RatanieGame from './components/RatanieGame';
+import AudioTalePlayer from './components/AudioTalePlayer';
+import { AUDIO_TALES } from './data/audioTales';
 
 function renderStars(starsCount) {
   return Array.from({ length: 5 }).map((_, i) => (
@@ -23,14 +25,36 @@ function MenuPage() {
     <>
       <h1>Vyber si hru:</h1>
       <div className="menu-container">
-        <button className="btn-menu-yi" onClick={() => navigate('/yi')}>
-          <span className="menu-title">Mäkké a Tvrdé</span>
-          <span className="menu-stars">{renderStars(yiStars)}</span>
-        </button>
-        <button className="btn-menu-obojake" onClick={() => navigate('/obojake')}>
-          <span className="menu-title">Obojaké</span>
-          <span className="menu-stars">{renderStars(obojakeStars)}</span>
-        </button>
+        <div className="menu-row">
+          <button className="btn-menu-yi" onClick={() => navigate('/yi')}>
+            <span className="menu-title">Mäkké a Tvrdé</span>
+            <span className="menu-stars">{renderStars(yiStars)}</span>
+          </button>
+          {yiStars === 5 && (
+            <AudioTalePlayer
+              taleUrl={AUDIO_TALES.yi}
+              className="menu-play-btn"
+              playLabel="▶"
+              pauseLabel="⏸"
+            />
+          )}
+        </div>
+
+        <div className="menu-row">
+          <button className="btn-menu-obojake" onClick={() => navigate('/obojake')}>
+            <span className="menu-title">Obojaké</span>
+            <span className="menu-stars">{renderStars(obojakeStars)}</span>
+          </button>
+          {obojakeStars === 5 && (
+            <AudioTalePlayer
+              taleUrl={AUDIO_TALES.obojake}
+              className="menu-play-btn"
+              playLabel="▶"
+              pauseLabel="⏸"
+            />
+          )}
+        </div>
+
         <button className="btn-menu-slova" onClick={() => navigate('/slova')}>
           <span className="menu-title">Slová</span>
           <span className="menu-stars">{`${slovaFinished} z 8`}</span>
@@ -40,10 +64,20 @@ function MenuPage() {
           <span>Matematické hry</span>
         </div>
 
-        <button className="btn-menu-ratanie" onClick={() => navigate('/ratanie')}>
-          <span className="menu-title">Rátanie</span>
-          <span className="menu-stars">{renderStars(ratanieStars)}</span>
-        </button>
+        <div className="menu-row">
+          <button className="btn-menu-ratanie" onClick={() => navigate('/ratanie')}>
+            <span className="menu-title">Rátanie</span>
+            <span className="menu-stars">{renderStars(ratanieStars)}</span>
+          </button>
+          {ratanieStars === 5 && (
+            <AudioTalePlayer
+              taleUrl={AUDIO_TALES.ratanie}
+              className="menu-play-btn"
+              playLabel="▶"
+              pauseLabel="⏸"
+            />
+          )}
+        </div>
       </div>
     </>
   );

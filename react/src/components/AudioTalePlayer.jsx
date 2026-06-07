@@ -1,6 +1,11 @@
 import { useEffect, useRef, useState } from 'react';
 
-export default function AudioTalePlayer({ taleUrl, className = 'btn-secondary' }) {
+export default function AudioTalePlayer({
+  taleUrl,
+  className = 'btn-secondary',
+  playLabel = 'Prehrať rozprávku',
+  pauseLabel = 'Pozastaviť rozprávku'
+}) {
   const audioRef = useRef(null);
   const [isPlaying, setIsPlaying] = useState(false);
 
@@ -33,7 +38,7 @@ export default function AudioTalePlayer({ taleUrl, className = 'btn-secondary' }
   return (
     <>
       <button className={className} onClick={togglePlayback}>
-        {isPlaying ? 'Pozastaviť rozprávku' : 'Prehrať rozprávku'}
+        {isPlaying ? pauseLabel : playLabel}
       </button>
       <audio
         ref={audioRef}
