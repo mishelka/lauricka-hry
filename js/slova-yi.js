@@ -1,17 +1,4 @@
-const originalneUlohy = [
-    {vypis: "D_vadlo", odpoved: "makke", cele: "Divadlo"},
-    {vypis: "T_žba", odpoved: "makke", cele: "Ťažba"},
-    {vypis: "L_pka", odpoved: "makke", cele: "Lipka"},
-    {vypis: "K_no", odpoved: "makke", cele: "Kino"},
-    {vypis: "Č_ta", odpoved: "makke", cele: "Číta"},
-    {vypis: "Š_pka", odpoved: "makke", cele: "Šípka"},
-    {vypis: "D_m", odpoved: "tvrde", cele: "Dym"},
-    {vypis: "T_k", odpoved: "tvrde", cele: "Tyk"},
-    {vypis: "N_tka", odpoved: "tvrde", cele: "Nytka"},
-    {vypis: "H_dra", odpoved: "tvrde", cele: "Hydra"},
-    {vypis: "L_ko", odpoved: "tvrde", cele: "Lyko"},
-    {vypis: "K_tka", odpoved: "tvrde", cele: "Kytka"}
-];
+const originalneUlohy = window.SLOVA_YI_TASKS || [];
 
 let poradie = [];
 let index = 0;

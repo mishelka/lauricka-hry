@@ -1,15 +1,4 @@
-const originalneUlohy = [
-    {char: 'D', type: 'tvrde'}, {char: 'T', type: 'tvrde'}, {char: 'N', type: 'tvrde'},
-    {char: 'L', type: 'tvrde'}, {char: 'K', type: 'tvrde'}, {char: 'G', type: 'tvrde'},
-    {char: 'H', type: 'tvrde'}, {char: 'CH', type: 'tvrde'},
-    {char: 'C', type: 'makke'}, {char: 'Č', type: 'makke'}, {char: 'Š', type: 'makke'},
-    {char: 'Ž', type: 'makke'}, {char: 'Ď', type: 'makke'}, {char: 'Ť', type: 'makke'},
-    {char: 'Ň', type: 'makke'}, {char: 'Ľ', type: 'makke'}, {char: 'J', type: 'makke'},
-    {char: 'DZ', type: 'makke'}, {char: 'DŽ', type: 'makke'},
-    {char: 'B', type: 'obojake'}, {char: 'M', type: 'obojake'}, {char: 'P', type: 'obojake'},
-    {char: 'R', type: 'obojake'}, {char: 'S', type: 'obojake'}, {char: 'V', type: 'obojake'},
-    {char: 'Z', type: 'obojake'}, {char: 'F', type: 'obojake'}
-];
+const originalneUlohy = window.OBOJAKE_TASKS || [];
 
 let poradie = [];
 let index = 0;

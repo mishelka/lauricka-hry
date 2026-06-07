@@ -1,12 +1,4 @@
-const originalneUlohy = [
-    {char: 'D', type: 'tvrde'}, {char: 'T', type: 'tvrde'}, {char: 'N', type: 'tvrde'},
-    {char: 'L', type: 'tvrde'}, {char: 'K', type: 'tvrde'}, {char: 'G', type: 'tvrde'},
-    {char: 'H', type: 'tvrde'}, {char: 'CH', type: 'tvrde'},
-    {char: 'C', type: 'makke'}, {char: 'Č', type: 'makke'}, {char: 'Š', type: 'makke'},
-    {char: 'Ž', type: 'makke'}, {char: 'Ď', type: 'makke'}, {char: 'Ť', type: 'makke'},
-    {char: 'Ň', type: 'makke'}, {char: 'Ľ', type: 'makke'}, {char: 'J', type: 'makke'},
-    {char: 'DŽ', type: 'makke'}, {char: 'DZ', type: 'makke'}
-];
+const originalneUlohy = window.YI_TASKS || [];
 
 let poradie = [], index = 0, hit = 0, miss = 0, chybnePismena = new Set();
 let blokovane = false;
