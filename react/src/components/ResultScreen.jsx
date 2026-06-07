@@ -1,7 +1,12 @@
 import { getStarCount } from '../utils/gameUtils';
+import { useEffect } from 'react';
 
-export default function ResultScreen({ miss, wrongItems, onRestart }) {
+export default function ResultScreen({ miss, wrongItems, onRestart, onResult }) {
   const stars = getStarCount(miss);
+
+  useEffect(() => {
+    if (onResult) onResult(stars);
+  }, [onResult, stars]);
 
   return (
     <div className="result-box">

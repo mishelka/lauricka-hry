@@ -1,5 +1,7 @@
 import QuizGame from './QuizGame';
 import { OBOJAKE_TASKS } from '../data/tasks';
+import { useState } from 'react';
+import { getBestStars, updateBestStars } from '../utils/player';
 
 const options = [
   { id: 'tvrde', label: 'Tvrdá Y', className: 'btn-ob-tvrde' },
@@ -8,6 +10,8 @@ const options = [
 ];
 
 export default function ObojakeGame() {
+  const [bestStars, setBestStars] = useState(() => getBestStars('obojake'));
+
   return (
     <QuizGame
       title="Aká je to spoluhláska?"
@@ -16,6 +20,8 @@ export default function ObojakeGame() {
       getPrompt={task => task.char}
       getCorrectOption={task => task.type}
       getWrongLabel={task => task.char}
+      bestStars={bestStars}
+      onResult={stars => setBestStars(updateBestStars('obojake', stars))}
     />
   );
 }

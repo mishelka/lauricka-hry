@@ -37,6 +37,26 @@ h1 {
   padding: 0 10px;
 }
 
+.menu-divider {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: 2rem 0 2px 0;
+  color: #5f6f80;
+  font-size: 14px;
+  font-weight: bold;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+.menu-divider::before,
+.menu-divider::after {
+  content: '';
+  height: 1px;
+  flex: 1;
+  background: #c7d4e1;
+}
+
 button {
   width: 100%;
   font-size: 26px;
@@ -61,7 +81,36 @@ button:disabled {
 
 .btn-menu-yi { background-color: #4682b4; }
 .btn-menu-obojake { background-color: #32cd32; }
+.btn-menu-ratanie { background-color: #f08c00; }
 .btn-menu-slova { background-color: #8430ce; }
+
+.btn-menu-yi,
+.btn-menu-obojake,
+.btn-menu-ratanie,
+.btn-menu-slova {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  text-align: left;
+}
+
+.menu-title,
+.menu-stars {
+  display: inline-block;
+  vertical-align: middle;
+}
+
+.menu-title {
+  flex: 1;
+}
+
+.menu-stars {
+  margin-left: 16px;
+  font-size: 22px;
+  opacity: 0.95;
+  text-align: right;
+  white-space: nowrap;
+}
 
 .btn-back {
   width: auto;
@@ -73,6 +122,16 @@ button:disabled {
 .score-board {
   font-size: 20px;
   margin-bottom: 15px;
+}
+
+.best-stars {
+  margin-bottom: 10px;
+}
+
+.progress {
+  font-size: 18px;
+  color: #3d566e;
+  margin-bottom: 12px;
 }
 
 .score-hit {
@@ -96,6 +155,46 @@ button:disabled {
   letter-spacing: 5px;
 }
 
+.prompt-ratanie {
+  font-size: 48px;
+}
+
+.answer-display {
+  min-height: 56px;
+  line-height: 56px;
+  font-size: 42px;
+  font-weight: bold;
+  margin: 10px 0 12px;
+  background: #fff;
+  border-radius: 14px;
+  border: 2px solid #c9d6e2;
+}
+
+.answer-display .cursor {
+  display: inline-block;
+  margin-right: 4px;
+  color: #3d566e;
+  animation: blink-cursor 1s step-start infinite;
+}
+
+.keyboard-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.btn-key {
+  background: #4682b4;
+}
+
+.btn-util {
+  background: #6c757d;
+}
+
+.btn-ok {
+  background: #28a745;
+}
+
 .btn-yi-tvrde { background-color: #ffc107; color: #333; }
 .btn-yi-makke { background-color: #4682b4; }
 
@@ -106,8 +205,81 @@ button:disabled {
 .btn-sl-tvrde { background-color: #5d6d7e; }
 .btn-sl-makke { background-color: #5499c7; }
 
+.levels-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.level-menu-help {
+  margin: 10px 0 20px;
+  color: #3d566e;
+}
+
+.level-btn {
+  color: #fff;
+  background: linear-gradient(135deg, #236ca4, #2a92cc);
+  border: none;
+  border-radius: 16px;
+  padding: 18px 10px;
+  font-size: 20px;
+  font-weight: bold;
+  line-height: 1.3;
+}
+
+.level-btn small {
+  display: block;
+  font-size: 14px;
+  font-weight: normal;
+  margin-top: 4px;
+}
+
+.level-btn.completed {
+  background: linear-gradient(135deg, #1e8f51, #2fb96c);
+}
+
+.level-btn.locked {
+  background: #9aa6b2;
+  opacity: 0.9;
+}
+
+.button-grid-2x2 {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 15px;
+  padding: 0 10px;
+}
+
+.current-level {
+  font-size: 20px;
+  margin-bottom: 10px;
+  color: #3d566e;
+  font-weight: bold;
+}
+
 .result-box {
   padding: 20px;
+}
+
+.result-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.btn-next-level {
+  background-color: #0077b6;
+}
+
+.btn-secondary {
+  background-color: #6c757d;
+}
+
+.level-progress-message {
+  font-size: 20px;
+  font-weight: bold;
+  color: #3d566e;
+  margin-bottom: 14px;
 }
 
 .stars {
@@ -155,6 +327,12 @@ button:disabled {
   opacity: 0;
 }
 
+@keyframes blink-cursor {
+  50% {
+    opacity: 0;
+  }
+}
+
 @media (max-width: 520px) {
   .prompt {
     font-size: 72px;
@@ -167,5 +345,28 @@ button:disabled {
   button {
     font-size: 24px;
     padding: 24px;
+  }
+
+  .btn-menu-yi,
+  .btn-menu-obojake,
+  .btn-menu-ratanie,
+  .btn-menu-slova {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 10px;
+  }
+
+  .menu-stars {
+    margin-left: 0;
+    text-align: left;
+  }
+
+  .menu-divider {
+    margin: -2px 0;
+    font-size: 12px;
+  }
+
+  .levels-grid {
+    grid-template-columns: 1fr;
   }
 }

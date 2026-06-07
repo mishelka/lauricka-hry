@@ -66,7 +66,8 @@ function setKeyboardDisabled(disabled) {
 
 function renderInput() {
     const display = document.getElementById('answer-display');
-    display.innerText = inputValue === '' ? '?' : inputValue;
+    const value = inputValue === '' ? '&nbsp;' : inputValue;
+    display.innerHTML = `<span class="cursor">_</span><span>${value}</span>`;
 }
 
 function renderCurrentExample() {
@@ -89,14 +90,13 @@ function renderCurrentExample() {
 function pressDigit(digit) {
     if (locked) return;
     if (inputValue.length >= 3) return;
-    if (inputValue === '0') inputValue = digit;
-    else inputValue += digit;
+    inputValue = digit + inputValue;
     renderInput();
 }
 
 function backspace() {
     if (locked) return;
-    inputValue = inputValue.slice(0, -1);
+    inputValue = inputValue.slice(1);
     renderInput();
 }
 

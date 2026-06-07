@@ -1,5 +1,7 @@
 import QuizGame from './QuizGame';
 import { YI_TASKS } from '../data/tasks';
+import { getBestStars, updateBestStars } from '../utils/player';
+import { useState } from 'react';
 
 const options = [
   { id: 'tvrde', label: 'Tvrdá Y', className: 'btn-yi-tvrde' },
@@ -7,6 +9,8 @@ const options = [
 ];
 
 export default function YiGame() {
+  const [bestStars, setBestStars] = useState(() => getBestStars('yi'));
+
   return (
     <QuizGame
       title="Mäkká alebo Tvrdá spoluhláska?"
@@ -15,6 +19,8 @@ export default function YiGame() {
       getPrompt={task => task.char}
       getCorrectOption={task => task.type}
       getWrongLabel={task => task.char}
+      bestStars={bestStars}
+      onResult={stars => setBestStars(updateBestStars('yi', stars))}
     />
   );
 }
