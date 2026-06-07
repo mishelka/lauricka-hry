@@ -24,6 +24,66 @@ function saveState(state) {
   localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
 }
 
+function mergeLevelStars(state, gameId, starsArray, levelCount) {
+  const rec = getRecord(state, gameId);
+  const levels = new Array(levelCount).fill(0).map((_, i) => clampStars(rec.levelStars[i]));
+  let changed = false;
+
+  for (let i = 0; i < levelCount; i++) {
+    const incoming = clampStars(Array.isArray(starsArray) ? starsArray[i] : 0);
+    if (incoming > levels[i]) {
+      levels[i] = incoming;
+      changed = true;
+    }
+  }
+
+  if (changed) {
+    rec.levelStars = levels;
+    rec.bestStars = Math.max(rec.bestStars, levels.reduce((a, b) => Math.max(a, b), 0));
+  }
+}
+
+function migrateLegacyIfNeeded(state) {
+  if (state.migratedLegacyV1) return;
+
+  const yi = clampStars(localStorage.getItem('yiBestStarsV1'));
+  const obojake = clampStars(localStorage.getItem('obojakeBestStarsV1'));
+
+  if (yi > 0) {
+    const rec = getRecord(state, 'yi');
+    rec.bestStars = Math.max(rec.bestStars, yi);
+  }
+
+  if (obojake > 0) {
+    const rec = getRecord(state, 'obojake');
+    rec.bestStars = Math.max(rec.bestStars, obojake);
+  }
+
+  try {
+    const slovaLegacyRaw = localStorage.getItem('slovaYiLevelStarsV1');
+    if (slovaLegacyRaw) {
+      mergeLevelStars(state, 'slovaYi', JSON.parse(slovaLegacyRaw), 8);
+    }
+  } catch {
+    // Ignore malformed legacy values.
+  }
+
+  try {
+    const slovaStateRaw = localStorage.getItem('slovaYiGameStateV1');
+    if (slovaStateRaw) {
+      const parsed = JSON.parse(slovaStateRaw);
+      if (parsed && Array.isArray(parsed.levelStars)) {
+        mergeLevelStars(state, 'slovaYi', parsed.levelStars, 8);
+      }
+    }
+  } catch {
+    // Ignore malformed legacy values.
+  }
+
+  state.migratedLegacyV1 = true;
+  saveState(state);
+}
+
 function getRecord(state, gameId) {
   if (!state.games[gameId] || typeof state.games[gameId] !== 'object') {
     state.games[gameId] = { bestStars: 0, levelStars: [] };
@@ -36,11 +96,13 @@ function getRecord(state, gameId) {
 
 export function getBestStars(gameId) {
   const state = loadState();
+  migrateLegacyIfNeeded(state);
   return getRecord(state, gameId).bestStars;
 }
 
 export function updateBestStars(gameId, stars) {
   const state = loadState();
+  migrateLegacyIfNeeded(state);
   const rec = getRecord(state, gameId);
   const next = clampStars(stars);
   if (next > rec.bestStars) {
@@ -52,6 +114,7 @@ export function updateBestStars(gameId, stars) {
 
 export function getLevelStars(gameId, levelCount) {
   const state = loadState();
+  migrateLegacyIfNeeded(state);
   const rec = getRecord(state, gameId);
   const out = new Array(levelCount).fill(0).map((_, i) => clampStars(rec.levelStars[i]));
   rec.levelStars = out;
@@ -61,6 +124,7 @@ export function getLevelStars(gameId, levelCount) {
 
 export function updateLevelBestStars(gameId, levelIndex, stars, levelCount) {
   const state = loadState();
+  migrateLegacyIfNeeded(state);
   const rec = getRecord(state, gameId);
   const levels = new Array(levelCount).fill(0).map((_, i) => clampStars(rec.levelStars[i]));
   const idx = Number(levelIndex);

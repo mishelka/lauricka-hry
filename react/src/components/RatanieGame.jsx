@@ -2,8 +2,9 @@ import { useState } from 'react';
 import ResultScreen from './ResultScreen';
 import { triggerFireworks } from '../utils/gameUtils';
 import { getBestStars, updateBestStars } from '../utils/player';
+import { AUDIO_TALES } from '../data/audioTales';
 
-const TOTAL = 10;
+const TOTAL = 5;
 
 function rnd(max) {
   return Math.floor(Math.random() * max);
@@ -75,7 +76,7 @@ export default function RatanieGame() {
 
   function backspace() {
     if (locked) return;
-    setInputValue(prev => prev.slice(0, -1));
+    setInputValue(prev => prev.slice(1));
   }
 
   function submit() {
@@ -107,6 +108,7 @@ export default function RatanieGame() {
         wrongItems={Array.from(wrongItems)}
         onRestart={restart}
         onResult={stars => setBestStars(updateBestStars('ratanie', stars))}
+        taleUrl={AUDIO_TALES.ratanie}
       />
     );
   }

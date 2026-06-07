@@ -2,6 +2,7 @@ import QuizGame from './QuizGame';
 import { YI_TASKS } from '../data/tasks';
 import { getBestStars, updateBestStars } from '../utils/player';
 import { useState } from 'react';
+import { AUDIO_TALES } from '../data/audioTales';
 
 const options = [
   { id: 'tvrde', label: 'Tvrdá Y', className: 'btn-yi-tvrde' },
@@ -21,6 +22,7 @@ export default function YiGame() {
       getWrongLabel={task => task.char}
       bestStars={bestStars}
       onResult={stars => setBestStars(updateBestStars('yi', stars))}
+      taleUrl={AUDIO_TALES.yi}
     />
   );
 }

@@ -7,6 +7,9 @@
     "dev": "vite",
     "build": "vite build",
     "preview": "vite preview",
+    "pages:prepare-local": "bash ./scripts/prepare-pages-local.sh",
+    "pages:serve-local": "cd ../public && python3 -m http.server 8080",
+    "pages:local": "npm run pages:prepare-local && npm run pages:serve-local",
     "predeploy": "npm run build",
     "deploy": "gh-pages -d dist"
   },

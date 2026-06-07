@@ -13,6 +13,7 @@ export default function QuizGame({
   onRestartGame,
   onResult,
   bestStars,
+  taleUrl,
   promptClassName = ''
 }) {
   const [order, setOrder] = useState(() => shuffleArray(tasks));
@@ -100,7 +101,15 @@ export default function QuizGame({
   }
 
   if (isFinished) {
-    return <ResultScreen miss={miss} wrongItems={wrongItemsArray} onRestart={restart} onResult={onResult} />;
+    return (
+      <ResultScreen
+        miss={miss}
+        wrongItems={wrongItemsArray}
+        onRestart={restart}
+        onResult={onResult}
+        taleUrl={taleUrl}
+      />
+    );
   }
 
   return (

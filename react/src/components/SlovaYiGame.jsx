@@ -2,6 +2,8 @@ import { useMemo, useRef, useState } from 'react';
 import { SLOVA_YI_GROUPS, SLOVA_YI_TASKS } from '../data/tasks';
 import { getStarCount, shuffleArray, triggerFireworks } from '../utils/gameUtils';
 import { getLevelStars, updateLevelBestStars } from '../utils/player';
+import AudioTalePlayer from './AudioTalePlayer';
+import { AUDIO_TALES } from '../data/audioTales';
 
 const MAX_STARS = 5;
 
@@ -147,6 +149,7 @@ export default function SlovaYiGame() {
 
   if (resultVisible) {
     const stars = getStarCount(miss);
+    const levelTaleUrl = AUDIO_TALES.slovaYiLevels[selectedLevel] || AUDIO_TALES.slovaYiLevels[0];
     return (
       <div className="result-box">
         <h2>Koniec hry!</h2>
@@ -165,6 +168,7 @@ export default function SlovaYiGame() {
         </div>
         <div className="result-actions">
           <button className="btn-restart" onClick={() => startLevel(selectedLevel)}>Opakovať level</button>
+          {stars === 5 && <AudioTalePlayer taleUrl={levelTaleUrl} />}
           {hasNextLevel && levelDone && (
             <button className="btn-next-level" onClick={() => startLevel(selectedLevel + 1)}>Ďalší level</button>
           )}

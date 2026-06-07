@@ -2,6 +2,7 @@ import QuizGame from './QuizGame';
 import { OBOJAKE_TASKS } from '../data/tasks';
 import { useState } from 'react';
 import { getBestStars, updateBestStars } from '../utils/player';
+import { AUDIO_TALES } from '../data/audioTales';
 
 const options = [
   { id: 'tvrde', label: 'Tvrdá Y', className: 'btn-ob-tvrde' },
@@ -22,6 +23,7 @@ export default function ObojakeGame() {
       getWrongLabel={task => task.char}
       bestStars={bestStars}
       onResult={stars => setBestStars(updateBestStars('obojake', stars))}
+      taleUrl={AUDIO_TALES.obojake}
     />
   );
 }

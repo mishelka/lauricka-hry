@@ -1,0 +1,18 @@
+body { font-family: sans-serif; text-align: center; background: #f0f8ff; margin: 0; padding: 10px; }
+#app-container { max-width: 500px; margin: 0 auto; }
+#score-board { font-size: 20px; margin-bottom: 15px; }
+#pismeno { font-size: 120px; font-weight: bold; margin: 20px 0; }
+#vysledok-box { display: none; padding: 20px; }
+.button-container { display: flex; flex-direction: column; gap: 15px; padding: 0 20px; }
+button { font-size: 28px; padding: 40px; cursor: pointer; border: none; border-radius: 20px; color: white; font-weight: bold; transition: 0.2s; position: relative; }
+.tvrde { background-color: #ffc107; color: #333; }
+.makke { background-color: #4682b4; }
+.nova-hra { background-color: #28a745; margin-top: 20px; }
+button:disabled { opacity: 0.9; cursor: not-allowed; }
+.icon { position: absolute; right: 20px; top: 50%; transform: translateY(-50%); font-size: 40px; }
+.stars { font-size: 50px; margin: 20px 0; }
+.star-gold { color: #FFD700; }
+.star-grey { color: #ccc; }
+.chyby-list { font-size: 20px; color: #d9534f; margin: 20px 0; }
+#fireworks-overlay { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; pointer-events: none; z-index: 1000; }
+.particle { position: absolute; width: 15px; height: 15px; border-radius: 50%; opacity: 0; }
