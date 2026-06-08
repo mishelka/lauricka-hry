@@ -58,14 +58,6 @@ function MenuPage() {
   const obojakeStars = menuStars.obojake;
   const ratanieStars = menuStars.ratanie;
   const slovaFinished = useMemo(() => menuStars.slovaLevels.filter(stars => stars === 5).length, [menuStars.slovaLevels]);
-  const firstCompletedSlovaLevel = useMemo(
-    () => menuStars.slovaLevels.findIndex(stars => stars === 5),
-    [menuStars.slovaLevels]
-  );
-  const slovaTaleUrl =
-    firstCompletedSlovaLevel >= 0
-      ? (AUDIO_TALES.slovaYiLevels[firstCompletedSlovaLevel] || AUDIO_TALES.slovaYiLevels[0])
-      : null;
 
   return (
     <>
@@ -110,14 +102,6 @@ function MenuPage() {
             <span className="menu-title">Slová</span>
             <span className="menu-stars">{`${slovaFinished} z 8`}</span>
           </button>
-          {slovaFinished > 0 && (
-            <AudioTalePlayer
-              taleUrl={slovaTaleUrl}
-              className="menu-play-btn"
-              playLabel="▶"
-              pauseLabel="⏸"
-            />
-          )}
         </div>
 
         <div className="menu-divider" role="separator" aria-label="Oddelovač kategórií">

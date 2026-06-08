@@ -226,8 +226,27 @@ button:disabled {
 
 .levels-grid {
   display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
+  grid-template-columns: 1fr;
   gap: 12px;
+}
+
+.level-row {
+  display: flex;
+  gap: 8px;
+  align-items: stretch;
+}
+
+.level-row .level-btn {
+  flex: 1;
+}
+
+.level-play-btn {
+  width: auto;
+  min-width: 56px;
+  padding: 0 12px 0 14px;
+  font-size: 24px;
+  border-radius: 14px;
+  background-color: #1f4e79;
 }
 
 .level-menu-help {
@@ -397,5 +416,11 @@ button:disabled {
 
   .levels-grid {
     grid-template-columns: 1fr;
+  }
+
+  .level-play-btn {
+    min-width: 50px;
+    font-size: 22px;
+    padding: 8px 10px 8px 12px;
   }
 }

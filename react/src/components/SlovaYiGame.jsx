@@ -124,22 +124,32 @@ export default function SlovaYiGame() {
         <div className="levels-grid">
           {groups.map((_, level) => {
             const best = levelStars[level] || 0;
+            const levelTaleUrl = AUDIO_TALES.slovaYiLevels[level] || AUDIO_TALES.slovaYiLevels[0];
             const unlocked = isLevelUnlocked(level);
             const classes = ['level-btn'];
             if (best === MAX_STARS) classes.push('completed');
             if (!unlocked && best < MAX_STARS) classes.push('locked');
 
             return (
-              <button
-                key={level}
-                className={classes.join(' ')}
-                disabled={!unlocked}
-                onClick={() => startLevel(level)}
-              >
-                {`Level ${level + 1}`}
-                <small>{renderStars(best)}</small>
-                {!unlocked && <small>{`Najprv získaj 5★ v leveli ${level}`}</small>}
-              </button>
+              <div key={level} className="level-row">
+                <button
+                  className={classes.join(' ')}
+                  disabled={!unlocked}
+                  onClick={() => startLevel(level)}
+                >
+                  {`Level ${level + 1}`}
+                  <small>{renderStars(best)}</small>
+                  {!unlocked && <small>{`Najprv získaj 5★ v leveli ${level}`}</small>}
+                </button>
+                {best === MAX_STARS && (
+                  <AudioTalePlayer
+                    taleUrl={levelTaleUrl}
+                    className="level-play-btn"
+                    playLabel="▶"
+                    pauseLabel="⏸"
+                  />
+                )}
+              </div>
             );
           })}
         </div>
