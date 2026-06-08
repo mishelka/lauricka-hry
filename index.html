@@ -71,7 +71,7 @@
             var basePath = path.replace(/(?:index|yi|obojake|slova-yi|ratanie)\.html$/, '');
             if (!/\/$/.test(basePath)) basePath += '/';
 
-            var target = window.location.origin + basePath + 'public/#' + route;
+            var target = window.location.origin + basePath + '#' + route;
             window.location.replace(target);
         })();
     </script>
