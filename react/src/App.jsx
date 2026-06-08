@@ -71,6 +71,10 @@ function MenuPage() {
     <>
       <h1>Vyber si hru:</h1>
       <div className="menu-container">
+        <div className="menu-divider" role="separator" aria-label="Oddelovač kategórií">
+          <span>Slovenčina</span>
+        </div>
+        
         <div className="menu-row">
           <button className="btn-menu-yi" onClick={() => navigate('/yi')}>
             <span className="menu-title">Mäkké a Tvrdé</span>
