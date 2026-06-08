@@ -41,27 +41,35 @@ jobs:
         run: |
           rm -rf public
           mkdir -p public
+          mkdir -p public/react
 
-          # React app becomes the root site.
-          cp -r react/dist/* .
+          # Publish built React app under /react.
+          cp -r react/dist/* public/react/
 
-          # Keep the current plain app available as a hidden fallback.
-          mkdir -p ./plain-legacy
-          cp index.html obojake.html slova-yi.html yi.html ratanie.html ./plain-legacy/
-          cp -r css js ./plain-legacy/
+          # Root entry points redirect legacy URLs into React routes.
+          cp index.html obojake.html slova-yi.html yi.html ratanie.html public/
 
-          # Keep compatibility for existing bookmarks to plain *.html URLs.
-          cat > ./yi.html <<'EOF'
-          <!doctype html><html><head><meta charset="utf-8"><meta http-equiv="refresh" content="0; url=./#/yi"><script>location.replace('./#/yi');</script></head><body></body></html>
-          EOF
-          cat > ./obojake.html <<'EOF'
-          <!doctype html><html><head><meta charset="utf-8"><meta http-equiv="refresh" content="0; url=./#/obojake"><script>location.replace('./#/obojake');</script></head><body></body></html>
-          EOF
-          cat > ./slova-yi.html <<'EOF'
-          <!doctype html><html><head><meta charset="utf-8"><meta http-equiv="refresh" content="0; url=./#/slova"><script>location.replace('./#/slova');</script></head><body></body></html>
-          EOF
-          cat > ./ratanie.html <<'EOF'
-          <!doctype html><html><head><meta charset="utf-8"><meta http-equiv="refresh" content="0; url=./#/ratanie"><script>location.replace('./#/ratanie');</script></head><body></body></html>
+          # SPA fallback for BrowserRouter deep links on GitHub Pages.
+          cat > public/404.html <<'EOF'
+          <!doctype html>
+          <html>
+          <head>
+            <meta charset="utf-8">
+            <title>Redirecting...</title>
+            <script>
+              (function () {
+                var path = window.location.pathname;
+                var search = window.location.search ? window.location.search.slice(1) : '';
+                var hash = window.location.hash ? window.location.hash.slice(1) : '';
+                var target = '/lauricka-hry/react/?p=' + encodeURIComponent(path);
+                if (search) target += '&q=' + encodeURIComponent(search);
+                if (hash) target += '&h=' + encodeURIComponent(hash);
+                window.location.replace(target);
+              })();
+            </script>
+          </head>
+          <body></body>
+          </html>
           EOF
 
       - name: Setup Pages

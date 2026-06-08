@@ -1,13 +1,32 @@
 import React from 'react';
 import ReactDOM from 'react-dom/client';
-import { HashRouter } from 'react-router-dom';
+import { BrowserRouter } from 'react-router-dom';
 import App from './App';
 import './index.css';
 
+const basePath = import.meta.env.BASE_URL.replace(/\/$/, '');
+
+function restorePathFromFallback() {
+  const params = new URLSearchParams(window.location.search);
+  const redirectedPath = params.get('p');
+  if (!redirectedPath) return;
+
+  const allowed = redirectedPath === basePath || redirectedPath.startsWith(`${basePath}/`);
+  const nextPath = allowed ? redirectedPath : `${basePath}/`;
+  const nextQuery = params.get('q');
+  const nextHash = params.get('h');
+  const search = nextQuery ? `?${nextQuery}` : '';
+  const hash = nextHash ? `#${nextHash}` : '';
+
+  window.history.replaceState(null, '', `${nextPath}${search}${hash}`);
+}
+
+restorePathFromFallback();
+
 ReactDOM.createRoot(document.getElementById('root')).render(
   <React.StrictMode>
-    <HashRouter>
+    <BrowserRouter basename={basePath}>
       <App />
-    </HashRouter>
+    </BrowserRouter>
   </React.StrictMode>
 );

@@ -1,79 +1,13 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="sk">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Menu hier</title>
-    <link rel="stylesheet" href="css/index.css">
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Redirecting...</title>
+  <meta http-equiv="refresh" content="0; url=react/">
+  <script>
+    window.location.replace('react/');
+  </script>
 </head>
-<body>
-    <div id="app-container">
-        <h1>Vyber si hru:</h1>
-        <div class="menu-container">
-            <div class="menu-divider" role="separator" aria-label="Oddelovač kategórií">
-                <span>Slovenčina</span>
-            </div>
-            <a href="yi.html">
-                <button class="btn-makke">
-                    <span class="menu-title">Mäkké a Tvrdé</span>
-                    <span class="menu-stars" id="yi-best-stars">☆☆☆☆☆</span>
-                </button>
-            </a>
-            <a href="obojake.html">
-                <button class="btn-obojake">
-                    <span class="menu-title">Obojaké</span>
-                    <span class="menu-stars" id="obojake-best-stars">☆☆☆☆☆</span>
-                </button>
-            </a>
-            <a href="slova-yi.html">
-                <button class="btn-slova">
-                    <span class="menu-title">Slová</span>
-                    <span class="menu-stars" id="slova-finished-levels">0 z 8</span>
-                </button>
-	        </a>
-        </div>
-        <div class="menu-container">
-            <div class="menu-divider" role="separator" aria-label="Oddelovač kategórií">
-                <span>Matematika</span>
-            </div>
-            <a href="ratanie.html">
-                <button class="btn-ratanie">
-                    <span class="menu-title">Rátanie</span>
-                    <span class="menu-stars" id="ratanie-best-stars">☆☆☆☆☆</span>
-                </button>
-            </a>
-        </div>
-    </div>
-
-    <script src="js/player.js"></script>
-    <script src="js/index.js"></script>
-    <script>
-        (function redirectToReact() {
-            var path = window.location.pathname || '';
-            var isLegacyCopy = path.indexOf('/plain-legacy/') !== -1;
-            var isPublicApp = /\/public\/?$/.test(path) || /\/public\/index\.html$/.test(path);
-
-            if (isLegacyCopy || isPublicApp) return;
-
-            var routeFromHash = (window.location.hash && window.location.hash.indexOf('#/') === 0)
-                ? window.location.hash.slice(1)
-                : '';
-            var fileName = path.split('/').pop();
-            var routeMap = {
-                'index.html': '/',
-                'yi.html': '/yi',
-                'obojake.html': '/obojake',
-                'slova-yi.html': '/slova',
-                'ratanie.html': '/ratanie'
-            };
-            var route = routeFromHash || routeMap[fileName] || '/';
-
-            var basePath = path.replace(/(?:index|yi|obojake|slova-yi|ratanie)\.html$/, '');
-            if (!/\/$/.test(basePath)) basePath += '/';
-
-            var target = window.location.origin + basePath + '#' + route;
-            window.location.replace(target);
-        })();
-    </script>
-</body>
+<body></body>
 </html>

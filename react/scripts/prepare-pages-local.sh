@@ -10,30 +10,35 @@ npm run build
 
 rm -rf "$PUBLIC_DIR"
 mkdir -p "$PUBLIC_DIR"
+mkdir -p "$PUBLIC_DIR/react"
 
-# React build becomes the root site, mirroring GitHub Pages workflow behavior.
-cp -r "$REACT_DIR/dist/." "$PUBLIC_DIR/"
+# Publish built React app under /react.
+cp -r "$REACT_DIR/dist/." "$PUBLIC_DIR/react/"
 
-# Keep the current plain app available as a hidden fallback.
-mkdir -p "$PUBLIC_DIR/plain-legacy"
-cp "$ROOT_DIR"/index.html "$ROOT_DIR"/obojake.html "$ROOT_DIR"/slova-yi.html "$ROOT_DIR"/yi.html "$ROOT_DIR"/ratanie.html "$PUBLIC_DIR/plain-legacy/"
-cp -r "$ROOT_DIR/css" "$ROOT_DIR/js" "$PUBLIC_DIR/plain-legacy/"
+# Root entry points redirect to React routes.
+cp "$ROOT_DIR"/index.html "$ROOT_DIR"/obojake.html "$ROOT_DIR"/slova-yi.html "$ROOT_DIR"/yi.html "$ROOT_DIR"/ratanie.html "$PUBLIC_DIR/"
 
-# Keep compatibility for existing bookmarks to plain *.html URLs.
-cat > "$PUBLIC_DIR/yi.html" <<'EOF'
-<!doctype html><html><head><meta charset="utf-8"><meta http-equiv="refresh" content="0; url=./#/yi"><script>location.replace('./#/yi');</script></head><body></body></html>
-EOF
-
-cat > "$PUBLIC_DIR/obojake.html" <<'EOF'
-<!doctype html><html><head><meta charset="utf-8"><meta http-equiv="refresh" content="0; url=./#/obojake"><script>location.replace('./#/obojake');</script></head><body></body></html>
-EOF
-
-cat > "$PUBLIC_DIR/slova-yi.html" <<'EOF'
-<!doctype html><html><head><meta charset="utf-8"><meta http-equiv="refresh" content="0; url=./#/slova"><script>location.replace('./#/slova');</script></head><body></body></html>
-EOF
-
-cat > "$PUBLIC_DIR/ratanie.html" <<'EOF'
-<!doctype html><html><head><meta charset="utf-8"><meta http-equiv="refresh" content="0; url=./#/ratanie"><script>location.replace('./#/ratanie');</script></head><body></body></html>
+# SPA fallback for BrowserRouter deep links.
+cat > "$PUBLIC_DIR/404.html" <<'EOF'
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>Redirecting...</title>
+  <script>
+    (function () {
+      var path = window.location.pathname;
+      var search = window.location.search ? window.location.search.slice(1) : '';
+      var hash = window.location.hash ? window.location.hash.slice(1) : '';
+      var target = '/lauricka-hry/react/?p=' + encodeURIComponent(path);
+      if (search) target += '&q=' + encodeURIComponent(search);
+      if (hash) target += '&h=' + encodeURIComponent(hash);
+      window.location.replace(target);
+    })();
+  </script>
+</head>
+<body></body>
+</html>
 EOF
 
 printf 'Local Pages artifact prepared in %s\n' "$PUBLIC_DIR"

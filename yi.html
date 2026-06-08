@@ -1,50 +1,13 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="sk">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Hra: Mäkká alebo Tvrdá spoluhláska?</title>
-    <script>
-        (function redirectToReactYi() {
-            var path = window.location.pathname || '';
-            if (path.indexOf('/plain-legacy/') !== -1) return;
-
-            var basePath = path.replace(/yi\.html$/, '');
-            if (!/\/$/.test(basePath)) basePath += '/';
-            window.location.replace(window.location.origin + basePath + '#/yi');
-        })();
-    </script>
-    <link rel="stylesheet" href="css/yi.css">
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Redirecting...</title>
+  <meta http-equiv="refresh" content="0; url=react/yi">
+  <script>
+    window.location.replace('react/yi');
+  </script>
 </head>
-<body>
-    <div id="app-container">
-        <div id="game-ui">
-            <h1>Mäkká alebo Tvrdá spoluhláska?</h1>
-            <div id="score-board">
-                Správne: <span id="hit" style="color: #28a745; font-weight: bold;">0</span> | 
-                Chyby: <span id="miss" style="color: #d9534f; font-weight: bold;">0</span>
-            </div>
-            <div id="best-stars">Najviac hviezd: 0/5 ★</div>
-            <div id="pismeno">?</div>
-            <div class="button-container">
-                <button id="btn-tvrde" class="tvrde" onclick="check('tvrde')">Tvrdá Y</button>
-                <button id="btn-makke" class="makke" onclick="check('makke')">Mäkká I</button>
-            </div>
-        </div>
-
-        <div id="vysledok-box">
-            <h2>Koniec hry!</h2>
-            <div class="stars" id="hviezdy"></div>
-            <div class="chyby-list" id="chyby-text"></div>
-            <button class="nova-hra" onclick="restart()">Nová hra</button>
-        </div>
-    </div>
-
-    <div id="fireworks-overlay"></div>
-
-    <script src="js/tasks.js"></script>
-    <script src="js/player.js"></script>
-    <script src="js/utils.js"></script>
-    <script src="js/yi.js"></script>
-</body>
+<body></body>
 </html>
