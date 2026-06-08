@@ -1,26 +1,52 @@
-import { useState } from 'react';
-import ResultScreen from './ResultScreen';
-import { triggerFireworks } from '../utils/gameUtils';
-import { getBestStars, updateBestStars } from '../utils/player';
+import { useRef, useState } from 'react';
+import { getStarCount, triggerFireworks } from '../utils/gameUtils';
+import { getBestStars, getLevelStars, updateLevelBestStars } from '../utils/player';
+import AudioTalePlayer from './AudioTalePlayer';
 import { AUDIO_TALES } from '../data/audioTales';
 
 const TOTAL = 5;
+const MAX_STARS = 5;
+
+const LEVELS = [
+  { max: 20, mode: 'add' },
+  { max: 20, mode: 'sub' },
+  { max: 20, mode: 'mixed' },
+  { max: 40, mode: 'mixed' },
+  { max: 40, mode: 'mixed' },
+  { max: 60, mode: 'mixed' },
+  { max: 60, mode: 'mixed' },
+  { max: 80, mode: 'mixed' },
+  { max: 80, mode: 'mixed' },
+  { max: 99, mode: 'mixed' }
+];
 
 function rnd(max) {
   return Math.floor(Math.random() * max);
 }
 
-function isOneDigit(n) {
-  return n >= 0 && n <= 9;
+function renderStars(stars) {
+  return `${'★'.repeat(stars)}${'☆'.repeat(MAX_STARS - stars)}`;
 }
 
-function makeExample() {
-  while (true) {
-    const op = Math.random() < 0.5 ? '+' : '-';
-    let a = rnd(100);
-    let b = rnd(100);
+function highestUnlockedLevel(starsByLevel) {
+  let highest = 0;
+  for (let i = 0; i < starsByLevel.length - 1; i++) {
+    if (starsByLevel[i] === MAX_STARS) highest = i + 1;
+    else break;
+  }
+  return highest;
+}
 
-    if (isOneDigit(a) && isOneDigit(b)) continue;
+function randomInRange(min, max) {
+  return min + rnd(max - min + 1);
+}
+
+function makeExample(config) {
+  const max = config.max;
+  while (true) {
+    const op = config.mode === 'mixed' ? (Math.random() < 0.5 ? '+' : '-') : (config.mode === 'add' ? '+' : '-');
+    let a = randomInRange(1, max);
+    let b = randomInRange(1, max);
 
     if (op === '+') {
       const result = a + b;
@@ -33,13 +59,26 @@ function makeExample() {
   }
 }
 
-function makeExamples() {
-  return Array.from({ length: TOTAL }, () => makeExample());
+function makeExamples(config) {
+  return Array.from({ length: TOTAL }, () => makeExample(config));
 }
 
 export default function RatanieGame() {
-  const [bestStars, setBestStars] = useState(() => getBestStars('ratanie'));
-  const [examples, setExamples] = useState(() => makeExamples());
+  const [levelStars, setLevelStars] = useState(() => {
+    const initial = getLevelStars('ratanie', LEVELS.length);
+    const hasAnyLevelStars = initial.some(stars => stars > 0);
+
+    if (!hasAnyLevelStars) {
+      const legacyBest = getBestStars('ratanie');
+      if (legacyBest > 0) {
+        return updateLevelBestStars('ratanie', 0, legacyBest, LEVELS.length);
+      }
+    }
+
+    return initial;
+  });
+  const [selectedLevel, setSelectedLevel] = useState(null);
+  const [examples, setExamples] = useState([]);
   const [index, setIndex] = useState(0);
   const [hit, setHit] = useState(0);
   const [miss, setMiss] = useState(0);
@@ -47,12 +86,19 @@ export default function RatanieGame() {
   const [inputValue, setInputValue] = useState('');
   const [mistakesOnCurrent, setMistakesOnCurrent] = useState(0);
   const [locked, setLocked] = useState(false);
+  const [resultVisible, setResultVisible] = useState(false);
+  const fireworksRef = useRef(null);
 
-  const finished = index >= examples.length;
-  const current = !finished ? examples[index] : null;
+  const current = examples[index] || null;
 
-  function restart() {
-    setExamples(makeExamples());
+  function isLevelUnlocked(level) {
+    return level <= highestUnlockedLevel(levelStars);
+  }
+
+  function startLevel(level) {
+    if (!isLevelUnlocked(level)) return;
+    setSelectedLevel(level);
+    setExamples(makeExamples(LEVELS[level]));
     setIndex(0);
     setHit(0);
     setMiss(0);
@@ -60,10 +106,27 @@ export default function RatanieGame() {
     setInputValue('');
     setMistakesOnCurrent(0);
     setLocked(false);
+    setResultVisible(false);
+  }
+
+  function finishLevel(finalMiss, wrongSet) {
+    const stars = getStarCount(finalMiss);
+    const previous = levelStars[selectedLevel] || 0;
+    const best = Math.max(previous, stars);
+    const updated = updateLevelBestStars('ratanie', selectedLevel, best, LEVELS.length);
+    setLevelStars(updated);
+    setWrongItems(new Set(wrongSet));
+    setResultVisible(true);
   }
 
   function nextQuestion() {
-    setIndex(prev => prev + 1);
+    const nextIndex = index + 1;
+    if (nextIndex >= examples.length) {
+      finishLevel(miss, wrongItems);
+      return;
+    }
+
+    setIndex(nextIndex);
     setInputValue('');
     setMistakesOnCurrent(0);
     setLocked(false);
@@ -71,22 +134,22 @@ export default function RatanieGame() {
 
   function pressDigit(d) {
     if (locked) return;
-    setInputValue(prev => (prev.length >= 3 ? prev : d + prev));
+    setInputValue(prev => (prev.length >= 3 ? prev : prev + d));
   }
 
   function backspace() {
     if (locked) return;
-    setInputValue(prev => prev.slice(1));
+    setInputValue(prev => prev.slice(0, -1));
   }
 
   function submit() {
-    if (locked || !current || inputValue === '') return;
+    if (locked || !current || resultVisible || inputValue === '') return;
     const value = Number(inputValue);
 
     if (value === current.result) {
       setLocked(true);
       if (mistakesOnCurrent === 0) setHit(prev => prev + 1);
-      triggerFireworks(document.querySelector('.fireworks-overlay'));
+      triggerFireworks(fireworksRef.current);
       setTimeout(nextQuestion, 1200);
       return;
     }
@@ -101,15 +164,80 @@ export default function RatanieGame() {
     setInputValue('');
   }
 
-  if (finished) {
+  const levelDone = selectedLevel !== null ? (levelStars[selectedLevel] || 0) === MAX_STARS : false;
+  const hasNextLevel = selectedLevel !== null && selectedLevel < LEVELS.length - 1;
+
+  if (selectedLevel === null) {
     return (
-      <ResultScreen
-        miss={miss}
-        wrongItems={Array.from(wrongItems)}
-        onRestart={restart}
-        onResult={stars => setBestStars(updateBestStars('ratanie', stars))}
-        taleUrl={AUDIO_TALES.ratanie}
-      />
+      <div>
+        <h1>Rátanie: Levely 1-10</h1>
+        <p className="level-menu-help">Na odomknutie ďalšieho levelu potrebuješ 5 hviezd v aktuálnom leveli.</p>
+        <div className="levels-grid">
+          {LEVELS.map((config, level) => {
+            const best = levelStars[level] || 0;
+            const levelTaleUrl = AUDIO_TALES.math[level] || AUDIO_TALES.math[0];
+            const unlocked = isLevelUnlocked(level);
+            const classes = ['level-btn'];
+
+            if (best === MAX_STARS) classes.push('completed');
+            if (!unlocked && best < MAX_STARS) classes.push('locked');
+
+            return (
+              <div key={level} className="level-row">
+                <button
+                  className={classes.join(' ')}
+                  disabled={!unlocked}
+                  onClick={() => startLevel(level)}
+                >
+                  {`Level ${level + 1}`}
+                  <small>{`${config.mode === 'add' ? 'Sčítanie' : (config.mode === 'sub' ? 'Odčítanie' : 'Sčítanie a odčítanie')} • 1-${config.max}`}</small>
+                  <small>{renderStars(best)}</small>
+                  {!unlocked && <small>{`Najprv získaj 5★ v leveli ${level}`}</small>}
+                </button>
+                {best === MAX_STARS && (
+                  <AudioTalePlayer
+                    taleUrl={levelTaleUrl}
+                    className="level-play-btn"
+                    playLabel="▶"
+                    pauseLabel="⏸"
+                  />
+                )}
+              </div>
+            );
+          })}
+        </div>
+      </div>
+    );
+  }
+
+  if (resultVisible) {
+    const stars = getStarCount(miss);
+    const levelTaleUrl = AUDIO_TALES.math[selectedLevel] || AUDIO_TALES.math[0];
+    return (
+      <div className="result-box">
+        <h2>Koniec hry!</h2>
+        <div className="stars">
+          {Array.from({ length: 5 }).map((_, idx) => (
+            <span key={idx} className={idx < stars ? 'star-gold' : 'star-grey'}>★</span>
+          ))}
+        </div>
+        <div className="level-progress-message">
+          {levelDone
+            ? (hasNextLevel ? 'Level splnený na 5★. Môžeš pokračovať ďalej.' : 'Výborne, dokončil(a) si všetky levely!')
+            : `Získal(a) si ${stars}/5 ★. Pre ďalší level potrebuješ 5/5 ★.`}
+        </div>
+        <div className="wrong-list">
+          {wrongItems.size > 0 ? `Precvič si: ${Array.from(wrongItems).join(', ')}` : 'Výborne, žiadne chyby!'}
+        </div>
+        <div className="result-actions">
+          <button className="btn-restart" onClick={() => startLevel(selectedLevel)}>Opakovať level</button>
+          {stars === 5 && <AudioTalePlayer taleUrl={levelTaleUrl} />}
+          {hasNextLevel && levelDone && (
+            <button className="btn-next-level" onClick={() => startLevel(selectedLevel + 1)}>Ďalší level</button>
+          )}
+          <button className="btn-secondary" onClick={() => setSelectedLevel(null)}>Menu levelov</button>
+        </div>
+      </div>
     );
   }
 
@@ -117,10 +245,10 @@ export default function RatanieGame() {
     <>
       <div className="game-ui">
         <h1>Rátanie</h1>
+        <div className="current-level">{`Level ${selectedLevel + 1} • Najlepšie: ${levelStars[selectedLevel] || 0}/5 ★`}</div>
         <div className="score-board">
           Správne: <span className="score-hit">{hit}</span> | Chyby: <span className="score-miss">{miss}</span>
         </div>
-        <div className="best-stars">Najviac hviezd: {bestStars}/5 ★</div>
         <div className="progress">Príklad {index + 1}/{TOTAL}</div>
         <div className="prompt prompt-ratanie">{current.text} = ?</div>
         <div className="answer-display">
@@ -136,7 +264,7 @@ export default function RatanieGame() {
           <button className="btn-key btn-ok" onClick={submit}>OK</button>
         </div>
       </div>
-      <div className="fireworks-overlay" />
+      <div className="fireworks-overlay" ref={fireworksRef} />
     </>
   );
 }

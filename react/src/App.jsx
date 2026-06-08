@@ -20,7 +20,7 @@ function MenuPage() {
   const [menuStars, setMenuStars] = useState(() => ({
     yi: getBestStars('yi'),
     obojake: getBestStars('obojake'),
-    ratanie: getBestStars('ratanie'),
+    ratanieLevels: getLevelStars('ratanie', 10),
     slovaLevels: getLevelStars('slovaYi', 8)
   }));
 
@@ -28,7 +28,7 @@ function MenuPage() {
     setMenuStars({
       yi: getBestStars('yi'),
       obojake: getBestStars('obojake'),
-      ratanie: getBestStars('ratanie'),
+      ratanieLevels: getLevelStars('ratanie', 10),
       slovaLevels: getLevelStars('slovaYi', 8)
     });
   }
@@ -56,7 +56,7 @@ function MenuPage() {
 
   const yiStars = menuStars.yi;
   const obojakeStars = menuStars.obojake;
-  const ratanieStars = menuStars.ratanie;
+  const ratanieFinished = useMemo(() => menuStars.ratanieLevels.filter(stars => stars === 5).length, [menuStars.ratanieLevels]);
   const slovaFinished = useMemo(() => menuStars.slovaLevels.filter(stars => stars === 5).length, [menuStars.slovaLevels]);
 
   return (
@@ -111,16 +111,8 @@ function MenuPage() {
         <div className="menu-row">
           <button className="btn-menu-ratanie" onClick={() => navigate('/ratanie')}>
             <span className="menu-title">Rátanie</span>
-            <span className="menu-stars">{renderStars(ratanieStars)}</span>
+            <span className="menu-stars">{`${ratanieFinished} z 10`}</span>
           </button>
-          {ratanieStars >= 5 && (
-            <AudioTalePlayer
-              taleUrl={AUDIO_TALES.ratanie}
-              className="menu-play-btn"
-              playLabel="▶"
-              pauseLabel="⏸"
-            />
-          )}
         </div>
       </div>
     </>
