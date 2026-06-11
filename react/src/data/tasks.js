@@ -24,9 +24,9 @@ export const OBOJAKE_TASKS = [
 export const SLOVA_YI_GROUPS = [
     [
         { vypis: 'Ľal_a', odpoved: 'makke', cele: 'Ľalia' },
-        { vypis: 'CH_ba', odpoved: 'tvrde', cele: 'Chyba' },
+        { vypis: 'Ch_ba', odpoved: 'tvrde', cele: 'Chyba' },
         { vypis: 'H_stória', odpoved: 'makke', cele: 'História' },
-        { vypis: 'CH_rurgia', odpoved: 'makke', cele: 'Chirurgia' },
+        { vypis: 'Ch_rurgia', odpoved: 'makke', cele: 'Chirurgia' },
         { vypis: 'K_no', odpoved: 'makke', cele: 'Kino' },
         { vypis: 'T_mián', odpoved: 'tvrde', cele: 'Tymián' },
         { vypis: 'C_trón', odpoved: 'makke', cele: 'Citrón' },
@@ -51,7 +51,7 @@ export const SLOVA_YI_GROUPS = [
         { vypis: 'C_buľa', odpoved: 'makke', cele: 'Cibuľa' },
         { vypis: 'N_tka', odpoved: 'makke', cele: 'Nitka' },
         { vypis: 'H_bať', odpoved: 'tvrde', cele: 'Hýbať' },
-        { vypis: 'CH_tiť', odpoved: 'tvrde', cele: 'Chytiť' },
+        { vypis: 'Ch_tiť', odpoved: 'tvrde', cele: 'Chytiť' },
         { vypis: 'L_ko', odpoved: 'tvrde', cele: 'Lyko' },
         { vypis: 'T_síc', odpoved: 'makke', cele: 'Tisíc' },
         { vypis: 'D_plom', odpoved: 'makke', cele: 'Diplom' },
@@ -59,7 +59,7 @@ export const SLOVA_YI_GROUPS = [
         { vypis: 'D_elo', odpoved: 'makke', cele: 'Dielo' },
     ],
     [
-        { vypis: 'CH_méra', odpoved: 'makke', cele: 'Chiméra' },
+        { vypis: 'Ch_méra', odpoved: 'makke', cele: 'Chiméra' },
         { vypis: 'Č_slo', odpoved: 'makke', cele: 'Číslo' },
         { vypis: 'D_ka', odpoved: 'tvrde', cele: 'Dýka' },
         { vypis: 'H_mna', odpoved: 'tvrde', cele: 'Hymna' },
@@ -72,7 +72,7 @@ export const SLOVA_YI_GROUPS = [
     ],
     [
         {vypis: 'Bic_kel', odpoved: 'tvrde', cele: 'Bicykel'},
-        {vypis: 'CH_stá', odpoved: 'tvrde', cele: 'Chystá'},
+        {vypis: 'Ch_stá', odpoved: 'tvrde', cele: 'Chystá'},
         {vypis: 'K_lometr', odpoved: 'makke', cele: 'Kilometer'},
         {vypis: 'Ž_la', odpoved: 'makke', cele: 'Žila'},
         {vypis: 'C_nický', odpoved: 'tvrde', cele: 'Cynický'},
@@ -89,13 +89,13 @@ export const SLOVA_YI_GROUPS = [
         {vypis: 'L_ra', odpoved: 'tvrde', cele: 'Lyra'},
         {vypis: 'Š_roký', odpoved: 'makke', cele: 'Široký'},
         {vypis: 'Rada, T_p', odpoved: 'makke', cele: 'Rada, Tip'},
-        {vypis: 'CH_rurg', odpoved: 'makke', cele: 'Chirurg'},
+        {vypis: 'Ch_rurg', odpoved: 'makke', cele: 'Chirurg'},
         {vypis: 'L_rický', odpoved: 'tvrde', cele: 'Lyrický'},
         {vypis: 'K_bel', odpoved: 'tvrde', cele: 'Kýbel'},
         {vypis: 'H_núť', odpoved: 'tvrde', cele: 'Hynúť'}
     ],
     [
-        {vypis: 'CH_trý', odpoved: 'tvrde', cele: 'Chytrý'},
+        {vypis: 'Ch_trý', odpoved: 'tvrde', cele: 'Chytrý'},
         {vypis: 'C_klus', odpoved: 'tvrde', cele: 'Cyklus'},
         {vypis: 'H_giena', odpoved: 'tvrde', cele: 'Hygiena'},
         {vypis: 'L_st', odpoved: 'makke', cele: 'List'},
@@ -110,10 +110,39 @@ export const SLOVA_YI_GROUPS = [
         {vypis: 'L_ceum', odpoved: 'tvrde', cele: 'Lýceum'},
         {vypis: 'T_pnuť si', odpoved: 'makke', cele: 'Tipnúť si'},
         {vypis: 'C_linder', odpoved: 'tvrde', cele: 'Cylinder'},
-        {vypis: 'CH_rny', odpoved: 'tvrde', cele: 'Chýrny'},
+        {vypis: 'Ch_rny', odpoved: 'tvrde', cele: 'Chýrny'},
         {vypis: 'H_bnosť', odpoved: 'tvrde', cele: 'Hybnosť'},
         {vypis: 'H_ena', odpoved: 'tvrde', cele: 'Hyena'}
     ]
 ];
 
 export const SLOVA_YI_TASKS = SLOVA_YI_GROUPS.flat();
+
+export const DOPLNOVACKY = [
+    'chystali', 'hydinová šunka', 'hýľ', 'pohybuje', 'hýri', 'pokyny', 'chytať', 'vždy',
+    'vyskočil', 'maličkosť', 'výťah', 'tieň', 'motýľ', 'deti', 'zmrzlina',
+    'stanica', 'diviak', 'diváci', 'ticho', 'dedina', 'porazil', 'veľký', 'spí', 'priletel', 'mieriť',
+    'kedysi', 'tyčinky', 'dychovka', 'nikdy', 'oči', 'mačička', 'očný', 'košík', 'žirafa', 'žinienka',
+    'cibuľa', 'medzi', 'čajík', 'dzindzik', 'cítiť', 'šiť', 'nevädza', 'mädza', 'päť', 'deväť',
+    'desať', 'tis', 'Žilina', 'Trenčín',
+    'počítač', 'tykadlo', 'džíp', 'dýka', 'dojímať', 'snívať', 'dívať sa', 'používať',
+    'na mori', 'videli', 'víkend', 'povysáva', 'vyčistí', 'obývačka',
+    'diktát', 'blízko', 'divina', 'nitka', 'týždeň', 'navždy', 'dýchať', 'dotyk', 'plyn', 'kývať', 'zlyhanie',
+    'zánik', 'dyha', 'dyňa', 'hodiny', 'pochybovať', 'nízka', 'citlivá',
+    'týpek', 'motyka', 'štyri', 'zahynúť', 'ulica', 'kniha', 'dedinčan', 'gýč',
+    'štípe', 'kreslíme', 'lipa', 'Nina', 'hodina', 'udica', 'burgyňa', 'zaváranina',
+    'lízatko', 'všeličo', 'dych', 'Margita', 'pomaly', 'obrázky', 'športovci', 'Hydra', 'Gymnázium', 
+    'recepty', 'vtáky', 'vtáci', 'protivník', 'polícia', 'neporiadnik', 'mních', 'kolíska', 'Hygiena',
+    'roky', 'zbojníci', 'výdychy', 'narcisy', 'malinovka', 'Chýrny', 'Likér', 'Limonáda', 'literatúra',
+];
+
+export const POZOR = [
+    'História', 'Chirurgia', 'Kino', 'Dinosaurus', 'Gitara', 'Cyrilika', 'detektív',
+    'Chiméra', 'Cynický', 'Disko', 'Chirurg', 'Cyklus', 
+    'Cysta', 'Cyklista', 'Cylinder', 'Hyena', 'Bicykel', 'Typ, Druh', 'Typický',
+    'Lyrika', 'Lyra', 'Lyko', 'Lyže', 'Hybnosť',
+    'lyrika', 'Bicykel', 'cyklista', 'cyklus', 'cysta', 'hygiena', 'kino', 'plyš',
+ 'lyžovať', 'lyžica', 'lyko', 'lýtko', 'rýdzik',
+    'hit', 'kikirikí', 'kivi', 'puding', 'dirigent', 'girlanda',
+    'Denisa', 'Brigita', 'tikot', 'tipnúť si', 'vplyv', 'matematika',
+];
