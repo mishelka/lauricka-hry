@@ -2,14 +2,28 @@ import { useMemo, useState } from 'react';
 import { shuffleArray } from '../utils/gameUtils';
 import { getBestStars, updateBestStars } from '../utils/player';
 
-const TARGET_CHARS = new Set(['e', 'ä', 'E', 'Ä']);
-const OPTIONS = ['e', 'ä'];
 const BATCH_SIZE = 5;
 const TOTAL_STARS = 5;
 
-function splitWord(word) {
+const IY_MODE = {
+  targetChars: new Set(['i', 'í', 'y', 'ý', 'I', 'Í', 'Y', 'Ý']),
+  options: ['i', 'í', 'y', 'ý']
+};
+
+const EA_MODE = {
+  targetChars: new Set(['e', 'ä', 'E', 'Ä']),
+  options: ['e', 'ä']
+};
+
+function getWordMode(word) {
+  const lower = word.toLocaleLowerCase('sk');
+  if (lower.includes('ä') || lower === 'desať') return EA_MODE;
+  return IY_MODE;
+}
+
+function splitWord(word, targetChars) {
   return Array.from(word).map((ch, index) => {
-    if (TARGET_CHARS.has(ch)) {
+    if (targetChars.has(ch)) {
       return { type: 'blank', correct: ch, index };
     }
     return { type: 'text', value: ch, index };
@@ -47,15 +61,20 @@ export default function WordFillGame({ title, gameId, sourceWords }) {
     [batchStart, words]
   );
 
-  const parsedBatch = useMemo(
-    () => batchWords.map(word => splitWord(word)),
-    [batchWords]
-  );
+  const parsedBatch = useMemo(() => {
+    return batchWords.map(word => {
+      const mode = getWordMode(word);
+      return {
+        parts: splitWord(word, mode.targetChars),
+        options: mode.options
+      };
+    });
+  }, [batchWords]);
 
-  const allFilled = parsedBatch.every((parts, wordIndex) => {
+  const allFilled = parsedBatch.every((entry, wordIndex) => {
     const globalIndex = batchStart + wordIndex;
     const selected = answers[globalIndex] || [];
-    const blankCount = parts.filter(part => part.type === 'blank').length;
+    const blankCount = entry.parts.filter(part => part.type === 'blank').length;
     if (blankCount === 0) return true;
     return selected.filter(Boolean).length >= blankCount;
   });
@@ -76,13 +95,13 @@ export default function WordFillGame({ title, gameId, sourceWords }) {
   function collectBatchMistakes() {
     const nextWrong = new Set(wrongWords);
 
-    parsedBatch.forEach((parts, wordIndex) => {
+    parsedBatch.forEach((entry, wordIndex) => {
       const globalWordIndex = batchStart + wordIndex;
       const selected = answers[globalWordIndex] || [];
       let blankCounter = 0;
       let hasMistake = false;
 
-      parts.forEach(part => {
+      entry.parts.forEach(part => {
         if (part.type !== 'blank') return;
         const choice = selected[blankCounter] || '';
         blankCounter += 1;
@@ -122,7 +141,8 @@ export default function WordFillGame({ title, gameId, sourceWords }) {
     setWrongWords(new Set());
   }
 
-  function renderWord(parts, globalWordIndex) {
+  function renderWord(entry, globalWordIndex) {
+    const parts = entry.parts;
     let blankCounter = 0;
     const selected = answers[globalWordIndex] || [];
 
@@ -145,7 +165,7 @@ export default function WordFillGame({ title, gameId, sourceWords }) {
             aria-label="Vyber pismeno"
           >
             <option value="">_</option>
-            {OPTIONS.map(option => (
+            {entry.options.map(option => (
               <option key={option} value={option}>{option}</option>
             ))}
           </select>
@@ -188,12 +208,12 @@ export default function WordFillGame({ title, gameId, sourceWords }) {
       <div className="best-stars">Najlepšie: {'★'.repeat(bestStars)}{'☆'.repeat(TOTAL_STARS - bestStars)}</div>
 
       <div className="dopln-list">
-        {parsedBatch.map((parts, wordIndex) => {
+        {parsedBatch.map((entry, wordIndex) => {
           const globalWordIndex = batchStart + wordIndex;
           return (
             <div className="dopln-word-row" key={`${batchStart}-${wordIndex}`}>
               <span className="dopln-word-index">{globalWordIndex + 1}.</span>
-              <span className="dopln-word">{renderWord(parts, globalWordIndex)}</span>
+              <span className="dopln-word">{renderWord(entry, globalWordIndex)}</span>
             </div>
           );
         })}
