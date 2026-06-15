@@ -180,6 +180,75 @@ button:disabled {
 
 .prompt-ratanie {
   font-size: 48px;
+  display: flex;
+  justify-content: center;
+}
+
+.vertical-math {
+  display: inline-flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 6px;
+  margin: 6px auto 12px;
+}
+
+.math-row {
+  display: grid;
+  grid-template-columns: 42px auto;
+  align-items: center;
+  column-gap: 10px;
+}
+
+.math-operator {
+  font-size: 48px;
+  font-weight: bold;
+  color: #2f3e4f;
+  line-height: 1;
+  text-align: right;
+}
+
+.math-number {
+  display: grid;
+  grid-template-columns: repeat(2, 64px);
+  gap: 8px;
+}
+
+.digit-box,
+.digit-input {
+  width: 64px;
+  height: 64px;
+  border-radius: 10px;
+  border: 2px solid #8da5ba;
+  background: #fff;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 40px;
+  font-weight: bold;
+  color: #1f2a38;
+  line-height: 1;
+}
+
+.math-line {
+  margin-left: 52px;
+  height: 4px;
+  border-radius: 2px;
+  background: #334155;
+}
+
+.math-answer {
+  margin-top: 2px;
+}
+
+.digit-input {
+  padding: 0;
+  color: #0f172a;
+  cursor: pointer;
+}
+
+.digit-input.active {
+  border-color: #2a92cc;
+  box-shadow: 0 0 0 3px rgba(42, 146, 204, 0.2);
 }
 
 .answer-display {
@@ -501,5 +570,30 @@ button:disabled {
     min-width: 50px;
     font-size: 22px;
     padding: 8px 10px 8px 12px;
+  }
+
+  .math-row {
+    grid-template-columns: 34px auto;
+    column-gap: 8px;
+  }
+
+  .math-operator {
+    font-size: 40px;
+  }
+
+  .math-number {
+    grid-template-columns: repeat(2, 52px);
+    gap: 7px;
+  }
+
+  .digit-box,
+  .digit-input {
+    width: 52px;
+    height: 52px;
+    font-size: 34px;
+  }
+
+  .math-line {
+    margin-left: 42px;
   }
 }

@@ -72,6 +72,17 @@ function MenuPage() {
       <h1>Vyber si hru:</h1>
       <div className="menu-container">
         <div className="menu-divider" role="separator" aria-label="Oddelovač kategórií">
+          <span>Matematické hry</span>
+        </div>
+
+        <div className="menu-row">
+          <button className="btn-menu-ratanie" onClick={() => navigate('/ratanie')}>
+            <span className="menu-title">Rátanie</span>
+            <span className="menu-stars">{`${ratanieFinished} z 10`}</span>
+          </button>
+        </div>
+        
+        <div className="menu-divider" role="separator" aria-label="Oddelovač kategórií">
           <span>Slovenčina</span>
         </div>
         
@@ -123,17 +134,6 @@ function MenuPage() {
           <button className="btn-menu-cudzie" onClick={() => navigate('/cudzie')}>
             <span className="menu-title">Cudzie</span>
             <span className="menu-stars">{renderStars(cudzieStars)}</span>
-          </button>
-        </div>
-
-        <div className="menu-divider" role="separator" aria-label="Oddelovač kategórií">
-          <span>Matematické hry</span>
-        </div>
-
-        <div className="menu-row">
-          <button className="btn-menu-ratanie" onClick={() => navigate('/ratanie')}>
-            <span className="menu-title">Rátanie</span>
-            <span className="menu-stars">{`${ratanieFinished} z 10`}</span>
           </button>
         </div>
       </div>

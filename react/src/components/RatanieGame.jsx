@@ -51,11 +51,11 @@ function makeExample(config) {
     if (op === '+') {
       const result = a + b;
       if (result > 99) continue;
-      return { text: `${a} + ${b}`, result };
+      return { a, b, op, text: `${a} + ${b}`, result };
     }
 
     if (a < b) [a, b] = [b, a];
-    return { text: `${a} - ${b}`, result: a - b };
+    return { a, b, op, text: `${a} - ${b}`, result: a - b };
   }
 }
 
@@ -83,7 +83,8 @@ export default function RatanieGame() {
   const [hit, setHit] = useState(0);
   const [miss, setMiss] = useState(0);
   const [wrongItems, setWrongItems] = useState(new Set());
-  const [inputValue, setInputValue] = useState('');
+  const [answerDigits, setAnswerDigits] = useState(['', '']);
+  const [activeDigit, setActiveDigit] = useState(0);
   const [mistakesOnCurrent, setMistakesOnCurrent] = useState(0);
   const [locked, setLocked] = useState(false);
   const [resultVisible, setResultVisible] = useState(false);
@@ -103,7 +104,8 @@ export default function RatanieGame() {
     setHit(0);
     setMiss(0);
     setWrongItems(new Set());
-    setInputValue('');
+    setAnswerDigits(['', '']);
+    setActiveDigit(0);
     setMistakesOnCurrent(0);
     setLocked(false);
     setResultVisible(false);
@@ -127,24 +129,49 @@ export default function RatanieGame() {
     }
 
     setIndex(nextIndex);
-    setInputValue('');
+    setAnswerDigits(['', '']);
+    setActiveDigit(0);
     setMistakesOnCurrent(0);
     setLocked(false);
   }
 
   function pressDigit(d) {
     if (locked) return;
-    setInputValue(prev => (prev.length >= 3 ? prev : prev + d));
+    setAnswerDigits(prev => {
+      const next = [...prev];
+      next[activeDigit] = d;
+      return next;
+    });
+    if (activeDigit < 1) setActiveDigit(activeDigit + 1);
   }
 
   function backspace() {
     if (locked) return;
-    setInputValue(prev => prev.slice(0, -1));
+
+    setAnswerDigits(prev => {
+      const next = [...prev];
+      if (next[activeDigit] !== '') {
+        next[activeDigit] = '';
+        return next;
+      }
+
+      if (activeDigit > 0) {
+        const previousIndex = activeDigit - 1;
+        next[previousIndex] = '';
+        setActiveDigit(previousIndex);
+      }
+
+      return next;
+    });
   }
 
   function submit() {
-    if (locked || !current || resultVisible || inputValue === '') return;
-    const value = Number(inputValue);
+    if (locked || !current || resultVisible) return;
+
+    const valueText = answerDigits.join('');
+    if (valueText === '') return;
+
+    const value = Number(valueText);
 
     if (value === current.result) {
       setLocked(true);
@@ -161,7 +188,8 @@ export default function RatanieGame() {
       next.add(`${current.text} = ${current.result}`);
       return next;
     });
-    setInputValue('');
+    setAnswerDigits(['', '']);
+    setActiveDigit(0);
   }
 
   const levelDone = selectedLevel !== null ? (levelStars[selectedLevel] || 0) === MAX_STARS : false;
@@ -250,10 +278,41 @@ export default function RatanieGame() {
           Správne: <span className="score-hit">{hit}</span> | Chyby: <span className="score-miss">{miss}</span>
         </div>
         <div className="progress">Príklad {index + 1}/{TOTAL}</div>
-        <div className="prompt prompt-ratanie">{current.text} = ?</div>
-        <div className="answer-display">
-          <span className="cursor">_</span>
-          <span>{inputValue || '\u00a0'}</span>
+        <div className="prompt prompt-ratanie">
+          <div className="vertical-math">
+            <div className="math-row">
+              <span className="math-operator">&nbsp;</span>
+              <div className="math-number">
+                {String(current.a).padStart(2, ' ').split('').map((digit, i) => (
+                  <span key={`top-${i}`} className="digit-box">{digit === ' ' ? '\u00a0' : digit}</span>
+                ))}
+              </div>
+            </div>
+            <div className="math-row">
+              <span className="math-operator">{current.op}</span>
+              <div className="math-number">
+                {String(current.b).padStart(2, ' ').split('').map((digit, i) => (
+                  <span key={`bottom-${i}`} className="digit-box">{digit === ' ' ? '\u00a0' : digit}</span>
+                ))}
+              </div>
+            </div>
+            <div className="math-line" />
+            <div className="math-row">
+              <span className="math-operator">&nbsp;</span>
+              <div className="math-number math-answer">
+                {answerDigits.map((digit, i) => (
+                  <button
+                    key={`answer-${i}`}
+                    type="button"
+                    className={`digit-input ${activeDigit === i ? 'active' : ''}`}
+                    onClick={() => !locked && setActiveDigit(i)}
+                  >
+                    {digit || '\u00a0'}
+                  </button>
+                ))}
+              </div>
+            </div>
+          </div>
         </div>
         <div className="keyboard-grid">
           {[1, 2, 3, 4, 5, 6, 7, 8, 9].map(n => (
