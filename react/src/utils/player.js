@@ -95,6 +95,13 @@ function migrateLegacyIfNeeded(state) {
     }
   });
 
+  const dtnlRec = getRecord(state, 'doplnovacky_dtnl');
+  const oldDoplnovacky = getRecord(state, 'doplnovacky');
+  if (oldDoplnovacky.bestStars > dtnlRec.bestStars) {
+    dtnlRec.bestStars = oldDoplnovacky.bestStars;
+    changed = true;
+  }
+
   const wasMigrated = Boolean(state.migratedLegacyV1);
   state.migratedLegacyV1 = true;
   if (changed || !wasMigrated) {

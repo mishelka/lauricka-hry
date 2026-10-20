@@ -1,6 +1,7 @@
 import { getStarCount } from '../utils/gameUtils';
 import { useEffect } from 'react';
 import AudioTalePlayer from './AudioTalePlayer';
+import { RestartIcon } from './Icons';
 
 export default function ResultScreen({ miss, wrongItems, onRestart, onResult, taleUrl }) {
   const stars = getStarCount(miss);
@@ -23,7 +24,10 @@ export default function ResultScreen({ miss, wrongItems, onRestart, onResult, ta
         {wrongItems.length > 0 ? `Precvič si: ${wrongItems.join(', ')}` : 'Výborne, žiadne chyby!'}
       </div>
       <div className="result-actions">
-        <button className="btn-restart" onClick={onRestart}>Nová hra</button>
+        <button className="btn-restart" onClick={onRestart}>
+          <RestartIcon />
+          <span>Nová hra</span>
+        </button>
         {stars === 5 && <AudioTalePlayer taleUrl={taleUrl} />}
       </div>
     </div>

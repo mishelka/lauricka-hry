@@ -118,7 +118,7 @@ export const SLOVA_YI_GROUPS = [
 
 export const SLOVA_YI_TASKS = SLOVA_YI_GROUPS.flat();
 
-export const DOPLNOVACKY = [
+export const DOPLNOVACKY_DTNL = [
     'chystali', 'hydinová šunka', 'hýľ', 'pohybuje', 'hýri', 'pokyny', 'chytať', 'vždy',
     'vyskočil', 'maličkosť', 'výťah', 'tieň', 'motýľ', 'deti', 'zmrzlina',
     'stanica', 'diviak', 'diváci', 'ticho', 'dedina', 'porazil', 'veľký', 'spí', 'priletel', 'mieriť',
@@ -134,6 +134,20 @@ export const DOPLNOVACKY = [
     'lízatko', 'všeličo', 'dych', 'Margita', 'pomaly', 'obrázky', 'športovci', 'Hydra', 'Gymnázium', 
     'recepty', 'vtáky', 'vtáci', 'protivník', 'polícia', 'neporiadnik', 'mních', 'kolíska', 'Hygiena',
     'roky', 'zbojníci', 'výdychy', 'narcisy', 'malinovka', 'Chýrny', 'Likér', 'Limonáda', 'literatúra',
+];
+
+export const DOPLNOVACKY = DOPLNOVACKY_DTNL;
+
+export const DOPLNOVACKY_B = [
+    'bylina', 'bystrý', 'býk', 'byt', 'bývať', 'dobytok', 'kobyla', 'aby', 'keby', 'byvol',
+    'bytosť', 'bývalý', 'zbytok', 'odbyt', 'byľ', 'bylinka', 'bylinkový', 'bylinožravec', 'bystrosť', 'Banská Bystrica',
+    'bystrina', 'obyvateľ', 'obývačka', 'príbytok', 'nábytok', 'bytovka', 'zabývať sa', 'dobytkárstvo', 'kobylka', 'býčí',
+    'býček', 'prebytok', 'úbytok', 'zbytočný', 'starobylý', 'neobývaný', 'byvolí', 'bystrozraký', 'dobytčí', 'nadbytok',
+    'dobytkár', 'obydlie', 'ubytovňa', 'bývanie', 'bylinár', 'Považská Bystrica', 'bicykel', 'biela', 'bieliť', 'bielizeň',
+    'bitka', 'bič', 'bistro', 'bižutéria', 'bifľovať sa', 'biológia', 'bibliotéka', 'bizón', 'bikiny', 'biliard',
+    'bitúnok', 'bidlo', 'bit', 'dobiť', 'odbiť', 'pribiť', 'zabiť', 'bielina', 'bivak', 'biketrial',
+    'bilancia', 'biskup', 'biatlon', 'biceps', 'bilingválny', 'biotop', 'bylinkový čaj', 'slávnostná bižutéria', 'horská bystrina', 'lúčna kobylka',
+    'divoký bizón', 'biela plachta', 'drevené bidlo', 'nový príbytok', 'dobitý mobil', 'dobyť hrad', 'hlasno biť', 'chcem byť', 'počítačový bit'
 ];
 
 export const POZOR = [

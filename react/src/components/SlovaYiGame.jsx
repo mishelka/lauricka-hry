@@ -4,6 +4,7 @@ import { getStarCount, shuffleArray, triggerFireworks } from '../utils/gameUtils
 import { getLevelStars, updateLevelBestStars } from '../utils/player';
 import AudioTalePlayer from './AudioTalePlayer';
 import { AUDIO_TALES } from '../data/audioTales';
+import { RestartIcon, NextLevelIcon, LevelsMenuIcon, PlayIcon, PauseIcon } from './Icons';
 
 const MAX_STARS = 5;
 
@@ -145,8 +146,8 @@ export default function SlovaYiGame() {
                   <AudioTalePlayer
                     taleUrl={levelTaleUrl}
                     className="level-play-btn"
-                    playLabel="▶"
-                    pauseLabel="⏸"
+                    playLabel={<PlayIcon size={22} />}
+                    pauseLabel={<PauseIcon size={22} />}
                   />
                 )}
               </div>
@@ -177,12 +178,21 @@ export default function SlovaYiGame() {
           {wrongItems.size > 0 ? `Precvič si: ${Array.from(wrongItems).join(', ')}` : 'Výborne, žiadne chyby!'}
         </div>
         <div className="result-actions">
-          <button className="btn-restart" onClick={() => startLevel(selectedLevel)}>Opakovať level</button>
+          <button className="btn-restart" onClick={() => startLevel(selectedLevel)}>
+            <RestartIcon />
+            <span>Opakovať level</span>
+          </button>
           {stars === 5 && <AudioTalePlayer taleUrl={levelTaleUrl} />}
           {hasNextLevel && levelDone && (
-            <button className="btn-next-level" onClick={() => startLevel(selectedLevel + 1)}>Ďalší level</button>
+            <button className="btn-next-level" onClick={() => startLevel(selectedLevel + 1)}>
+              <NextLevelIcon />
+              <span>Ďalší level</span>
+            </button>
           )}
-          <button className="btn-secondary" onClick={() => setSelectedLevel(null)}>Menu levelov</button>
+          <button className="btn-secondary" onClick={() => setSelectedLevel(null)}>
+            <LevelsMenuIcon />
+            <span>Menu levelov</span>
+          </button>
         </div>
       </div>
     );

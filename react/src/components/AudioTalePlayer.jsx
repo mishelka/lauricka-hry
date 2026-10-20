@@ -1,10 +1,11 @@
 import { useEffect, useRef, useState } from 'react';
+import { HeadphonesIcon, PauseIcon } from './Icons';
 
 export default function AudioTalePlayer({
   taleUrl,
   className = 'btn-secondary',
-  playLabel = 'Prehrať rozprávku',
-  pauseLabel = 'Pozastaviť rozprávku'
+  playLabel = null,
+  pauseLabel = null
 }) {
   const audioRef = useRef(null);
   const [isPlaying, setIsPlaying] = useState(false);
@@ -38,7 +39,21 @@ export default function AudioTalePlayer({
   return (
     <>
       <button className={className} onClick={togglePlayback}>
-        {isPlaying ? pauseLabel : playLabel}
+        {isPlaying ? (
+          pauseLabel ?? (
+            <>
+              <PauseIcon />
+              <span>Pozastaviť rozprávku</span>
+            </>
+          )
+        ) : (
+          playLabel ?? (
+            <>
+              <HeadphonesIcon />
+              <span>Prehrať rozprávku</span>
+            </>
+          )
+        )}
       </button>
       <audio
         ref={audioRef}

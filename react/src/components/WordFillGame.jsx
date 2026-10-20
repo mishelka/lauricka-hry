@@ -1,6 +1,7 @@
 import { useMemo, useState } from 'react';
 import { shuffleArray } from '../utils/gameUtils';
 import { getBestStars, updateBestStars } from '../utils/player';
+import { RestartIcon } from './Icons';
 
 const BATCH_SIZE = 5;
 const TOTAL_STARS = 5;
@@ -245,7 +246,10 @@ export default function WordFillGame({ title, gameId, sourceWords }) {
                 ? `Precvič si: ${Array.from(wrongWords).join(', ')}`
                 : 'Výborne, žiadne chyby!'}
             </div>
-            <button className="btn-restart" onClick={restartGame}>Hrať znova</button>
+            <button className="btn-restart" onClick={restartGame}>
+              <RestartIcon />
+              <span>Hrať znova</span>
+            </button>
           </div>
         )}
       </div>

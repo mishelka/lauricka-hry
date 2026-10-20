@@ -4,11 +4,15 @@ import { useEffect, useMemo, useState } from 'react';
 import YiGame from './components/YiGame';
 import ObojakeGame from './components/ObojakeGame';
 import SlovaYiGame from './components/SlovaYiGame';
+import VybraneBGame from './components/VybraneBGame';
 import RatanieGame from './components/RatanieGame';
 import AudioTalePlayer from './components/AudioTalePlayer';
-import DoplnovackyGame from './components/DoplnovackyGame';
+import DoplnovackyMenu, { DoplnovackyDtnlGame, DoplnovackyBGame } from './components/DoplnovackyGame';
 import CudzieGame from './components/CudzieGame';
+import BlockOutGame from './rewards/BlockOutGame';
+import { BLOCK_OUT_LEVELS } from './rewards/blockOutLevels';
 import { AUDIO_TALES } from './data/audioTales';
+import { BackIcon, PlayIcon, PauseIcon } from './components/Icons';
 
 function renderStars(starsCount) {
   return Array.from({ length: 5 }).map((_, i) => (
@@ -22,20 +26,26 @@ function MenuPage() {
   const [menuStars, setMenuStars] = useState(() => ({
     yi: getBestStars('yi'),
     obojake: getBestStars('obojake'),
-    doplnovacky: getBestStars('doplnovacky'),
+    doplnovackyDtnl: getBestStars('doplnovacky_dtnl'),
+    doplnovackyB: getBestStars('doplnovacky_b'),
     cudzie: getBestStars('cudzie'),
     ratanieLevels: getLevelStars('ratanie', 10),
-    slovaLevels: getLevelStars('slovaYi', 8)
+    slovaLevels: getLevelStars('slovaYi', 8),
+    vybraneBLevels: getLevelStars('vybraneB', 6),
+    blockOutLevels: getLevelStars('blockOut', BLOCK_OUT_LEVELS.length)
   }));
 
   function refreshMenuStars() {
     setMenuStars({
       yi: getBestStars('yi'),
       obojake: getBestStars('obojake'),
-      doplnovacky: getBestStars('doplnovacky'),
+      doplnovackyDtnl: getBestStars('doplnovacky_dtnl'),
+      doplnovackyB: getBestStars('doplnovacky_b'),
       cudzie: getBestStars('cudzie'),
       ratanieLevels: getLevelStars('ratanie', 10),
-      slovaLevels: getLevelStars('slovaYi', 8)
+      slovaLevels: getLevelStars('slovaYi', 8),
+      vybraneBLevels: getLevelStars('vybraneB', 6),
+      blockOutLevels: getLevelStars('blockOut', BLOCK_OUT_LEVELS.length)
     });
   }
 
@@ -62,10 +72,15 @@ function MenuPage() {
 
   const yiStars = menuStars.yi;
   const obojakeStars = menuStars.obojake;
-  const doplnovackyStars = menuStars.doplnovacky;
   const cudzieStars = menuStars.cudzie;
   const ratanieFinished = useMemo(() => menuStars.ratanieLevels.filter(stars => stars === 5).length, [menuStars.ratanieLevels]);
   const slovaFinished = useMemo(() => menuStars.slovaLevels.filter(stars => stars === 5).length, [menuStars.slovaLevels]);
+  const vybraneBFinished = useMemo(() => menuStars.vybraneBLevels.filter(stars => stars === 5).length, [menuStars.vybraneBLevels]);
+  const blockOutFinished = useMemo(() => menuStars.blockOutLevels.filter(stars => stars === 5).length, [menuStars.blockOutLevels]);
+  const doplnovackyFinished = useMemo(
+    () => (menuStars.doplnovackyDtnl === 5 ? 1 : 0) + (menuStars.doplnovackyB === 5 ? 1 : 0),
+    [menuStars.doplnovackyDtnl, menuStars.doplnovackyB]
+  );
 
   return (
     <>
@@ -95,8 +110,8 @@ function MenuPage() {
             <AudioTalePlayer
               taleUrl={AUDIO_TALES.yi}
               className="menu-play-btn"
-              playLabel="▶"
-              pauseLabel="⏸"
+              playLabel={<PlayIcon size={22} />}
+              pauseLabel={<PauseIcon size={22} />}
             />
           )}
         </div>
@@ -110,8 +125,8 @@ function MenuPage() {
             <AudioTalePlayer
               taleUrl={AUDIO_TALES.obojake}
               className="menu-play-btn"
-              playLabel="▶"
-              pauseLabel="⏸"
+              playLabel={<PlayIcon size={22} />}
+              pauseLabel={<PauseIcon size={22} />}
             />
           )}
         </div>
@@ -126,7 +141,7 @@ function MenuPage() {
         <div className="menu-row">
           <button className="btn-menu-doplnovacky" onClick={() => navigate('/doplnovacky')}>
             <span className="menu-title">Doplňovačky</span>
-            <span className="menu-stars">{renderStars(doplnovackyStars)}</span>
+            <span className="menu-stars">{`${doplnovackyFinished} z 2`}</span>
           </button>
         </div>
 
@@ -136,18 +151,39 @@ function MenuPage() {
             <span className="menu-stars">{renderStars(cudzieStars)}</span>
           </button>
         </div>
+
+        <div className="menu-row">
+          <button className="btn-menu-vybrane-b" onClick={() => navigate('/vybrane-b')}>
+            <span className="menu-title">Vybrané po B</span>
+            <span className="menu-stars">{`${vybraneBFinished} z 6`}</span>
+          </button>
+        </div>
+
+        <div className="menu-divider" role="separator" aria-label="Oddelovač kategórií">
+          <span>Hry za odmenu</span>
+        </div>
+
+        <div className="menu-row">
+          <button className="btn-menu-blockout" onClick={() => navigate('/block-out')}>
+            <span className="menu-title">Block Out!</span>
+            <span className="menu-stars">{`${blockOutFinished} z ${BLOCK_OUT_LEVELS.length}`}</span>
+          </button>
+        </div>
       </div>
     </>
   );
 }
 
-function GamePage({ children }) {
+function GamePage({ children, backTo = '/' }) {
   const navigate = useNavigate();
 
   return (
     <>
       <div className="top-actions">
-        <button className="btn-back" onClick={() => navigate('/')}>Späť do menu</button>
+        <button className="btn-back" onClick={() => navigate(backTo)}>
+          <BackIcon />
+          <span>Späť do menu</span>
+        </button>
       </div>
       {children}
     </>
@@ -164,9 +200,13 @@ export default function App() {
           <Route path="/yi" element={<GamePage><YiGame /></GamePage>} />
           <Route path="/obojake" element={<GamePage><ObojakeGame /></GamePage>} />
           <Route path="/slova" element={<GamePage><SlovaYiGame /></GamePage>} />
-          <Route path="/doplnovacky" element={<GamePage><DoplnovackyGame /></GamePage>} />
+          <Route path="/doplnovacky" element={<GamePage><DoplnovackyMenu /></GamePage>} />
+          <Route path="/doplnovacky/dtnl" element={<GamePage backTo="/doplnovacky"><DoplnovackyDtnlGame /></GamePage>} />
+          <Route path="/doplnovacky/b" element={<GamePage backTo="/doplnovacky"><DoplnovackyBGame /></GamePage>} />
           <Route path="/cudzie" element={<GamePage><CudzieGame /></GamePage>} />
+          <Route path="/vybrane-b" element={<GamePage><VybraneBGame /></GamePage>} />
           <Route path="/ratanie" element={<GamePage><RatanieGame /></GamePage>} />
+          <Route path="/block-out" element={<GamePage><BlockOutGame /></GamePage>} />
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
       </div>
