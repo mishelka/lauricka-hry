@@ -11,12 +11,16 @@ const DEFAULT_PADDING = 12;
 const DEFAULT_DOOR_DEPTH = 22;
 const DRAG_THRESHOLD = 16;
 
-export default function BlockOutGame() {
+export default function BlockOutGame({ rewardLevel = null, onBack = null }) {
   const [levelStars, setLevelStars] = useState(() =>
     getLevelStars('blockOut', BLOCK_OUT_LEVELS.length)
   );
-  const [currentLevelIndex, setCurrentLevelIndex] = useState(0);
-  const [gameState, setGameState] = useState('levels'); // 'levels' | 'playing' | 'win'
+  const [currentLevelIndex, setCurrentLevelIndex] = useState(() =>
+    rewardLevel !== null ? rewardLevel : 0
+  );
+  const [gameState, setGameState] = useState(() =>
+    rewardLevel !== null ? 'playing' : 'levels'
+  );
   const [blocks, setBlocks] = useState([]);
   const [selectedBlockId, setSelectedBlockId] = useState(null);
   const [dragInfo, setDragInfo] = useState(null); // { blockId, offsetX, offsetY, activeDir }
@@ -108,6 +112,12 @@ export default function BlockOutGame() {
     setGameState('playing');
   }, []);
 
+  useEffect(() => {
+    if (rewardLevel !== null) {
+      startLevel(rewardLevel);
+    }
+  }, [rewardLevel, startLevel]);
+
   const resetCurrentLevel = () => {
     startLevel(currentLevelIndex);
   };
@@ -133,45 +143,57 @@ export default function BlockOutGame() {
     const limits = {};
 
     for (const [dir, { dr, dc }] of Object.entries(directions)) {
-      const nextR = block.r + dr;
-      const nextC = block.c + dc;
-      let canMove = false;
+      let curR = block.r;
+      let curC = block.c;
+      let maxCells = 0;
       let canExit = false;
 
-      if (nextR < 0) {
-        const door = findDoorAt('top', block.c);
-        if (door && door.color === block.color) {
-          canExit = true;
-          canMove = true;
+      while (true) {
+        const nextR = curR + dr;
+        const nextC = curC + dc;
+
+        if (nextR < 0) {
+          const door = findDoorAt('top', curC);
+          if (door && door.color === block.color) {
+            canExit = true;
+          }
+          break;
         }
-      } else if (nextR >= level.height) {
-        const door = findDoorAt('bottom', block.c);
-        if (door && door.color === block.color) {
-          canExit = true;
-          canMove = true;
+        if (nextR >= level.height) {
+          const door = findDoorAt('bottom', curC);
+          if (door && door.color === block.color) {
+            canExit = true;
+          }
+          break;
         }
-      } else if (nextC < 0) {
-        const door = findDoorAt('left', block.r);
-        if (door && door.color === block.color) {
-          canExit = true;
-          canMove = true;
+        if (nextC < 0) {
+          const door = findDoorAt('left', curR);
+          if (door && door.color === block.color) {
+            canExit = true;
+          }
+          break;
         }
-      } else if (nextC >= level.width) {
-        const door = findDoorAt('right', block.r);
-        if (door && door.color === block.color) {
-          canExit = true;
-          canMove = true;
+        if (nextC >= level.width) {
+          const door = findDoorAt('right', curR);
+          if (door && door.color === block.color) {
+            canExit = true;
+          }
+          break;
         }
-      } else {
+
         const isOccupied = allBlocks.some(
           b => !b.exiting && b.id !== block.id && b.r === nextR && b.c === nextC
         );
-        if (!isOccupied) {
-          canMove = true;
+        if (isOccupied) {
+          break;
         }
+
+        curR = nextR;
+        curC = nextC;
+        maxCells += 1;
       }
 
-      limits[dir] = { maxCells: canMove && !canExit ? 1 : 0, canExit, canMove };
+      limits[dir] = { maxCells, canExit, canMove: maxCells > 0 || canExit };
     }
 
     return limits;
@@ -203,7 +225,7 @@ export default function BlockOutGame() {
     return !currentBlocks.some(b => !b.exiting && b.id !== block.id && b.r === nextR && b.c === nextC);
   }, [findDoorAt, level.height, level.width]);
 
-  const moveBlock = useCallback((blockId, direction) => {
+  const moveBlock = useCallback((blockId, direction, requestedSteps = 1, forceExit = false) => {
     if (gameState !== 'playing') return;
 
     const dirMap = {
@@ -219,53 +241,76 @@ export default function BlockOutGame() {
       const target = prevBlocks.find(b => b.id === blockId && !b.exiting);
       if (!target) return prevBlocks;
 
-      const nextR = target.r + dr;
-      const nextC = target.c + dc;
+      let curR = target.r;
+      let curC = target.c;
       let exited = false;
-      let finalR = target.r;
-      let finalC = target.c;
+      let stepsRemaining = Math.max(1, requestedSteps);
 
-      if (nextR < 0) {
-        const door = findDoorAt('top', target.c);
-        if (door && door.color === target.color) {
-          exited = true;
-          finalR = -1;
+      while (stepsRemaining > 0 && !exited) {
+        const nextR = curR + dr;
+        const nextC = curC + dc;
+
+        if (nextR < 0) {
+          const door = findDoorAt('top', curC);
+          if (door && door.color === target.color) {
+            exited = true;
+            curR = -1;
+          }
+          break;
+        } else if (nextR >= level.height) {
+          const door = findDoorAt('bottom', curC);
+          if (door && door.color === target.color) {
+            exited = true;
+            curR = level.height;
+          }
+          break;
+        } else if (nextC < 0) {
+          const door = findDoorAt('left', curR);
+          if (door && door.color === target.color) {
+            exited = true;
+            curC = -1;
+          }
+          break;
+        } else if (nextC >= level.width) {
+          const door = findDoorAt('right', curR);
+          if (door && door.color === target.color) {
+            exited = true;
+            curC = level.width;
+          }
+          break;
         } else {
-          return prevBlocks;
+          const isOccupied = prevBlocks.some(
+            b => !b.exiting && b.id !== target.id && b.r === nextR && b.c === nextC
+          );
+          if (isOccupied) {
+            break;
+          }
+          curR = nextR;
+          curC = nextC;
+          stepsRemaining -= 1;
         }
-      } else if (nextR >= level.height) {
-        const door = findDoorAt('bottom', target.c);
-        if (door && door.color === target.color) {
+      }
+
+      if (forceExit && !exited) {
+        const nextR = curR + dr;
+        const nextC = curC + dc;
+        if (nextR < 0 && findDoorAt('top', curC)?.color === target.color) {
           exited = true;
-          finalR = level.height;
-        } else {
-          return prevBlocks;
-        }
-      } else if (nextC < 0) {
-        const door = findDoorAt('left', target.r);
-        if (door && door.color === target.color) {
+          curR = -1;
+        } else if (nextR >= level.height && findDoorAt('bottom', curC)?.color === target.color) {
           exited = true;
-          finalC = -1;
-        } else {
-          return prevBlocks;
-        }
-      } else if (nextC >= level.width) {
-        const door = findDoorAt('right', target.r);
-        if (door && door.color === target.color) {
+          curR = level.height;
+        } else if (nextC < 0 && findDoorAt('left', curR)?.color === target.color) {
           exited = true;
-          finalC = level.width;
-        } else {
-          return prevBlocks;
+          curC = -1;
+        } else if (nextC >= level.width && findDoorAt('right', curR)?.color === target.color) {
+          exited = true;
+          curC = level.width;
         }
-      } else {
-        const isOccupied = prevBlocks.some(
-          b => !b.exiting && b.id !== target.id && b.r === nextR && b.c === nextC
-        );
-        if (isOccupied) {
-          return prevBlocks;
-        }
-        finalR = nextR;
-        finalC = nextC;
+      }
+
+      if (curR === target.r && curC === target.c && !exited) {
+        return prevBlocks; // No movement possible
       }
 
       // Save history snapshot before moving
@@ -274,7 +319,7 @@ export default function BlockOutGame() {
         {
           blocks: prevBlocks.map(b => ({ ...b })),
           moves,
-          selectedBlockId
+          selectedBlockId: target.id
         }
       ]);
       setMoves(m => m + 1);
@@ -286,7 +331,7 @@ export default function BlockOutGame() {
 
         const updated = prevBlocks.map(b =>
           b.id === target.id
-            ? { ...b, r: finalR, c: finalC, exiting: true, exitSide }
+            ? { ...b, r: curR, c: curC, exiting: true, exitSide }
             : b
         );
 
@@ -319,10 +364,10 @@ export default function BlockOutGame() {
 
       sounds.playSlide();
       return prevBlocks.map(b =>
-        b.id === target.id ? { ...b, r: finalR, c: finalC } : b
+        b.id === target.id ? { ...b, r: curR, c: curC } : b
       );
     });
-  }, [gameState, findDoorAt, level.height, level.width, moves, selectedBlockId, currentLevelIndex]);
+  }, [gameState, findDoorAt, level.height, level.width, moves, currentLevelIndex]);
 
   const undoMove = () => {
     if (history.length === 0 || gameState !== 'playing') return;
@@ -413,17 +458,27 @@ export default function BlockOutGame() {
     if (isHoriz) {
       if (rawDx > 0) {
         activeDir = 'right';
-        const maxDist = limits.right.canExit ? step + doorDepth : step;
-        if (limits.right.canMove) {
-          offsetX = Math.min(rawDx, maxDist);
+        const limit = limits.right;
+        const maxDist = limit.maxCells * step + (limit.canExit ? doorDepth + cellSize * 0.35 : 0);
+        if (limit.canMove) {
+          if (rawDx <= maxDist) {
+            offsetX = rawDx;
+          } else {
+            offsetX = maxDist + Math.min((rawDx - maxDist) * 0.12, 10);
+          }
         } else {
           offsetX = Math.min(rawDx * 0.12, 8);
         }
       } else {
         activeDir = 'left';
-        const maxDist = limits.left.canExit ? step + doorDepth : step;
-        if (limits.left.canMove) {
-          offsetX = Math.max(rawDx, -maxDist);
+        const limit = limits.left;
+        const maxDist = limit.maxCells * step + (limit.canExit ? doorDepth + cellSize * 0.35 : 0);
+        if (limit.canMove) {
+          if (-rawDx <= maxDist) {
+            offsetX = rawDx;
+          } else {
+            offsetX = -maxDist - Math.min((-rawDx - maxDist) * 0.12, 10);
+          }
         } else {
           offsetX = Math.max(rawDx * 0.12, -8);
         }
@@ -431,17 +486,27 @@ export default function BlockOutGame() {
     } else {
       if (rawDy > 0) {
         activeDir = 'down';
-        const maxDist = limits.down.canExit ? step + doorDepth : step;
-        if (limits.down.canMove) {
-          offsetY = Math.min(rawDy, maxDist);
+        const limit = limits.down;
+        const maxDist = limit.maxCells * step + (limit.canExit ? doorDepth + cellSize * 0.35 : 0);
+        if (limit.canMove) {
+          if (rawDy <= maxDist) {
+            offsetY = rawDy;
+          } else {
+            offsetY = maxDist + Math.min((rawDy - maxDist) * 0.12, 10);
+          }
         } else {
           offsetY = Math.min(rawDy * 0.12, 8);
         }
       } else {
         activeDir = 'up';
-        const maxDist = limits.up.canExit ? step + doorDepth : step;
-        if (limits.up.canMove) {
-          offsetY = Math.max(rawDy, -maxDist);
+        const limit = limits.up;
+        const maxDist = limit.maxCells * step + (limit.canExit ? doorDepth + cellSize * 0.35 : 0);
+        if (limit.canMove) {
+          if (-rawDy <= maxDist) {
+            offsetY = rawDy;
+          } else {
+            offsetY = -maxDist - Math.min((-rawDy - maxDist) * 0.12, 10);
+          }
         } else {
           offsetY = Math.max(rawDy * 0.12, -8);
         }
@@ -479,26 +544,63 @@ export default function BlockOutGame() {
     const rawDx = e.clientX - startX;
     const rawDy = e.clientY - startY;
     const isHoriz = Math.abs(rawDx) >= Math.abs(rawDy);
+    const step = cellSize + gap;
     const threshold = Math.min(DRAG_THRESHOLD, cellSize * 0.28);
 
     let directionToMove = null;
+    let stepsToMove = 1;
+    let forceExit = false;
 
     if (isHoriz) {
       if (rawDx > threshold && limits.right.canMove) {
         directionToMove = 'right';
+        const limit = limits.right;
+        const exitDistThreshold = limit.maxCells * step + threshold;
+        if (limit.canExit && rawDx >= exitDistThreshold) {
+          forceExit = true;
+          stepsToMove = limit.maxCells + 1;
+        } else {
+          stepsToMove = Math.min(limit.maxCells, Math.max(1, Math.round(rawDx / step)));
+        }
       } else if (rawDx < -threshold && limits.left.canMove) {
         directionToMove = 'left';
+        const limit = limits.left;
+        const dist = -rawDx;
+        const exitDistThreshold = limit.maxCells * step + threshold;
+        if (limit.canExit && dist >= exitDistThreshold) {
+          forceExit = true;
+          stepsToMove = limit.maxCells + 1;
+        } else {
+          stepsToMove = Math.min(limit.maxCells, Math.max(1, Math.round(dist / step)));
+        }
       }
     } else {
       if (rawDy > threshold && limits.down.canMove) {
         directionToMove = 'down';
+        const limit = limits.down;
+        const exitDistThreshold = limit.maxCells * step + threshold;
+        if (limit.canExit && rawDy >= exitDistThreshold) {
+          forceExit = true;
+          stepsToMove = limit.maxCells + 1;
+        } else {
+          stepsToMove = Math.min(limit.maxCells, Math.max(1, Math.round(rawDy / step)));
+        }
       } else if (rawDy < -threshold && limits.up.canMove) {
         directionToMove = 'up';
+        const limit = limits.up;
+        const dist = -rawDy;
+        const exitDistThreshold = limit.maxCells * step + threshold;
+        if (limit.canExit && dist >= exitDistThreshold) {
+          forceExit = true;
+          stepsToMove = limit.maxCells + 1;
+        } else {
+          stepsToMove = Math.min(limit.maxCells, Math.max(1, Math.round(dist / step)));
+        }
       }
     }
 
-    if (directionToMove) {
-      moveBlock(blockId, directionToMove);
+    if (directionToMove && (stepsToMove > 0 || forceExit)) {
+      moveBlock(blockId, directionToMove, stepsToMove, forceExit);
     }
   };
 
@@ -571,8 +673,14 @@ export default function BlockOutGame() {
           <div className="blockout-header">
             <button
               className="blockout-btn-icon"
-              onClick={() => setGameState('levels')}
-              title="Výber levelov"
+              onClick={() => {
+                if (onBack) {
+                  onBack();
+                } else {
+                  setGameState('levels');
+                }
+              }}
+              title={onBack ? 'Späť' : 'Výber levelov'}
             >
               📋
             </button>
@@ -607,8 +715,6 @@ export default function BlockOutGame() {
             <span>{level.hint}</span>
             <span className="blockout-moves-badge">Ťahy: {moves}</span>
           </div>
-
-          {message && <div className="blockout-hint" style={{ fontWeight: 'bold' }}>{message}</div>}
 
           <div className="blockout-board-wrapper">
             <div
@@ -754,6 +860,14 @@ export default function BlockOutGame() {
               </div>
             </div>
 
+            {/* Temporary feedback banner under the game board */}
+            <div
+              className={`blockout-message-banner ${message ? 'visible' : ''}`}
+              aria-live="polite"
+            >
+              {message || ' '}
+            </div>
+
             {/* Controls hint & D-Pad */}
             <div className="blockout-controls-panel">
               <div className="blockout-control-tip">
@@ -830,12 +944,21 @@ export default function BlockOutGame() {
                   >
                     Hrať znova 🔄
                   </button>
-                  <button
-                    className="btn-blockout-secondary"
-                    onClick={() => setGameState('levels')}
-                  >
-                    Výber levelov 📋
-                  </button>
+                  {onBack ? (
+                    <button
+                      className="btn-blockout-secondary"
+                      onClick={onBack}
+                    >
+                      Späť do vybraných slov 📋
+                    </button>
+                  ) : (
+                    <button
+                      className="btn-blockout-secondary"
+                      onClick={() => setGameState('levels')}
+                    >
+                      Výber levelov 📋
+                    </button>
+                  )}
                 </div>
               </div>
             </div>

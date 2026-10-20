@@ -118,37 +118,82 @@ export const SLOVA_YI_GROUPS = [
 
 export const SLOVA_YI_TASKS = SLOVA_YI_GROUPS.flat();
 
-export const DOPLNOVACKY_DTNL = [
-    'chystali', 'hydinová šunka', 'hýľ', 'pohybuje', 'hýri', 'pokyny', 'chytať', 'vždy',
-    'vyskočil', 'maličkosť', 'výťah', 'tieň', 'motýľ', 'deti', 'zmrzlina',
-    'stanica', 'diviak', 'diváci', 'ticho', 'dedina', 'porazil', 'veľký', 'spí', 'priletel', 'mieriť',
-    'kedysi', 'tyčinky', 'dychovka', 'nikdy', 'oči', 'mačička', 'očný', 'košík', 'žirafa', 'žinienka',
-    'cibuľa', 'medzi', 'čajík', 'dzindzik', 'cítiť', 'šiť', 'nevädza', 'mädza', 'päť', 'deväť',
-    'desať', 'tis', 'Žilina', 'Trenčín',
-    'počítač', 'tykadlo', 'džíp', 'dýka', 'dojímať', 'snívať', 'dívať sa', 'používať',
-    'na mori', 'videli', 'víkend', 'povysáva', 'vyčistí', 'obývačka',
-    'diktát', 'blízko', 'divina', 'nitka', 'týždeň', 'navždy', 'dýchať', 'dotyk', 'plyn', 'kývať', 'zlyhanie',
-    'zánik', 'dyha', 'dyňa', 'hodiny', 'pochybovať', 'nízka', 'citlivá',
-    'týpek', 'motyka', 'štyri', 'zahynúť', 'ulica', 'kniha', 'dedinčan', 'gýč',
-    'štípe', 'kreslíme', 'lipa', 'Nina', 'hodina', 'udica', 'burgyňa', 'zaváranina',
-    'lízatko', 'všeličo', 'dych', 'Margita', 'pomaly', 'obrázky', 'športovci', 'Hydra', 'Gymnázium', 
-    'recepty', 'vtáky', 'vtáci', 'protivník', 'polícia', 'neporiadnik', 'mních', 'kolíska', 'Hygiena',
-    'roky', 'zbojníci', 'výdychy', 'narcisy', 'malinovka', 'Chýrny', 'Likér', 'Limonáda', 'literatúra',
+export const DOPLNOVACKY_DTNL_GROUPS = [
+    [
+        'chystali', 'hydinová šunka', 'hýľ', 'pohybuje', 'hýri', 'pokyny', 'chytať', 'vždy', 'vyskočil', 'maličkosť'
+    ],
+    [
+        'výťah', 'tieň', 'motýľ', 'deti', 'zmrzlina', 'stanica', 'diviak', 'diváci', 'ticho', 'dedina'
+    ],
+    [
+        'porazil', 'veľký', 'spí', 'priletel', 'mieriť', 'kedysi', 'tyčinky', 'dychovka', 'nikdy', 'oči'
+    ],
+    [
+        'mačička', 'očný', 'košík', 'žirafa', 'žinienka', 'cibuľa', 'medzi', 'čajík', 'dzindzik', 'cítiť'
+    ],
+    [
+        'šiť', 'nevädza', 'mädza', 'päť', 'deväť', 'desať', 'tis', 'Žilina', 'Trenčín', 'počítač'
+    ],
+    [
+        'tykadlo', 'džíp', 'dýka', 'dojímať', 'snívať', 'dívať sa', 'používať', 'na mori', 'videli', 'víkend'
+    ],
+    [
+        'povysáva', 'vyčistí', 'obývačka', 'diktát', 'blízko', 'divina', 'nitka', 'týždeň', 'navždy', 'dýchať'
+    ],
+    [
+        'dotyk', 'plyn', 'kývať', 'zlyhanie', 'zánik', 'dyha', 'dyňa', 'hodiny', 'pochybovať', 'nízka'
+    ],
+    [
+        'citlivá', 'týpek', 'motyka', 'štyri', 'zahynúť', 'ulica', 'kniha', 'dedinčan', 'gýč', 'štípe'
+    ],
+    [
+        'kreslíme', 'lipa', 'Nina', 'hodina', 'udica', 'burgyňa', 'zaváranina', 'lízatko', 'všeličo', 'dych'
+    ],
+    [
+        'Margita', 'pomaly', 'obrázky', 'športovci', 'Hydra', 'Gymnázium', 'recepty', 'vtáky', 'vtáci', 'protivník'
+    ],
+    [
+        'polícia', 'neporiadnik', 'mních', 'kolíska', 'Hygiena', 'roky', 'zbojníci', 'výdychy', 'narcisy', 'malinovka'
+    ],
+    [
+        'Chýrny', 'Likér', 'Limonáda', 'literatúra', 'dolina', 'motív', 'tehla', 'listina', 'krídla', 'rybár'
+    ]
 ];
 
+export const DOPLNOVACKY_DTNL = DOPLNOVACKY_DTNL_GROUPS.flat();
 export const DOPLNOVACKY = DOPLNOVACKY_DTNL;
 
-export const DOPLNOVACKY_B = [
-    'bylina', 'bystrý', 'býk', 'byt', 'bývať', 'dobytok', 'kobyla', 'aby', 'keby', 'byvol',
-    'bytosť', 'bývalý', 'zbytok', 'odbyt', 'byľ', 'bylinka', 'bylinkový', 'bylinožravec', 'bystrosť', 'Banská Bystrica',
-    'bystrina', 'obyvateľ', 'obývačka', 'príbytok', 'nábytok', 'bytovka', 'zabývať sa', 'dobytkárstvo', 'kobylka', 'býčí',
-    'býček', 'prebytok', 'úbytok', 'zbytočný', 'starobylý', 'neobývaný', 'byvolí', 'bystrozraký', 'dobytčí', 'nadbytok',
-    'dobytkár', 'obydlie', 'ubytovňa', 'bývanie', 'bylinár', 'Považská Bystrica', 'bicykel', 'biela', 'bieliť', 'bielizeň',
-    'bitka', 'bič', 'bistro', 'bižutéria', 'bifľovať sa', 'biológia', 'bibliotéka', 'bizón', 'bikiny', 'biliard',
-    'bitúnok', 'bidlo', 'bit', 'dobiť', 'odbiť', 'pribiť', 'zabiť', 'bielina', 'bivak', 'biketrial',
-    'bilancia', 'biskup', 'biatlon', 'biceps', 'bilingválny', 'biotop', 'bylinkový čaj', 'slávnostná bižutéria', 'horská bystrina', 'lúčna kobylka',
-    'divoký bizón', 'biela plachta', 'drevené bidlo', 'nový príbytok', 'dobitý mobil', 'dobyť hrad', 'hlasno biť', 'chcem byť', 'počítačový bit'
+export const DOPLNOVACKY_B_GROUPS = [
+    [
+        'bylina', 'bystrý', 'býk', 'byt', 'bývať', 'dobytok', 'kobyla', 'aby', 'keby', 'byvol'
+    ],
+    [
+        'bytosť', 'bývalý', 'zbytok', 'odbyt', 'byľ', 'bylinka', 'bylinkový', 'bylinožravec', 'bystrosť', 'Banská Bystrica'
+    ],
+    [
+        'bystrina', 'obyvateľ', 'obývačka', 'príbytok', 'nábytok', 'bytovka', 'zabývať sa', 'dobytkárstvo', 'kobylka', 'býčí'
+    ],
+    [
+        'býček', 'prebytok', 'úbytok', 'zbytočný', 'starobylý', 'neobývaný', 'byvolí', 'bystrozraký', 'dobytčí', 'nadbytok'
+    ],
+    [
+        'dobytkár', 'obydlie', 'ubytovňa', 'bývanie', 'bylinár', 'Považská Bystrica', 'bicykel', 'biela', 'bieliť', 'bielizeň'
+    ],
+    [
+        'bitka', 'bič', 'bistro', 'bižutéria', 'bifľovať sa', 'biológia', 'bibliotéka', 'bizón', 'bikiny', 'biliard'
+    ],
+    [
+        'bitúnok', 'bidlo', 'bit', 'dobiť', 'odbiť', 'pribiť', 'zabiť', 'bielina', 'bivak', 'biketrial'
+    ],
+    [
+        'bilancia', 'biskup', 'biatlon', 'biceps', 'bilingválny', 'biotop', 'bylinkový čaj', 'slávnostná bižutéria', 'horská bystrina', 'lúčna kobylka'
+    ],
+    [
+        'divoký bizón', 'biela plachta', 'drevené bidlo', 'nový príbytok', 'dobitý mobil', 'dobyť hrad', 'hlasno biť', 'chcem byť', 'počítačový bit', 'starobylosť'
+    ]
 ];
+
+export const DOPLNOVACKY_B = DOPLNOVACKY_B_GROUPS.flat();
 
 export const POZOR = [
     'História', 'Chirurgia', 'Kino', 'Dinosaurus', 'Gitara', 'Cyrilika', 'detektív',

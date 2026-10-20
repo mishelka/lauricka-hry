@@ -2,9 +2,8 @@ import { useMemo, useRef, useState } from 'react';
 import { VYBRANE_B_GROUPS, VYBRANE_B_RULES, VYBRANE_B_CHYTAKY } from '../data/vybraneBSlova';
 import { getStarCount, shuffleArray, triggerFireworks } from '../utils/gameUtils';
 import { getLevelStars, updateLevelBestStars } from '../utils/player';
-import AudioTalePlayer from './AudioTalePlayer';
-import { AUDIO_TALES } from '../data/audioTales';
-import { RestartIcon, NextLevelIcon, LevelsMenuIcon, PlayIcon, PauseIcon } from './Icons';
+import BlockOutGame from '../rewards/BlockOutGame';
+import { RestartIcon, NextLevelIcon, LevelsMenuIcon, GameIcon } from './Icons';
 
 const MAX_STARS = 5;
 
@@ -25,6 +24,7 @@ export default function VybraneBGame() {
   const groups = useMemo(() => VYBRANE_B_GROUPS, []);
   const [levelStars, setLevelStars] = useState(() => getLevelStars('vybraneB', groups.length));
   const [selectedLevel, setSelectedLevel] = useState(null);
+  const [playingRewardLevel, setPlayingRewardLevel] = useState(null);
   const [showRules, setShowRules] = useState(false);
   const [order, setOrder] = useState([]);
   const [index, setIndex] = useState(0);
@@ -132,11 +132,22 @@ export default function VybraneBGame() {
   const levelDone = selectedLevel !== null ? (levelStars[selectedLevel] || 0) === MAX_STARS : false;
   const hasNextLevel = selectedLevel !== null && selectedLevel < groups.length - 1;
 
+  if (playingRewardLevel !== null) {
+    return (
+      <div className="reward-game-view">
+        <BlockOutGame
+          rewardLevel={playingRewardLevel}
+          onBack={() => setPlayingRewardLevel(null)}
+        />
+      </div>
+    );
+  }
+
   if (selectedLevel === null) {
     return (
       <div>
         <h1>Vybrané slová po B</h1>
-        <p className="level-menu-help">Vyber si úroveň a precvič si vybrané slová po B. Získaj 5★ na odomknutie ďalšej úrovne.</p>
+        <p className="level-menu-help">Vyber si úroveň a precvič si vybrané slová po B. Získaj 5★ na odomknutie ďalšej úrovne a odmeny.</p>
 
         <div style={{ marginBottom: '18px' }}>
           <button
@@ -186,7 +197,6 @@ export default function VybraneBGame() {
         <div className="levels-grid">
           {groups.map((_, level) => {
             const best = levelStars[level] || 0;
-            const levelTaleUrl = AUDIO_TALES.slovaYiLevels[level] || AUDIO_TALES.slovaYiLevels[0];
             const unlocked = isLevelUnlocked(level);
             const classes = ['level-btn'];
             if (best === MAX_STARS) classes.push('completed');
@@ -204,12 +214,15 @@ export default function VybraneBGame() {
                   {!unlocked && <small>{`Najprv získaj 5★ v predchádzajúcom leveli`}</small>}
                 </button>
                 {best === MAX_STARS && (
-                  <AudioTalePlayer
-                    taleUrl={levelTaleUrl}
+                  <button
+                    type="button"
                     className="level-play-btn"
-                    playLabel={<PlayIcon size={22} />}
-                    pauseLabel={<PauseIcon size={22} />}
-                  />
+                    onClick={() => setPlayingRewardLevel(level)}
+                    title={`Hrať odmenu: Block Out - Level ${level + 1}`}
+                    style={{ background: '#2563eb' }}
+                  >
+                    <GameIcon size={22} />
+                  </button>
                 )}
               </div>
             );
@@ -221,7 +234,6 @@ export default function VybraneBGame() {
 
   if (resultVisible) {
     const stars = getStarCount(miss);
-    const levelTaleUrl = AUDIO_TALES.slovaYiLevels[selectedLevel] || AUDIO_TALES.slovaYiLevels[0];
     return (
       <div className="result-box">
         <h2>Koniec hry!</h2>
@@ -232,8 +244,8 @@ export default function VybraneBGame() {
         </div>
         <div className="level-progress-message">
           {levelDone
-            ? (hasNextLevel ? 'Level splnený na 5★! Môžeš pokračovať na ďalší.' : 'Fantastické! Zvládla si všetky úrovne vybraných slov po B!')
-            : `Získala si ${stars}/5 ★. Na postup do ďalšieho levelu potrebuješ 5/5 ★.`}
+            ? (hasNextLevel ? 'Level splnený na 5★! Odomkla sa ti odmena Block Out a ďalší level.' : 'Fantastické! Zvládla si všetky úrovne vybraných slov po B!')
+            : `Získala si ${stars}/5 ★. Na postup do ďalšieho levelu a odmenu potrebuješ 5/5 ★.`}
         </div>
         <div className="wrong-list">
           {wrongItems.size > 0 ? `Precvič si: ${Array.from(wrongItems).join(', ')}` : 'Výborne, žiadne chyby! Všetko správne! 🎉'}
@@ -243,7 +255,16 @@ export default function VybraneBGame() {
             <RestartIcon />
             <span>Opakovať level</span>
           </button>
-          {stars === 5 && <AudioTalePlayer taleUrl={levelTaleUrl} />}
+          {stars === 5 && (
+            <button
+              type="button"
+              className="btn-reward-game"
+              onClick={() => setPlayingRewardLevel(selectedLevel)}
+            >
+              <GameIcon />
+              <span>{`Hrať odmenu: Block Out (${selectedLevel + 1}. level)`}</span>
+            </button>
+          )}
           {hasNextLevel && levelDone && (
             <button className="btn-next-level" onClick={() => startLevel(selectedLevel + 1)}>
               <NextLevelIcon />

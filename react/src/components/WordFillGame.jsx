@@ -1,10 +1,11 @@
-import { useMemo, useState } from 'react';
-import { shuffleArray } from '../utils/gameUtils';
-import { getBestStars, updateBestStars } from '../utils/player';
-import { RestartIcon } from './Icons';
+import { useMemo, useRef, useState } from 'react';
+import { getStarCount, shuffleArray, triggerFireworks } from '../utils/gameUtils';
+import { getLevelStars, updateLevelBestStars } from '../utils/player';
+import AudioTalePlayer from './AudioTalePlayer';
+import { AUDIO_TALES } from '../data/audioTales';
+import { RestartIcon, NextLevelIcon, LevelsMenuIcon } from './Icons';
 
-const BATCH_SIZE = 5;
-const TOTAL_STARS = 5;
+const MAX_STARS = 5;
 
 const IY_MODE = {
   targetChars: new Set(['i', 'í', 'y', 'ý', 'I', 'Í', 'Y', 'Ý']),
@@ -39,66 +40,115 @@ function normalizeChoiceForCorrect(choice, correct) {
   return choice;
 }
 
-function starsFromProgress(done, total) {
-  if (total <= 0) return 0;
-  if (done >= total) return TOTAL_STARS;
-  return Math.max(0, Math.min(TOTAL_STARS, Math.floor((done / total) * TOTAL_STARS)));
+function chunkWords(words, size = 10) {
+  if (!words || words.length === 0) return [];
+  const chunks = [];
+  for (let i = 0; i < words.length; i += size) {
+    chunks.push(words.slice(i, i + size));
+  }
+  return chunks;
 }
 
-export default function WordFillGame({ title, gameId, sourceWords }) {
-  const [words, setWords] = useState(() => shuffleArray(sourceWords));
-  const [batchStart, setBatchStart] = useState(0);
-  const [submitted, setSubmitted] = useState(false);
+function renderStars(stars) {
+  return `${'★'.repeat(stars)}${'☆'.repeat(MAX_STARS - stars)}`;
+}
+
+export default function WordFillGame({ title, gameId, levelGroups, sourceWords }) {
+  const groups = useMemo(() => {
+    if (levelGroups && levelGroups.length > 0) return levelGroups;
+    if (sourceWords && sourceWords.length > 0) return chunkWords(sourceWords, 10);
+    return [];
+  }, [levelGroups, sourceWords]);
+
+  const [levelStars, setLevelStars] = useState(() => getLevelStars(gameId, groups.length));
+  const [selectedLevel, setSelectedLevel] = useState(null);
+  const [words, setWords] = useState([]);
   const [answers, setAnswers] = useState({});
-  const [sessionStars, setSessionStars] = useState(0);
-  const [bestStars, setBestStars] = useState(() => getBestStars(gameId));
+  const [submitted, setSubmitted] = useState(false);
   const [wrongWords, setWrongWords] = useState(new Set());
+  const fireworksRef = useRef(null);
 
-  const total = words.length;
-  const doneCount = Math.min(batchStart + (submitted ? BATCH_SIZE : 0), total);
-  const currentStars = starsFromProgress(doneCount, total);
-  const batchWords = useMemo(
-    () => words.slice(batchStart, batchStart + BATCH_SIZE),
-    [batchStart, words]
-  );
+  function highestUnlockedLevel(starsByLevel) {
+    let highest = 0;
+    for (let i = 0; i < starsByLevel.length - 1; i++) {
+      if (starsByLevel[i] === MAX_STARS) highest = i + 1;
+      else break;
+    }
+    return highest;
+  }
 
-  const parsedBatch = useMemo(() => {
-    return batchWords.map(word => {
+  function isLevelUnlocked(level) {
+    return level <= highestUnlockedLevel(levelStars);
+  }
+
+  function startLevel(levelIndex) {
+    if (!isLevelUnlocked(levelIndex)) return;
+    const levelWords = groups[levelIndex] || [];
+    setSelectedLevel(levelIndex);
+    setWords(shuffleArray(levelWords));
+    setAnswers({});
+    setSubmitted(false);
+    setWrongWords(new Set());
+  }
+
+  function restartCurrentLevel() {
+    if (selectedLevel === null) return;
+    const levelWords = groups[selectedLevel] || [];
+    setWords(shuffleArray(levelWords));
+    setAnswers({});
+    setSubmitted(false);
+    setWrongWords(new Set());
+  }
+
+  const parsedWords = useMemo(() => {
+    return words.map(word => {
       const mode = getWordMode(word);
       return {
+        word,
         parts: splitWord(word, mode.targetChars),
         options: mode.options
       };
     });
-  }, [batchWords]);
+  }, [words]);
 
-  const allFilled = parsedBatch.every((entry, wordIndex) => {
-    const globalIndex = batchStart + wordIndex;
-    const selected = answers[globalIndex] || [];
-    const blankCount = entry.parts.filter(part => part.type === 'blank').length;
-    if (blankCount === 0) return true;
-    return selected.filter(Boolean).length >= blankCount;
-  });
+  const allFilled = useMemo(() => {
+    if (parsedWords.length === 0) return false;
+    return parsedWords.every((entry, wordIndex) => {
+      const selected = answers[wordIndex] || [];
+      const blankCount = entry.parts.filter(part => part.type === 'blank').length;
+      if (blankCount === 0) return true;
+      return selected.filter(Boolean).length >= blankCount;
+    });
+  }, [parsedWords, answers]);
 
-  const finished = submitted && doneCount >= total;
+  const filledCount = useMemo(() => {
+    return parsedWords.filter((entry, wordIndex) => {
+      const selected = answers[wordIndex] || [];
+      const blankCount = entry.parts.filter(part => part.type === 'blank').length;
+      if (blankCount === 0) return true;
+      return selected.filter(Boolean).length >= blankCount;
+    }).length;
+  }, [parsedWords, answers]);
 
-  function onSelect(globalWordIndex, blankIndex, value) {
+  function onSelect(wordIndex, blankIndex, value) {
     if (submitted) return;
     setAnswers(prev => {
       const next = { ...prev };
-      const row = [...(next[globalWordIndex] || [])];
+      const row = [...(next[wordIndex] || [])];
       row[blankIndex] = value;
-      next[globalWordIndex] = row;
+      next[wordIndex] = row;
       return next;
     });
   }
 
-  function collectBatchMistakes() {
-    const nextWrong = new Set(wrongWords);
+  function confirmLevel() {
+    if (!allFilled || submitted) return;
 
-    parsedBatch.forEach((entry, wordIndex) => {
-      const globalWordIndex = batchStart + wordIndex;
-      const selected = answers[globalWordIndex] || [];
+    let mistakesCount = 0;
+    const wrong = new Set();
+
+    parsedWords.forEach((entry, wordIndex) => {
+      const selected = answers[wordIndex] || [];
       let blankCounter = 0;
       let hasMistake = false;
 
@@ -107,49 +157,39 @@ export default function WordFillGame({ title, gameId, sourceWords }) {
         const choice = selected[blankCounter] || '';
         blankCounter += 1;
         const normalizedChoice = normalizeChoiceForCorrect(choice, part.correct);
-        if (normalizedChoice !== part.correct) hasMistake = true;
+        if (normalizedChoice !== part.correct) {
+          hasMistake = true;
+          mistakesCount += 1;
+        }
       });
 
       if (hasMistake) {
-        nextWrong.add(words[globalWordIndex]);
+        wrong.add(entry.word);
       }
     });
 
-    setWrongWords(nextWrong);
-  }
-
-  function confirmBatch() {
-    if (!allFilled || submitted) return;
-    collectBatchMistakes();
+    setWrongWords(wrong);
     setSubmitted(true);
-    setSessionStars(currentStars);
-    const nextBest = updateBestStars(gameId, currentStars);
-    setBestStars(nextBest);
+
+    const stars = getStarCount(mistakesCount);
+    const previous = levelStars[selectedLevel] || 0;
+    const best = Math.max(previous, stars);
+    const updated = updateLevelBestStars(gameId, selectedLevel, best, groups.length);
+    setLevelStars(updated);
+
+    if (stars === MAX_STARS) {
+      triggerFireworks(fireworksRef.current);
+    }
   }
 
-  function nextBatch() {
-    if (!submitted) return;
-    setBatchStart(prev => prev + BATCH_SIZE);
-    setSubmitted(false);
-  }
-
-  function restartGame() {
-    setWords(shuffleArray(sourceWords));
-    setBatchStart(0);
-    setSubmitted(false);
-    setAnswers({});
-    setSessionStars(0);
-    setWrongWords(new Set());
-  }
-
-  function renderWord(entry, globalWordIndex) {
+  function renderWord(entry, wordIndex) {
     const parts = entry.parts;
     let blankCounter = 0;
-    const selected = answers[globalWordIndex] || [];
+    const selected = answers[wordIndex] || [];
 
     return parts.map((part, idx) => {
       if (part.type === 'text') {
-        return <span key={`${globalWordIndex}-text-${idx}`}>{part.value}</span>;
+        return <span key={`${wordIndex}-text-${idx}`}>{part.value}</span>;
       }
 
       const optionIndex = blankCounter;
@@ -159,11 +199,11 @@ export default function WordFillGame({ title, gameId, sourceWords }) {
       if (!submitted) {
         return (
           <select
-            key={`${globalWordIndex}-blank-${idx}`}
+            key={`${wordIndex}-blank-${idx}`}
             className="dopln-select"
             value={choice}
-            onChange={e => onSelect(globalWordIndex, optionIndex, e.target.value)}
-            aria-label="Vyber pismeno"
+            onChange={e => onSelect(wordIndex, optionIndex, e.target.value)}
+            aria-label="Vyber písmeno"
           >
             <option value="">_</option>
             {entry.options.map(option => (
@@ -175,7 +215,7 @@ export default function WordFillGame({ title, gameId, sourceWords }) {
 
       if (!choice) {
         return (
-          <span key={`${globalWordIndex}-result-empty-${idx}`} className="letter-wrong-stack">
+          <span key={`${wordIndex}-result-empty-${idx}`} className="letter-wrong-stack">
             <span className="letter-correct-top">{part.correct}</span>
             <span className="letter-wrong-bottom">_</span>
           </span>
@@ -186,12 +226,12 @@ export default function WordFillGame({ title, gameId, sourceWords }) {
 
       if (normalizedChoice === part.correct) {
         return (
-          <span key={`${globalWordIndex}-result-good-${idx}`} className="letter-correct">{normalizedChoice}</span>
+          <span key={`${wordIndex}-result-good-${idx}`} className="letter-correct">{normalizedChoice}</span>
         );
       }
 
       return (
-        <span key={`${globalWordIndex}-result-bad-${idx}`} className="letter-wrong-stack">
+        <span key={`${wordIndex}-result-bad-${idx}`} className="letter-wrong-stack">
           <span className="letter-correct-top">{part.correct}</span>
           <span className="letter-wrong-bottom">{normalizedChoice}</span>
         </span>
@@ -199,64 +239,127 @@ export default function WordFillGame({ title, gameId, sourceWords }) {
     });
   }
 
+  const levelDone = selectedLevel !== null ? (levelStars[selectedLevel] || 0) === MAX_STARS : false;
+  const hasNextLevel = selectedLevel !== null && selectedLevel < groups.length - 1;
+  const taleUrl = AUDIO_TALES.slovaYiLevels[selectedLevel % AUDIO_TALES.slovaYiLevels.length] || AUDIO_TALES.yi;
+
+  if (selectedLevel === null) {
+    return (
+      <div>
+        <h1>{title}</h1>
+        <p className="level-menu-help">
+          Vyber si úroveň a doplň správne písmená do 10 slov. Získaj 5★ na odomknutie ďalšej úrovne.
+        </p>
+
+        <div className="levels-grid">
+          {groups.map((_, level) => {
+            const best = levelStars[level] || 0;
+            const levelTaleUrl = AUDIO_TALES.slovaYiLevels[level % AUDIO_TALES.slovaYiLevels.length] || AUDIO_TALES.yi;
+            const unlocked = isLevelUnlocked(level);
+            const classes = ['level-btn'];
+            if (best === MAX_STARS) classes.push('completed');
+            if (!unlocked) classes.push('locked');
+
+            return (
+              <div key={level} className="level-item-wrapper">
+                <button
+                  type="button"
+                  className={classes.join(' ')}
+                  onClick={() => startLevel(level)}
+                  disabled={!unlocked}
+                >
+                  <span className="level-number">{`Level ${level + 1}`}</span>
+                  <span className="level-stars">{renderStars(best)}</span>
+                  {!unlocked && <small>Najprv získaj 5★ v predchádzajúcom leveli</small>}
+                </button>
+                {best === MAX_STARS && (
+                  <AudioTalePlayer
+                    taleUrl={levelTaleUrl}
+                    className="level-play-btn"
+                  />
+                )}
+              </div>
+            );
+          })}
+        </div>
+      </div>
+    );
+  }
+
+  const currentStars = submitted ? getStarCount(wrongWords.size) : 0;
+
   return (
     <div className="dopln-game">
-      <h1>{title}</h1>
-      <div className="score-board">
-        Postup: <span className="score-hit">{doneCount}</span> / {total}
-      </div>
-      <div className="best-stars">Hviezdy: {'★'.repeat(currentStars)}{'☆'.repeat(TOTAL_STARS - currentStars)}</div>
-      <div className="best-stars">Najlepšie: {'★'.repeat(bestStars)}{'☆'.repeat(TOTAL_STARS - bestStars)}</div>
+      <div ref={fireworksRef} className="fireworks-overlay" />
+      <h1>{`${title} - Level ${selectedLevel + 1}`}</h1>
 
-      <div className="dopln-list">
-        {parsedBatch.map((entry, wordIndex) => {
-          const globalWordIndex = batchStart + wordIndex;
-          return (
-            <div className="dopln-word-row" key={`${batchStart}-${wordIndex}`}>
-              <span className="dopln-word-index">{globalWordIndex + 1}.</span>
-              <span className="dopln-word">{renderWord(entry, globalWordIndex)}</span>
-            </div>
-          );
-        })}
-      </div>
-
-      <div className="result-actions">
-        {!submitted && (
-          <button className="btn-restart" disabled={!allFilled} onClick={confirmBatch}>
-            Potvrdiť výber
-          </button>
-        )}
-
-        {submitted && !finished && (
-          <button className="btn-next-level" onClick={nextBatch}>
-            Ďalších 5 slov
-          </button>
-        )}
-
-        {finished && (
-          <div className="result-box">
-            <h2>Výborne, prešiel(a) si všetky slová.</h2>
-            <div className="stars">
-              {Array.from({ length: TOTAL_STARS }).map((_, idx) => (
-                <span key={idx} className="star-gold">★</span>
-              ))}
-            </div>
-            <div className="wrong-list">
-              {wrongWords.size > 0
-                ? `Precvič si: ${Array.from(wrongWords).join(', ')}`
-                : 'Výborne, žiadne chyby!'}
-            </div>
-            <button className="btn-restart" onClick={restartGame}>
+      {!submitted ? (
+        <>
+          <p className="level-menu-help">
+            Doplň správne písmená do všetkých 10 slov a stlač <strong>Skontrolovať</strong>:
+          </p>
+          <div className="score-board">
+            Doplnené: <span className="score-hit">{filledCount}</span> / {words.length}
+          </div>
+        </>
+      ) : (
+        <div className="result-box">
+          <h2>Koniec levelu!</h2>
+          <div className="stars">
+            {Array.from({ length: MAX_STARS }).map((_, idx) => (
+              <span key={idx} className={idx < currentStars ? 'star-gold' : 'star-grey'}>★</span>
+            ))}
+          </div>
+          <div className="level-progress-message">
+            {currentStars === MAX_STARS
+              ? (hasNextLevel ? 'Level splnený na 5★! Môžeš pokračovať na ďalší.' : 'Fantastické! Zvládla si všetky levely!')
+              : `Získala si ${currentStars}/5 ★. Na postup do ďalšieho levelu potrebuješ 5/5 ★.`}
+          </div>
+          <div className="wrong-list">
+            {wrongWords.size > 0
+              ? `Precvič si: ${Array.from(wrongWords).join(', ')}`
+              : 'Výborne, žiadne chyby! Všetko správne! 🎉'}
+          </div>
+          <div className="result-actions">
+            <button className="btn-restart" onClick={restartCurrentLevel}>
               <RestartIcon />
-              <span>Hrať znova</span>
+              <span>Opakovať level</span>
+            </button>
+            {currentStars === MAX_STARS && <AudioTalePlayer taleUrl={taleUrl} />}
+            {hasNextLevel && (levelDone || currentStars === MAX_STARS) && (
+              <button className="btn-next-level" onClick={() => startLevel(selectedLevel + 1)}>
+                <NextLevelIcon />
+                <span>Ďalší level</span>
+              </button>
+            )}
+            <button className="btn-levels-menu" onClick={() => setSelectedLevel(null)}>
+              <LevelsMenuIcon />
+              <span>Menu levelov</span>
             </button>
           </div>
-        )}
+        </div>
+      )}
+
+      <div className="dopln-list" style={{ marginTop: '16px' }}>
+        {parsedWords.map((entry, wordIndex) => (
+          <div className="dopln-word-row" key={`${selectedLevel}-${wordIndex}`}>
+            <span className="dopln-word-index">{wordIndex + 1}.</span>
+            <span className="dopln-word">{renderWord(entry, wordIndex)}</span>
+          </div>
+        ))}
       </div>
 
-      <p className="level-menu-help">Po potvrdení sú správne písmená zelené a nesprávne červené, pričom správne vidíš nad chybou.</p>
-      <p className="level-menu-help">Hviezdu získaš po každej pätine celého zoznamu.</p>
-      <div className="best-stars" aria-live="polite">Aktuálne získané hviezdy: {sessionStars}</div>
+      {!submitted && (
+        <div className="result-actions" style={{ marginTop: '20px' }}>
+          <button className="btn-confirm" disabled={!allFilled} onClick={confirmLevel}>
+            Skontrolovať
+          </button>
+          <button className="btn-secondary" onClick={() => setSelectedLevel(null)}>
+            <LevelsMenuIcon />
+            <span>Menu levelov</span>
+          </button>
+        </div>
+      )}
     </div>
   );
 }

@@ -419,6 +419,23 @@ button:disabled {
   background-color: #0077b6;
 }
 
+.btn-reward-game {
+  background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+  color: #ffffff;
+  box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+  font-size: 18px;
+  font-weight: bold;
+}
+
+.btn-reward-game:hover {
+  background: linear-gradient(135deg, #059669 0%, #047857 100%);
+  box-shadow: 0 6px 16px rgba(16, 185, 129, 0.4);
+}
+
+.reward-game-view {
+  width: 100%;
+}
+
 .btn-secondary {
   background-color: #6c757d;
 }

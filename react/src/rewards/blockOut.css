@@ -67,6 +67,7 @@
   justify-content: space-between;
   align-items: center;
   width: 100%;
+  min-height: 42px;
   padding: 8px 16px;
   background: #ffffff;
   border-radius: 14px;
@@ -404,6 +405,33 @@
   }
 }
 
+/* Temporary feedback banner under game board */
+.blockout-message-banner {
+  min-height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px;
+  font-weight: 700;
+  color: #1e40af;
+  background: #eff6ff;
+  border: 1px solid #bfdbfe;
+  border-radius: 12px;
+  padding: 4px 16px;
+  margin: 6px 0 2px;
+  opacity: 0;
+  transform: scale(0.96);
+  transition: opacity 0.2s ease, transform 0.2s ease, visibility 0.2s ease;
+  pointer-events: none;
+  visibility: hidden;
+}
+
+.blockout-message-banner.visible {
+  opacity: 1;
+  visibility: visible;
+  transform: scale(1);
+}
+
 /* Movement directional controls */
 .blockout-controls-panel {
   display: flex;
@@ -668,6 +696,13 @@
   .blockout-board-wrapper {
     padding: 10px 8px 8px;
     border-radius: 20px;
+  }
+
+  .blockout-message-banner {
+    min-height: 28px;
+    font-size: 12px;
+    padding: 3px 12px;
+    margin: 4px 0 2px;
   }
 
   .blockout-control-tip {

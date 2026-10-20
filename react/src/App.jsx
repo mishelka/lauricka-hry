@@ -159,11 +159,11 @@ function MenuPage() {
           </button>
         </div>
 
-        <div className="menu-divider" role="separator" aria-label="Oddelovač kategórií">
+        <div className="menu-divider" role="separator" aria-label="Oddelovač kategórií" style={{ display: 'none' }}>
           <span>Hry za odmenu</span>
         </div>
 
-        <div className="menu-row">
+        <div className="menu-row" style={{ display: 'none' }}>
           <button className="btn-menu-blockout" onClick={() => navigate('/block-out')}>
             <span className="menu-title">Block Out!</span>
             <span className="menu-stars">{`${blockOutFinished} z ${BLOCK_OUT_LEVELS.length}`}</span>

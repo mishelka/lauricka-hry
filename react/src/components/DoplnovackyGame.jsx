@@ -1,46 +1,43 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { DOPLNOVACKY_DTNL, DOPLNOVACKY_B } from '../data/tasks';
-import { getBestStars } from '../utils/player';
+import { DOPLNOVACKY_DTNL_GROUPS, DOPLNOVACKY_B_GROUPS } from '../data/tasks';
+import { getLevelStars } from '../utils/player';
 import WordFillGame from './WordFillGame';
-
-function renderStars(starsCount) {
-  return Array.from({ length: 5 }).map((_, i) => (
-    <span key={i} className={i < starsCount ? 'star-gold' : 'star-grey'}>★</span>
-  ));
-}
 
 export function DoplnovackyMenu() {
   const navigate = useNavigate();
   const [stars, setStars] = useState(() => ({
-    dtnl: getBestStars('doplnovacky_dtnl'),
-    b: getBestStars('doplnovacky_b')
+    dtnl: getLevelStars('doplnovacky_dtnl', DOPLNOVACKY_DTNL_GROUPS.length),
+    b: getLevelStars('doplnovacky_b', DOPLNOVACKY_B_GROUPS.length)
   }));
 
   useEffect(() => {
     setStars({
-      dtnl: getBestStars('doplnovacky_dtnl'),
-      b: getBestStars('doplnovacky_b')
+      dtnl: getLevelStars('doplnovacky_dtnl', DOPLNOVACKY_DTNL_GROUPS.length),
+      b: getLevelStars('doplnovacky_b', DOPLNOVACKY_B_GROUPS.length)
     });
   }, []);
+
+  const dtnlFinished = stars.dtnl.filter(s => s === 5).length;
+  const bFinished = stars.b.filter(s => s === 5).length;
 
   return (
     <div>
       <h1>Doplňovačky</h1>
-      <p className="level-menu-help">Vyber si doplňovačku a doplň správne i/í alebo y/ý:</p>
+      <p className="level-menu-help">Vyber si doplňovačku a precvič si správne dopĺňanie písmen po leveloch:</p>
 
       <div className="menu-container">
         <div className="menu-row">
           <button className="btn-menu-doplnovacky-dtnl" onClick={() => navigate('/doplnovacky/dtnl')}>
             <span className="menu-title">Doplňovačky dtnl</span>
-            <span className="menu-stars">{renderStars(stars.dtnl)}</span>
+            <span className="menu-stars">{`${dtnlFinished} z ${DOPLNOVACKY_DTNL_GROUPS.length}`}</span>
           </button>
         </div>
 
         <div className="menu-row">
           <button className="btn-menu-doplnovacky-b" onClick={() => navigate('/doplnovacky/b')}>
             <span className="menu-title">Doplňovačky B</span>
-            <span className="menu-stars">{renderStars(stars.b)}</span>
+            <span className="menu-stars">{`${bFinished} z ${DOPLNOVACKY_B_GROUPS.length}`}</span>
           </button>
         </div>
       </div>
@@ -49,11 +46,23 @@ export function DoplnovackyMenu() {
 }
 
 export function DoplnovackyDtnlGame() {
-  return <WordFillGame title="Doplňovačky dtnl" gameId="doplnovacky_dtnl" sourceWords={DOPLNOVACKY_DTNL} />;
+  return (
+    <WordFillGame
+      title="Doplňovačky dtnl"
+      gameId="doplnovacky_dtnl"
+      levelGroups={DOPLNOVACKY_DTNL_GROUPS}
+    />
+  );
 }
 
 export function DoplnovackyBGame() {
-  return <WordFillGame title="Doplňovačky B" gameId="doplnovacky_b" sourceWords={DOPLNOVACKY_B} />;
+  return (
+    <WordFillGame
+      title="Doplňovačky B"
+      gameId="doplnovacky_b"
+      levelGroups={DOPLNOVACKY_B_GROUPS}
+    />
+  );
 }
 
 export default DoplnovackyMenu;
