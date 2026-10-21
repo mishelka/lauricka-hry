@@ -5,6 +5,7 @@ import { getLevelStars, updateLevelBestStars } from '../utils/player';
 import BlockOutGame from '../rewards/BlockOutGame';
 import { RestartIcon, NextLevelIcon, LevelsMenuIcon, GameIcon } from './Icons';
 
+const QUESTIONS_PER_LEVEL = 15;
 const MAX_STARS = 5;
 
 function renderStars(stars) {
@@ -45,7 +46,8 @@ export default function VybraneBGame() {
 
   function startLevel(level) {
     if (!isLevelUnlocked(level)) return;
-    const shuffled = shuffleArray(groups[level]);
+    const pool = groups[level] || [];
+    const shuffled = shuffleArray(pool).slice(0, Math.min(pool.length, QUESTIONS_PER_LEVEL));
     setSelectedLevel(level);
     setOrder(shuffled);
     setIndex(0);

@@ -338,6 +338,126 @@
   box-sizing: border-box;
 }
 
+/* Frozen block styles (Zamrznutý blok s číslom) */
+.blockout-piece-container.is-frozen {
+  cursor: not-allowed;
+  filter: drop-shadow(0 2px 10px rgba(56, 189, 248, 0.4));
+}
+
+.blockout-piece-container.is-frozen:hover {
+  filter: drop-shadow(0 2px 14px rgba(56, 189, 248, 0.65));
+}
+
+.blockout-piece-container.is-frozen .blockout-subcell {
+  background: linear-gradient(135deg, #e0f2fe 0%, #bae6fd 50%, #7dd3fc 100%) !important;
+  border-color: #0284c7 !important;
+  box-shadow: inset 0 2px 6px rgba(255, 255, 255, 0.95), inset 0 -3px 6px rgba(3, 105, 161, 0.4), 0 4px 10px rgba(56, 189, 248, 0.35) !important;
+  position: relative;
+  overflow: hidden;
+}
+
+.blockout-subcell-ice {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: repeating-linear-gradient(
+    -45deg,
+    rgba(255, 255, 255, 0.3),
+    rgba(255, 255, 255, 0.3) 3px,
+    transparent 3px,
+    transparent 9px
+  );
+  opacity: 0.85;
+}
+
+.blockout-subcell-ice::after {
+  content: '';
+  position: absolute;
+  top: 10%;
+  left: 10%;
+  width: 40%;
+  height: 40%;
+  border-top: 2px solid rgba(255, 255, 255, 0.9);
+  border-left: 2px solid rgba(255, 255, 255, 0.9);
+  border-radius: 4px 0 0 0;
+}
+
+.blockout-piece-container.is-frozen .blockout-cell-bridge {
+  background: #bae6fd !important;
+  border-color: #0284c7 !important;
+}
+
+/* Frozen Countdown Badge */
+.blockout-frozen-badge {
+  position: absolute;
+  transform: translate(-50%, -50%);
+  z-index: 25;
+  pointer-events: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.blockout-frozen-badge-inner {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
+  width: 100%;
+  height: 100%;
+  background: radial-gradient(circle at 35% 35%, #ffffff 0%, #e0f2fe 60%, #bae6fd 100%);
+  border: 2.5px solid #0284c7;
+  border-radius: 50%;
+  box-shadow: 0 4px 12px rgba(2, 132, 199, 0.5), inset 0 2px 4px rgba(255, 255, 255, 0.95);
+  font-weight: 900;
+  line-height: 1;
+  animation: frozen-pulse 2.2s ease-in-out infinite;
+}
+
+.blockout-frozen-snowflake {
+  font-size: 0.72em;
+  color: #0284c7;
+  text-shadow: 0 1px 2px rgba(255, 255, 255, 0.8);
+}
+
+.blockout-frozen-number {
+  font-size: 1.15em;
+  font-weight: 900;
+  color: #0c4a6e;
+  text-shadow: 0 1px 1px rgba(255, 255, 255, 0.8);
+}
+
+@keyframes frozen-pulse {
+  0%, 100% {
+    transform: scale(1);
+    box-shadow: 0 4px 12px rgba(2, 132, 199, 0.5), inset 0 2px 4px rgba(255, 255, 255, 0.95);
+  }
+  50% {
+    transform: scale(1.08);
+    box-shadow: 0 6px 16px rgba(56, 189, 248, 0.75), inset 0 2px 5px rgba(255, 255, 255, 1);
+  }
+}
+
+/* Unfreeze Animation */
+.blockout-piece-container.just-unfrozen {
+  animation: unfreeze-pop 0.65s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+}
+
+@keyframes unfreeze-pop {
+  0% {
+    transform: scale(0.94);
+    filter: brightness(1.7) drop-shadow(0 0 18px rgba(56, 189, 248, 0.95));
+  }
+  50% {
+    transform: scale(1.1);
+    filter: brightness(1.35) drop-shadow(0 0 14px rgba(255, 255, 255, 0.85));
+  }
+  100% {
+    transform: scale(1);
+    filter: brightness(1);
+  }
+}
+
 /* Backward-compatibility for single square pieces */
 .blockout-piece {
   position: absolute;

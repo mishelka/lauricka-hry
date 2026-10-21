@@ -1390,6 +1390,7 @@ export default function BlockOutGame({
                   const conf = COLOR_CONFIG[block.color] || COLOR_CONFIG.red;
                   const isSelected = selectedBlockId === block.id;
                   const isDragging = dragInfo && dragInfo.blockId === block.id;
+                  const isFrozen = isBlockFrozen(block);
                   const cells = getBlockCells(block);
                   const dims = getBlockDimensions(block);
 
@@ -1411,12 +1412,13 @@ export default function BlockOutGame({
                   }
 
                   const exitClass = block.exiting ? `exiting exit-${block.exitSide}` : '';
+                  const frozenClass = isFrozen ? 'is-frozen' : (block.justUnfrozen ? 'just-unfrozen' : '');
                   const cellRadius = Math.max(8, Math.round(cellSize * 0.24));
 
                   return (
                     <div
                       key={block.id}
-                      className={`blockout-piece-container ${isSelected ? 'selected' : ''} ${exitClass} ${
+                      className={`blockout-piece-container ${isSelected ? 'selected' : ''} ${exitClass} ${frozenClass} ${
                         isDragging ? 'dragging' : ''
                       }`}
                       style={pieceStyle}
@@ -1430,6 +1432,13 @@ export default function BlockOutGame({
                         block={block}
                         width={containerW}
                         height={containerH}
+                        cellSize={cellSize}
+                        gap={gap}
+                      />
+
+                      {/* Frozen countdown badge with snowflake and remaining count */}
+                      <FrozenBlockBadge
+                        block={block}
                         cellSize={cellSize}
                         gap={gap}
                       />
@@ -1455,7 +1464,9 @@ export default function BlockOutGame({
 
                         return (
                           <div key={cellIdx} className="blockout-subcell-wrapper">
-                            <div className="blockout-subcell" style={subStyle} />
+                            <div className="blockout-subcell" style={subStyle}>
+                              {isFrozen && <div className="blockout-subcell-ice" />}
+                            </div>
 
                             {/* Seamless bridge between adjacent horizontal cells */}
                             {hasRight && (
@@ -1546,7 +1557,13 @@ export default function BlockOutGame({
                   ◀
                 </button>
                 <div className="blockout-dpad-center">
-                  {selectedBlock ? (COLOR_CONFIG[selectedBlock.color]?.label || '•') : '•'}
+                  {selectedBlock ? (
+                    isBlockFrozen(selectedBlock) ? (
+                      `❄️ ${selectedBlock.frozen ?? selectedBlock.freezeCount ?? selectedBlock.count}`
+                    ) : (
+                      COLOR_CONFIG[selectedBlock.color]?.label || '•'
+                    )
+                  ) : '•'}
                 </div>
                 <button
                   className="blockout-dpad-btn"
