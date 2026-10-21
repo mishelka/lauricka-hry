@@ -243,7 +243,7 @@ function FrozenBlockBadge({ block, cellSize, gap = 0 }) {
 
   const cx = avgC * (cellSize + gap) + cellSize / 2;
   const cy = avgR * (cellSize + gap) + cellSize / 2;
-  const badgeSize = Math.max(24, Math.round(cellSize * 0.52));
+  const badgeSize = Math.max(28, Math.round(cellSize * 0.58));
 
   return (
     <div
@@ -252,8 +252,7 @@ function FrozenBlockBadge({ block, cellSize, gap = 0 }) {
         left: `${cx}px`,
         top: `${cy}px`,
         width: `${badgeSize}px`,
-        height: `${badgeSize}px`,
-        fontSize: `${Math.max(13, Math.round(badgeSize * 0.52))}px`
+        height: `${badgeSize}px`
       }}
     >
       <div className="blockout-frozen-badge-inner">
@@ -1541,8 +1540,11 @@ export default function BlockOutGame({
                   : doorDepth;
 
                 let doorStyle = {
-                  backgroundColor: conf.bg,
-                  boxShadow: `0 0 10px ${conf.glow}`
+                  backgroundColor: isLocked ? '#334155' : conf.bg,
+                  borderColor: isLocked ? '#475569' : conf.border,
+                  boxShadow: isLocked
+                    ? 'inset 0 2px 5px rgba(0, 0, 0, 0.5), 0 2px 6px rgba(0, 0, 0, 0.25)'
+                    : `0 0 10px ${conf.glow}`
                 };
 
                 if (door.side === 'top') {
@@ -1758,6 +1760,7 @@ export default function BlockOutGame({
                   const revealedClass = block.justRevealed ? 'just-revealed' : '';
                   const cellRadius = Math.max(8, Math.round(cellSize * 0.24));
                   const innerInset = Math.max(6, Math.min(Math.round(cellSize * 0.24), Math.round(Math.min(containerW, containerH) * 0.22)));
+                  const isRectangular = cells.length === dims.rows * dims.cols;
 
                   return (
                     <div
@@ -1771,6 +1774,21 @@ export default function BlockOutGame({
                       onPointerUp={handlePointerUp}
                       onPointerCancel={handlePointerCancel}
                     >
+                      {/* Unified seamless ice crystal surface for frozen blocks */}
+                      {isFrozen && isRectangular && (
+                        <div
+                          className="blockout-frozen-block-surface"
+                          style={{
+                            width: `${containerW}px`,
+                            height: `${containerH}px`,
+                            borderRadius: `${cellRadius}px`
+                          }}
+                        >
+                          <div className="blockout-frozen-crystal-glow" />
+                          <div className="blockout-frozen-facets" />
+                        </div>
+                      )}
+
                       {/* Directional arrow overlay for restricted blocks (↕, ↔, ↑, ↓, etc.) */}
                       <BlockArrowOverlay
                         block={block}
@@ -1788,7 +1806,7 @@ export default function BlockOutGame({
                       />
 
                       {/* Inner block layer for two-color blocks */}
-                      {innerConf && (
+                      {!isFrozen && innerConf && (
                         <div
                           className="blockout-inner-block"
                           style={{
@@ -1803,7 +1821,7 @@ export default function BlockOutGame({
                         />
                       )}
 
-                      {cells.map(([dr, dc], cellIdx) => {
+                      {(!isFrozen || !isRectangular) && cells.map(([dr, dc], cellIdx) => {
                         const hasTop = cells.some(([r, c]) => r === dr - 1 && c === dc);
                         const hasBottom = cells.some(([r, c]) => r === dr + 1 && c === dc);
                         const hasLeft = cells.some(([r, c]) => r === dr && c === dc - 1);
@@ -1814,12 +1832,12 @@ export default function BlockOutGame({
                           left: dc * (cellSize + gap),
                           width: cellSize,
                           height: cellSize,
-                          backgroundColor: conf.bg,
-                          borderColor: conf.border,
-                          borderTopLeftRadius: !hasTop && !hasLeft ? `${cellRadius}px` : '4px',
-                          borderTopRightRadius: !hasTop && !hasRight ? `${cellRadius}px` : '4px',
-                          borderBottomLeftRadius: !hasBottom && !hasLeft ? `${cellRadius}px` : '4px',
-                          borderBottomRightRadius: !hasBottom && !hasRight ? `${cellRadius}px` : '4px',
+                          backgroundColor: isFrozen ? '#cbd5e1' : conf.bg,
+                          borderColor: isFrozen ? '#94a3b8' : conf.border,
+                          borderTopLeftRadius: !hasTop && !hasLeft ? `${cellRadius}px` : '0px',
+                          borderTopRightRadius: !hasTop && !hasRight ? `${cellRadius}px` : '0px',
+                          borderBottomLeftRadius: !hasBottom && !hasLeft ? `${cellRadius}px` : '0px',
+                          borderBottomRightRadius: !hasBottom && !hasRight ? `${cellRadius}px` : '0px',
                         };
 
                         return (
@@ -1837,9 +1855,9 @@ export default function BlockOutGame({
                                   left: dc * (cellSize + gap) + cellSize - 1,
                                   width: gap + 2,
                                   height: cellSize,
-                                  backgroundColor: conf.bg,
-                                  borderTop: `2px solid ${conf.border}`,
-                                  borderBottom: `2px solid ${conf.border}`
+                                  backgroundColor: isFrozen ? '#cbd5e1' : conf.bg,
+                                  borderTop: `2px solid ${isFrozen ? '#94a3b8' : conf.border}`,
+                                  borderBottom: `2px solid ${isFrozen ? '#94a3b8' : conf.border}`
                                 }}
                               />
                             )}
@@ -1853,9 +1871,9 @@ export default function BlockOutGame({
                                   left: dc * (cellSize + gap),
                                   width: cellSize,
                                   height: gap + 2,
-                                  backgroundColor: conf.bg,
-                                  borderLeft: `2px solid ${conf.border}`,
-                                  borderRight: `2px solid ${conf.border}`
+                                  backgroundColor: isFrozen ? '#cbd5e1' : conf.bg,
+                                  borderLeft: `2px solid ${isFrozen ? '#94a3b8' : conf.border}`,
+                                  borderRight: `2px solid ${isFrozen ? '#94a3b8' : conf.border}`
                                 }}
                               />
                             )}
@@ -1869,7 +1887,7 @@ export default function BlockOutGame({
                                   left: dc * (cellSize + gap) + cellSize - 1,
                                   width: gap + 2,
                                   height: gap + 2,
-                                  backgroundColor: conf.bg
+                                  backgroundColor: isFrozen ? '#cbd5e1' : conf.bg
                                 }}
                               />
                             )}

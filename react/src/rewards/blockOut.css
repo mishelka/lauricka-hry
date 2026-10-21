@@ -290,9 +290,11 @@
 
 /* Locked door styles */
 .blockout-door.blockout-door-locked {
-  filter: brightness(0.8) saturate(0.85);
+  background: #334155 !important;
+  border: 2px solid #475569 !important;
+  box-shadow: inset 0 2px 5px rgba(0, 0, 0, 0.5), 0 2px 6px rgba(0, 0, 0, 0.25) !important;
   cursor: not-allowed;
-  box-shadow: inset 0 0 6px rgba(0, 0, 0, 0.4), 0 2px 6px rgba(0, 0, 0, 0.2) !important;
+  filter: none;
 }
 
 .blockout-door.blockout-door-locked::after {
@@ -444,17 +446,62 @@
 /* Frozen block styles (Zamrznutý blok s číslom) */
 .blockout-piece-container.is-frozen {
   cursor: not-allowed;
-  filter: drop-shadow(0 2px 10px rgba(56, 189, 248, 0.4));
+  filter: drop-shadow(0 4px 10px rgba(0, 0, 0, 0.2));
 }
 
 .blockout-piece-container.is-frozen:hover {
-  filter: drop-shadow(0 2px 14px rgba(56, 189, 248, 0.65));
+  filter: drop-shadow(0 4px 14px rgba(148, 163, 184, 0.5));
 }
 
+/* Seamless single ice crystal surface for rectangular frozen blocks */
+.blockout-frozen-block-surface {
+  position: absolute;
+  top: 0;
+  left: 0;
+  box-sizing: border-box;
+  background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 30%, #cbd5e1 70%, #94a3b8 100%);
+  border: 2.5px solid #cbd5e1;
+  box-shadow: inset 0 3px 8px rgba(255, 255, 255, 0.95), inset 0 -4px 10px rgba(100, 116, 139, 0.4), 0 4px 12px rgba(0, 0, 0, 0.15);
+  overflow: hidden;
+  pointer-events: none;
+  z-index: 12;
+}
+
+.blockout-frozen-crystal-glow {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 45%;
+  background: linear-gradient(to bottom, rgba(255, 255, 255, 0.65), rgba(255, 255, 255, 0.05));
+  pointer-events: none;
+}
+
+.blockout-frozen-facets {
+  position: absolute;
+  inset: 0;
+  background: repeating-linear-gradient(
+    45deg,
+    rgba(255, 255, 255, 0.22) 0px,
+    rgba(255, 255, 255, 0.22) 6px,
+    transparent 6px,
+    transparent 16px
+  ), repeating-linear-gradient(
+    -45deg,
+    rgba(255, 255, 255, 0.15) 0px,
+    rgba(255, 255, 255, 0.15) 4px,
+    transparent 4px,
+    transparent 12px
+  );
+  opacity: 0.9;
+  pointer-events: none;
+}
+
+/* Fallback subcell styling for non-rectangular frozen shapes */
 .blockout-piece-container.is-frozen .blockout-subcell {
-  background: linear-gradient(135deg, #e0f2fe 0%, #bae6fd 50%, #7dd3fc 100%) !important;
-  border-color: #0284c7 !important;
-  box-shadow: inset 0 2px 6px rgba(255, 255, 255, 0.95), inset 0 -3px 6px rgba(3, 105, 161, 0.4), 0 4px 10px rgba(56, 189, 248, 0.35) !important;
+  background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 30%, #cbd5e1 70%, #94a3b8 100%) !important;
+  border-color: #cbd5e1 !important;
+  box-shadow: inset 0 2px 6px rgba(255, 255, 255, 0.9), inset 0 -3px 6px rgba(100, 116, 139, 0.4) !important;
   position: relative;
   overflow: hidden;
 }
@@ -464,30 +511,18 @@
   inset: 0;
   pointer-events: none;
   background: repeating-linear-gradient(
-    -45deg,
-    rgba(255, 255, 255, 0.3),
-    rgba(255, 255, 255, 0.3) 3px,
-    transparent 3px,
-    transparent 9px
+    45deg,
+    rgba(255, 255, 255, 0.25) 0px,
+    rgba(255, 255, 255, 0.25) 4px,
+    transparent 4px,
+    transparent 12px
   );
   opacity: 0.85;
 }
 
-.blockout-subcell-ice::after {
-  content: '';
-  position: absolute;
-  top: 10%;
-  left: 10%;
-  width: 40%;
-  height: 40%;
-  border-top: 2px solid rgba(255, 255, 255, 0.9);
-  border-left: 2px solid rgba(255, 255, 255, 0.9);
-  border-radius: 4px 0 0 0;
-}
-
 .blockout-piece-container.is-frozen .blockout-cell-bridge {
-  background: #bae6fd !important;
-  border-color: #0284c7 !important;
+  background: #cbd5e1 !important;
+  border-color: #94a3b8 !important;
 }
 
 /* Frozen Countdown Badge */
@@ -505,13 +540,13 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 2px;
+  gap: 3px;
   width: 100%;
   height: 100%;
-  background: radial-gradient(circle at 35% 35%, #ffffff 0%, #e0f2fe 60%, #bae6fd 100%);
-  border: 2.5px solid #0284c7;
+  background: radial-gradient(circle at 35% 35%, #ffffff 0%, #f1f5f9 50%, #e2e8f0 85%, #cbd5e1 100%);
+  border: 2.5px solid #64748b;
   border-radius: 50%;
-  box-shadow: 0 4px 12px rgba(2, 132, 199, 0.5), inset 0 2px 4px rgba(255, 255, 255, 0.95);
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.25), inset 0 2px 4px rgba(255, 255, 255, 0.95);
   font-weight: 900;
   line-height: 1;
   animation: frozen-pulse 2.2s ease-in-out infinite;
@@ -519,25 +554,25 @@
 
 .blockout-frozen-snowflake {
   font-size: 0.72em;
-  color: #0284c7;
+  color: #475569;
   text-shadow: 0 1px 2px rgba(255, 255, 255, 0.8);
 }
 
 .blockout-frozen-number {
-  font-size: 1.15em;
+  font-size: 1.18em;
   font-weight: 900;
-  color: #0c4a6e;
+  color: #1e293b;
   text-shadow: 0 1px 1px rgba(255, 255, 255, 0.8);
 }
 
 @keyframes frozen-pulse {
   0%, 100% {
     transform: scale(1);
-    box-shadow: 0 4px 12px rgba(2, 132, 199, 0.5), inset 0 2px 4px rgba(255, 255, 255, 0.95);
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.25), inset 0 2px 4px rgba(255, 255, 255, 0.95);
   }
   50% {
     transform: scale(1.08);
-    box-shadow: 0 6px 16px rgba(56, 189, 248, 0.75), inset 0 2px 5px rgba(255, 255, 255, 1);
+    box-shadow: 0 6px 14px rgba(100, 116, 139, 0.4), inset 0 2px 5px rgba(255, 255, 255, 1);
   }
 }
 
@@ -549,7 +584,7 @@
 @keyframes unfreeze-pop {
   0% {
     transform: scale(0.94);
-    filter: brightness(1.7) drop-shadow(0 0 18px rgba(56, 189, 248, 0.95));
+    filter: brightness(1.7) drop-shadow(0 0 18px rgba(255, 255, 255, 0.95));
   }
   50% {
     transform: scale(1.1);

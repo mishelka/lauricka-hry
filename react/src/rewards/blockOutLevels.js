@@ -379,33 +379,33 @@ function createLevel2Blocks() {
 
 function createLevel3Blocks() {
   return [
-    // Horná časť (riadky 0..3)
-    // Modrý zvislý pás vľavo (col 0): (0..3, 0)
-    { id: 'b_top_blue', color: 'blue', r: 0, c: 0, shape: '4x1' },
-    // Červený zvislý pás (col 1): (0..3, 1)
-    { id: 'b_top_red_1', color: 'red', r: 0, c: 1, shape: '4x1' },
-    // Zamrznutý modrý pás s odpočtom 1 (col 2): (0..3, 2)
-    { id: 'b_top_ice_1', color: 'blue', r: 0, c: 2, shape: '4x1', frozen: 1 },
-    // Zamrznutý modrý pás s odpočtom 1 (col 3): (0..3, 3)
-    { id: 'b_top_ice_2', color: 'blue', r: 0, c: 3, shape: '4x1', frozen: 1 },
-    // Žltý zvislý pás (col 4): (0..3, 4)
-    { id: 'b_top_yellow', color: 'yellow', r: 0, c: 4, shape: '4x1' },
-    // Červený zvislý pás vpravo (col 5): (0..3, 5)
-    { id: 'b_top_red_2', color: 'red', r: 0, c: 5, shape: '4x1' },
+    // Horná časť (riadky 0..2)
+    // Modrý zvislý pás vľavo (col 0): (0..2, 0)
+    { id: 'b_top_blue', color: 'blue', r: 0, c: 0, shape: '3x1' },
+    // Červený zvislý pás (col 1): (0..2, 1)
+    { id: 'b_top_red_1', color: 'red', r: 0, c: 1, shape: '3x1' },
+    // Zamrznutý zelený pás s odpočtom 1 (col 2): (0..2, 2)
+    { id: 'b_top_ice_1', color: 'green', r: 0, c: 2, shape: '3x1', frozen: 1 },
+    // Zamrznutý modrý pás s odpočtom 1 (col 3): (0..2, 3)
+    { id: 'b_top_ice_2', color: 'blue', r: 0, c: 3, shape: '3x1', frozen: 1 },
+    // Žltý zvislý pás (col 4): (0..2, 4)
+    { id: 'b_top_yellow', color: 'yellow', r: 0, c: 4, shape: '3x1' },
+    // Červený zvislý pás vpravo (col 5): (0..2, 5)
+    { id: 'b_top_red_2', color: 'red', r: 0, c: 5, shape: '3x1' },
 
-    // Dolná časť (riadky 6..9)
-    // Žltý zvislý pás vľavo (col 0): (6..9, 0)
-    { id: 'b_bot_yellow_1', color: 'yellow', r: 6, c: 0, shape: '4x1' },
-    // Červený zvislý pás (col 1): (6..9, 1)
-    { id: 'b_bot_red_1', color: 'red', r: 6, c: 1, shape: '4x1' },
-    // Zamrznutý modrý pás s odpočtom 2 (col 2): (6..9, 2)
-    { id: 'b_bot_ice_1', color: 'blue', r: 6, c: 2, shape: '4x1', frozen: 2 },
-    // Zamrznutý modrý pás s odpočtom 2 (col 3): (6..9, 3)
-    { id: 'b_bot_ice_2', color: 'blue', r: 6, c: 3, shape: '4x1', frozen: 2 },
-    // Červený zvislý pás (col 4): (6..9, 4)
-    { id: 'b_bot_red_2', color: 'red', r: 6, c: 4, shape: '4x1' },
-    // Žltý zvislý pás vpravo (col 5): (6..9, 5)
-    { id: 'b_bot_yellow_2', color: 'yellow', r: 6, c: 5, shape: '4x1' }
+    // Dolná časť (riadky 6..8)
+    // Žltý zvislý pás vľavo (col 0): (6..8, 0)
+    { id: 'b_bot_yellow_1', color: 'yellow', r: 6, c: 0, shape: '3x1' },
+    // Červený zvislý pás (col 1): (6..8, 1)
+    { id: 'b_bot_red_1', color: 'red', r: 6, c: 1, shape: '3x1' },
+    // Zamrznutý žltý pás s odpočtom 2 (col 2): (6..8, 2)
+    { id: 'b_bot_ice_1', color: 'yellow', r: 6, c: 2, shape: '3x1', frozen: 2 },
+    // Zamrznutý modrý pás s odpočtom 2 (col 3): (6..8, 3)
+    { id: 'b_bot_ice_2', color: 'blue', r: 6, c: 3, shape: '3x1', frozen: 2 },
+    // Červený zvislý pás (col 4): (6..8, 4)
+    { id: 'b_bot_red_2', color: 'red', r: 6, c: 4, shape: '3x1' },
+    // Žltý zvislý pás vpravo (col 5): (6..8, 5)
+    { id: 'b_bot_yellow_2', color: 'yellow', r: 6, c: 5, shape: '3x1' }
   ];
 }
 
@@ -438,6 +438,46 @@ function createLevel4Blocks() {
     { id: 'b_6_0', color: 'blue', innerColor: 'pink', r: 6, c: 0, shape: '2x2' },
     // Dolný-pravý (col 4..5): vonkajšia zelená, vnútorná modrá
     { id: 'b_6_4', color: 'green', innerColor: 'blue', r: 6, c: 4, shape: '2x2' }
+  ];
+}
+
+function createLevel5Blocks() {
+  return [
+    // Ľavý stĺpec (stĺpce 0..2, riadky 1..8)
+    // Riadok 1: žltá (0..2)
+    { id: 'b_l1_yellow', color: 'yellow', r: 1, c: 0, shape: '1x3' },
+    // Riadok 2: zelená (0..2)
+    { id: 'b_l2_green', color: 'green', r: 2, c: 0, shape: '1x3' },
+    // Riadok 3: žltá (0..2)
+    { id: 'b_l3_yellow', color: 'yellow', r: 3, c: 0, shape: '1x3' },
+    // Riadok 4: tmavomodrá (0..2)
+    { id: 'b_l4_blue', color: 'blue', r: 4, c: 0, shape: '1x3' },
+    // Riadok 5: zamrznutý blok s odpočtom 8, skrytá žltá (0..2)
+    { id: 'b_l5_ice8', color: 'yellow', r: 5, c: 0, shape: '1x3', frozen: 8 },
+    // Riadok 6: červená (0..2)
+    { id: 'b_l6_red', color: 'red', r: 6, c: 0, shape: '1x3' },
+    // Riadok 7: žltá (0..2)
+    { id: 'b_l7_yellow', color: 'yellow', r: 7, c: 0, shape: '1x3' },
+    // Riadok 8: tmavomodrá (0..2)
+    { id: 'b_l8_blue', color: 'blue', r: 8, c: 0, shape: '1x3' },
+
+    // Pravý stĺpec (stĺpce 3..5, riadky 1..8)
+    // Riadok 1: tmavomodrá (3..5)
+    { id: 'b_r1_blue', color: 'blue', r: 1, c: 3, shape: '1x3' },
+    // Riadok 2: zamrznutý blok s odpočtom 10, skrytá žltá (3..5)
+    { id: 'b_r2_ice10', color: 'yellow', r: 2, c: 3, shape: '1x3', frozen: 10 },
+    // Riadok 3: ružová (3..5)
+    { id: 'b_r3_pink', color: 'pink', r: 3, c: 3, shape: '1x3' },
+    // Riadok 4: žltá (3..5)
+    { id: 'b_r4_yellow', color: 'yellow', r: 4, c: 3, shape: '1x3' },
+    // Riadok 5: svetlomodrá (3..5)
+    { id: 'b_r5_cyan', color: 'cyan', r: 5, c: 3, shape: '1x3' },
+    // Riadok 6: žltá (3..5)
+    { id: 'b_r6_yellow', color: 'yellow', r: 6, c: 3, shape: '1x3' },
+    // Riadok 7: zamrznutý blok s odpočtom 6, skrytá tmavomodrá (3..5)
+    { id: 'b_r7_ice6', color: 'blue', r: 7, c: 3, shape: '1x3', frozen: 6 },
+    // Riadok 8: žltá (3..5)
+    { id: 'b_r8_yellow', color: 'yellow', r: 8, c: 3, shape: '1x3' }
   ];
 }
 
@@ -488,18 +528,17 @@ export const BLOCK_OUT_LEVELS = [
     id: 3,
     name: 'Level 3 - Presýpacie hodiny a zámky',
     width: 6,
-    height: 10,
+    height: 9,
     doors: [
-      { side: 'left', index: 0, span: 4, color: 'blue', locked: 5 },
-      { side: 'right', index: 0, span: 4, color: 'red' },
-      { side: 'left', index: 6, span: 4, color: 'blue', locked: 5 },
-      { side: 'right', index: 6, span: 4, color: 'yellow', locked: 3 }
+      { side: 'left', index: 0, span: 3, color: 'green', locked: 5 },
+      { side: 'right', index: 0, span: 3, color: 'red' },
+      { side: 'left', index: 6, span: 3, color: 'blue', locked: 5 },
+      { side: 'right', index: 6, span: 3, color: 'yellow', locked: 3 }
     ],
     walls: [
-      { r: 4, c: 0 }, { r: 4, c: 1 },
-      { r: 5, c: 0 }, { r: 5, c: 1 },
-      { r: 4, c: 4 }, { r: 4, c: 5 },
-      { r: 5, c: 4 }, { r: 5, c: 5 }
+      { r: 3, c: 0 }, { r: 3, c: 1 }, { r: 3, c: 4 }, { r: 3, c: 5 },
+      { r: 4, c: 0 }, { r: 4, c: 1 }, { r: 4, c: 4 }, { r: 4, c: 5 },
+      { r: 5, c: 0 }, { r: 5, c: 1 }, { r: 5, c: 4 }, { r: 5, c: 5 }
     ],
     blocks: createLevel3Blocks()
   },
@@ -525,25 +564,18 @@ export const BLOCK_OUT_LEVELS = [
   },
   {
     id: 5,
-    name: 'Level 5 - Premávka v labyrinte',
-    width: 5,
-    height: 5,
-    walls: [
-      { r: 0, c: 1 },
-      { r: 4, c: 3 }
-    ],
+    name: 'Level 5 - Zámkový stĺp',
+    width: 6,
+    height: 9,
     doors: [
-      { side: 'left', index: 1, color: 'green' },
-      { side: 'bottom', index: 0, color: 'purple' },
-      { side: 'right', index: 3, color: 'orange' },
-      { side: 'top', index: 3, color: 'red' }
+      { side: 'top', index: 0, span: 3, color: 'green', locked: 3 },
+      { side: 'top', index: 3, span: 3, color: 'yellow', locked: 4 },
+      { side: 'bottom', index: 3, span: 3, color: 'blue', locked: 5 },
+      { side: 'left', index: 6, span: 1, color: 'cyan', locked: 2 },
+      { side: 'right', index: 5, span: 1, color: 'red' },
+      { side: 'right', index: 6, span: 1, color: 'pink', locked: 1 }
     ],
-    blocks: [
-      { id: 'b1', color: 'purple', r: 0, c: 0, shape: '2x1', direction: 'vertical' },
-      { id: 'b2', color: 'green', r: 1, c: 1, shape: '1x3', direction: 'horizontal' },
-      { id: 'b3', color: 'red', r: 2, c: 3, shape: '2x1', direction: 'vertical' },
-      { id: 'b4', color: 'orange', r: 3, c: 1, shape: '1x2', direction: 'horizontal' }
-    ]
+    blocks: createLevel5Blocks()
   },
   {
     id: 6,
