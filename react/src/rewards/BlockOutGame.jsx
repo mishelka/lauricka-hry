@@ -233,7 +233,7 @@ function BlockArrowOverlay({ block, width, height, cellSize, gap = 0 }) {
   return null;
 }
 
-function FrozenBlockBadge({ block, cellSize, gap = 0 }) {
+function FrozenBlockNumber({ block, cellSize, gap = 0 }) {
   const count = block.frozen ?? block.freezeCount ?? block.count ?? 0;
   if (!count || count <= 0) return null;
 
@@ -243,22 +243,18 @@ function FrozenBlockBadge({ block, cellSize, gap = 0 }) {
 
   const cx = avgC * (cellSize + gap) + cellSize / 2;
   const cy = avgR * (cellSize + gap) + cellSize / 2;
-  const badgeSize = Math.max(28, Math.round(cellSize * 0.58));
+  const fontSize = Math.max(22, Math.round(cellSize * 0.58));
 
   return (
     <div
-      className="blockout-frozen-badge"
+      className="blockout-frozen-number-overlay"
       style={{
         left: `${cx}px`,
         top: `${cy}px`,
-        width: `${badgeSize}px`,
-        height: `${badgeSize}px`
+        fontSize: `${fontSize}px`
       }}
     >
-      <div className="blockout-frozen-badge-inner">
-        <span className="blockout-frozen-snowflake">❄</span>
-        <span className="blockout-frozen-number">{count}</span>
-      </div>
+      {count}
     </div>
   );
 }
@@ -375,7 +371,7 @@ export default function BlockOutGame({
 
       const currentGap = isSmallMobile ? 4 : isMobile ? 5 : 7;
       const currentPadding = isSmallMobile ? 6 : isMobile ? 8 : 10;
-      const currentDoorDepth = isSmallMobile ? 14 : isMobile ? 16 : 20;
+      const currentDoorDepth = isSmallMobile ? 18 : isMobile ? 20 : 24;
 
       // Available width calculation
       // Screen padding + board wrapper padding + doors on left and right
@@ -977,6 +973,7 @@ export default function BlockOutGame({
   // Touch and mouse drag handlers using Pointer Events
   const handlePointerDown = (block, e) => {
     if (gameState !== 'playing' || block.exiting) return;
+    if (e.button !== undefined && e.button !== 0) return; // Only primary button
     e.preventDefault();
 
     setSelectedBlockId(block.id);
@@ -1022,19 +1019,19 @@ export default function BlockOutGame({
     });
   };
 
-  const handlePointerMove = (e) => {
+  const handlePointerMove = useCallback((e) => {
     if (!dragRef.current || dragRef.current.pointerId !== e.pointerId) return;
 
     const drag = dragRef.current;
     const totalDist = Math.hypot(e.clientX - drag.startX, e.clientY - drag.startY);
 
-    if (totalDist < 5 && !drag.isDragging) {
-      return; // Small deadzone for simple clicks/taps
+    if (totalDist < 3 && !drag.isDragging) {
+      return; // Tiny deadzone to prevent accidental jitter on simple clicks
     }
 
     drag.isDragging = true;
     const step = cellSize + gap;
-    const threshold = step * 0.5;
+    const threshold = step * 0.45;
 
     let maxLoops = 10;
     while (maxLoops-- > 0) {
@@ -1074,18 +1071,18 @@ export default function BlockOutGame({
           pDc = localDx > 0 ? 1 : -1;
         }
         if (absDy >= threshold) {
-          pDr = localDy > 0 ? 1 : -1;
+          sDr = localDy > 0 ? 1 : -1;
         }
       } else {
         if (absDy >= threshold) {
           pDr = localDy > 0 ? 1 : -1;
         }
         if (absDx >= threshold) {
-          pDc = localDx > 0 ? 1 : -1;
+          sDc = localDx > 0 ? 1 : -1;
         }
       }
 
-      if (pDr === 0 && pDc === 0) break;
+      if (pDr === 0 && pDc === 0 && sDr === 0 && sDc === 0) break;
 
       let moved = false;
       // Try primary direction first
@@ -1197,9 +1194,9 @@ export default function BlockOutGame({
       isExiting: drag.isExiting,
       exitSide: drag.exitSide
     });
-  };
+  }, [cellSize, gap, doorDepth, checkBlockStep, blocks]);
 
-  const handlePointerUp = (e) => {
+  const handlePointerUp = useCallback((e) => {
     if (!dragRef.current || dragRef.current.pointerId !== e.pointerId) return;
 
     const {
@@ -1363,9 +1360,9 @@ export default function BlockOutGame({
         prev.map(b => (b.id === blockId ? { ...b, r: currentR, c: currentC } : b))
       );
     }
-  };
+  }, [blocks, doors, moves, currentLevelIndex]);
 
-  const handlePointerCancel = (e) => {
+  const handlePointerCancel = useCallback((e) => {
     if (dragRef.current && dragRef.current.pointerId === e.pointerId) {
       const { targetEl } = dragRef.current;
       if (targetEl && targetEl.releasePointerCapture) {
@@ -1376,7 +1373,41 @@ export default function BlockOutGame({
       dragRef.current = null;
       setDragInfo(null);
     }
+  }, []);
+
+  // Global window listeners for drag & drop to guarantee zero lost pointer events
+  const pointerHandlersRef = useRef({
+    handlePointerMove,
+    handlePointerUp,
+    handlePointerCancel
+  });
+  pointerHandlersRef.current = {
+    handlePointerMove,
+    handlePointerUp,
+    handlePointerCancel
   };
+
+  useEffect(() => {
+    const onWindowPointerMove = (e) => {
+      pointerHandlersRef.current.handlePointerMove(e);
+    };
+    const onWindowPointerUp = (e) => {
+      pointerHandlersRef.current.handlePointerUp(e);
+    };
+    const onWindowPointerCancel = (e) => {
+      pointerHandlersRef.current.handlePointerCancel(e);
+    };
+
+    window.addEventListener('pointermove', onWindowPointerMove, { passive: false });
+    window.addEventListener('pointerup', onWindowPointerUp, { passive: false });
+    window.addEventListener('pointercancel', onWindowPointerCancel, { passive: false });
+
+    return () => {
+      window.removeEventListener('pointermove', onWindowPointerMove);
+      window.removeEventListener('pointerup', onWindowPointerUp);
+      window.removeEventListener('pointercancel', onWindowPointerCancel);
+    };
+  }, []);
 
   const handleExit = () => {
     if (onBack) {
@@ -1616,10 +1647,14 @@ export default function BlockOutGame({
                     title={isLocked ? `Zamknutý východ (zostáva ${door.locked})` : undefined}
                   >
                     {isLocked ? (
-                      <div className="blockout-door-lock-badge">
-                        <span className="blockout-door-lock-icon">🔒</span>
-                        <span className="blockout-door-lock-count">{door.locked}</span>
-                      </div>
+                      <span
+                        className="blockout-door-lock-count"
+                        style={{
+                          fontSize: `${Math.max(14, Math.round(doorDepth * 0.78))}px`
+                        }}
+                      >
+                        {door.locked}
+                      </span>
                     ) : (
                       <DoorArrow
                         side={door.side}
@@ -1798,8 +1833,8 @@ export default function BlockOutGame({
                         gap={gap}
                       />
 
-                      {/* Frozen countdown badge with snowflake and remaining count */}
-                      <FrozenBlockBadge
+                      {/* Frozen countdown number without badge/icon */}
+                      <FrozenBlockNumber
                         block={block}
                         cellSize={cellSize}
                         gap={gap}

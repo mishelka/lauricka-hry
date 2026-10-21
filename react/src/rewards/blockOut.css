@@ -290,9 +290,9 @@
 
 /* Locked door styles */
 .blockout-door.blockout-door-locked {
-  background: #334155 !important;
+  background: #1e293b !important;
   border: 2px solid #475569 !important;
-  box-shadow: inset 0 2px 5px rgba(0, 0, 0, 0.5), 0 2px 6px rgba(0, 0, 0, 0.25) !important;
+  box-shadow: inset 0 2px 5px rgba(0, 0, 0, 0.6), 0 2px 6px rgba(0, 0, 0, 0.25) !important;
   cursor: not-allowed;
   filter: none;
 }
@@ -312,33 +312,31 @@
   pointer-events: none;
 }
 
-.blockout-door-lock-badge {
+.blockout-door-lock-count {
   position: relative;
   z-index: 2;
+  font-weight: 900;
+  font-family: inherit;
+  color: #fef08a;
+  line-height: 1;
+  text-shadow: 
+    0 1px 3px rgba(0, 0, 0, 0.95),
+    0 0 2px #000000;
+  pointer-events: none;
+  user-select: none;
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 2px;
-  background: radial-gradient(circle at 35% 35%, #ffffff 0%, #fef3c7 60%, #fde68a 100%);
-  border: 1.5px solid #d97706;
-  border-radius: 999px;
-  padding: 1px 4px;
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.35), inset 0 1px 2px rgba(255, 255, 255, 0.9);
-  animation: frozen-pulse 2.2s ease-in-out infinite;
-  pointer-events: none;
+  animation: door-lock-number-pulse 2.2s ease-in-out infinite;
 }
 
-.blockout-door-lock-icon {
-  font-size: 10px;
-  line-height: 1;
-}
-
-.blockout-door-lock-count {
-  font-size: 11px;
-  font-weight: 900;
-  color: #78350f;
-  line-height: 1;
-  text-shadow: 0 1px 0 rgba(255, 255, 255, 0.8);
+@keyframes door-lock-number-pulse {
+  0%, 100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.12);
+  }
 }
 
 .blockout-door.just-unlocked {
@@ -525,54 +523,35 @@
   border-color: #94a3b8 !important;
 }
 
-/* Frozen Countdown Badge */
-.blockout-frozen-badge {
+/* Frozen Countdown Number (direct large text, no circle/badge or icon) */
+.blockout-frozen-number-overlay {
   position: absolute;
   transform: translate(-50%, -50%);
   z-index: 25;
   pointer-events: none;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.blockout-frozen-badge-inner {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 3px;
-  width: 100%;
-  height: 100%;
-  background: radial-gradient(circle at 35% 35%, #ffffff 0%, #f1f5f9 50%, #e2e8f0 85%, #cbd5e1 100%);
-  border: 2.5px solid #64748b;
-  border-radius: 50%;
-  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.25), inset 0 2px 4px rgba(255, 255, 255, 0.95);
   font-weight: 900;
+  font-family: inherit;
+  color: #0f172a;
+  text-shadow: 
+    -1.5px -1.5px 0 #ffffff,
+     1.5px -1.5px 0 #ffffff,
+    -1.5px  1.5px 0 #ffffff,
+     1.5px  1.5px 0 #ffffff,
+     0px    2px   6px rgba(0, 0, 0, 0.45);
   line-height: 1;
-  animation: frozen-pulse 2.2s ease-in-out infinite;
+  user-select: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  animation: frozen-number-pulse 2.2s ease-in-out infinite;
 }
 
-.blockout-frozen-snowflake {
-  font-size: 0.72em;
-  color: #475569;
-  text-shadow: 0 1px 2px rgba(255, 255, 255, 0.8);
-}
-
-.blockout-frozen-number {
-  font-size: 1.18em;
-  font-weight: 900;
-  color: #1e293b;
-  text-shadow: 0 1px 1px rgba(255, 255, 255, 0.8);
-}
-
-@keyframes frozen-pulse {
+@keyframes frozen-number-pulse {
   0%, 100% {
-    transform: scale(1);
-    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.25), inset 0 2px 4px rgba(255, 255, 255, 0.95);
+    transform: translate(-50%, -50%) scale(1);
   }
   50% {
-    transform: scale(1.08);
-    box-shadow: 0 6px 14px rgba(100, 116, 139, 0.4), inset 0 2px 5px rgba(255, 255, 255, 1);
+    transform: translate(-50%, -50%) scale(1.1);
   }
 }
 
