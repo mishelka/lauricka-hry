@@ -1,5 +1,5 @@
 export const VYBRANE_Z_GROUPS = [
-  // Level 1: Základné vybrané a bežné slová (Mix Y a I)
+  // Level 1: Základné vybrané a bežné slová 1 (Mix Y a I)
   [
     { vypis: 'jaz_k', odpoved: 'tvrde', cele: 'jazyk', hint: 'jazyk = svalový orgán v ústach alebo reč (vybrané slovo)' },
     { vypis: 'z_ma', odpoved: 'makke', cele: 'zima', hint: 'zima = chladné ročné obdobie (nie je vybrané slovo)' },
@@ -8,7 +8,11 @@ export const VYBRANE_Z_GROUPS = [
     { vypis: 'poz_vať', odpoved: 'tvrde-dlhe', cele: 'pozývať', hint: 'pozývať = volať niekoho na návštevu či oslavu (vybrané slovo)' },
     { vypis: 'z_skať', odpoved: 'makke-dlhe', cele: 'získať', hint: 'získať = nadobudnúť, vyhrať' },
     { vypis: 'naz_vať', odpoved: 'tvrde-dlhe', cele: 'nazývať', hint: 'nazývať = dávať meno, pomenovávať (vybrané slovo)' },
-    { vypis: 'z_ps', odpoved: 'makke', cele: 'zips', hint: 'zips = zdrhovadlo na bunde (cudzie slovo)' },
+    { vypis: 'z_ps', odpoved: 'makke', cele: 'zips', hint: 'zips = zdrhovadlo na bunde (cudzie slovo)' }
+  ],
+
+  // Level 2: Základné vybrané a bežné slová 2 (Mix Y a I)
+  [
     { vypis: 'vyz_vať', odpoved: 'tvrde-dlhe', cele: 'vyzývať', hint: 'vyzývať = podnecovať do súboja či činnosti (vybrané slovo)' },
     { vypis: 'z_stiť', odpoved: 'makke', cele: 'zistiť', hint: 'zistiť = spoznať pravdu, dopátrať sa' },
     { vypis: 'prez_vať', odpoved: 'tvrde-dlhe', cele: 'prezývať', hint: 'prezývať = dávať niekomu prezývku (vybrané slovo)' },
@@ -19,7 +23,7 @@ export const VYBRANE_Z_GROUPS = [
     { vypis: 'z_mný kabát', odpoved: 'makke', cele: 'zimný kabát', hint: 'odvodené od zima' }
   ],
 
-  // Level 2: Odvodené a bežné slová (Mix Y a I)
+  // Level 3: Odvodené a bežné slová 1 (Mix Y a I)
   [
     { vypis: 'jaz_ček', odpoved: 'tvrde-dlhe', cele: 'jazýček', hint: 'odvodené od jazyk' },
     { vypis: 'z_movisko', odpoved: 'makke', cele: 'zimovisko', hint: 'odvodené od zima (miesto, kde zvieratá trávia zimu)' },
@@ -28,7 +32,11 @@ export const VYBRANE_Z_GROUPS = [
     { vypis: 'poz_vanie na oslavu', odpoved: 'tvrde-dlhe', cele: 'pozývanie na oslavu', hint: 'odvodené od pozývať' },
     { vypis: 'z_stovať informácie', odpoved: 'makke', cele: 'zisťovať informácie', hint: 'odvodené od zistiť' },
     { vypis: 'prez_vka', odpoved: 'tvrde-dlhe', cele: 'prezývka', hint: 'odvodené od prezývať' },
-    { vypis: 'z_psnúť bundu', odpoved: 'makke', cele: 'zipsnúť bundu', hint: 'odvodené od zips' },
+    { vypis: 'z_psnúť bundu', odpoved: 'makke', cele: 'zipsnúť bundu', hint: 'odvodené od zips' }
+  ],
+
+  // Level 4: Odvodené a bežné slová 2 (Mix Y a I)
+  [
     { vypis: 'v_zva na zápas', odpoved: 'tvrde-dlhe', cele: 'výzva na zápas', hint: 'odvodené od vyzývať' },
     { vypis: 'z_motvorný', odpoved: 'makke', cele: 'zimotvorný', hint: 'odvodené od zima' },
     { vypis: 'jaz_čnica', odpoved: 'tvrde', cele: 'jazyčnica', hint: 'odvodené od jazyk (ukecaná osoba)' },
@@ -39,7 +47,7 @@ export const VYBRANE_Z_GROUPS = [
     { vypis: 'z_vanie od nudy', odpoved: 'makke-dlhe', cele: 'zívanie od nudy', hint: 'odvodené od zívať' }
   ],
 
-  // Level 3: Rozšírené a cudzie slová (Mix Y a I)
+  // Level 5: Rozšírené a cudzie slová 1 (Mix Y a I)
   [
     { vypis: 'cudzojaz_čný slovník', odpoved: 'tvrde', cele: 'cudzojazyčný slovník', hint: 'odvodené od jazyk' },
     { vypis: 'z_momravý človek', odpoved: 'makke', cele: 'zimomravý človek', hint: 'odvodené od zima' },
@@ -48,7 +56,11 @@ export const VYBRANE_Z_GROUPS = [
     { vypis: 'dvojjaz_čná tabuľa', odpoved: 'tvrde', cele: 'dvojjazyčná tabuľa', hint: 'odvodené od jazyk' },
     { vypis: 'z_psové zapínanie', odpoved: 'makke', cele: 'zipsové zapínanie', hint: 'odvodené od zips' },
     { vypis: 'oz_vajúci sa hlas', odpoved: 'tvrde-dlhe', cele: 'ozývajúci sa hlas', hint: 'odvodené od ozývať sa' },
-    { vypis: 'z_skané body', odpoved: 'makke-dlhe', cele: 'získané body', hint: 'odvodené od získať' },
+    { vypis: 'z_skané body', odpoved: 'makke-dlhe', cele: 'získané body', hint: 'odvodené od získať' }
+  ],
+
+  // Level 6: Rozšírené a cudzie slová 2 (Mix Y a I)
+  [
     { vypis: 'priz_vať odborníka', odpoved: 'tvrde-dlhe', cele: 'prizývať odborníka', hint: 'odvodené od prizývať' },
     { vypis: 'z_mné olympijské hry', odpoved: 'makke', cele: 'zimné olympijské hry', hint: 'odvodené od zima' },
     { vypis: 'vz_vanie bohov', odpoved: 'tvrde-dlhe', cele: 'vzývanie bohov', hint: 'odvodené od vzývať' },
@@ -59,7 +71,7 @@ export const VYBRANE_Z_GROUPS = [
     { vypis: 'hlasné z_vnutie v posteli', odpoved: 'makke-dlhe', cele: 'hlasné zívnutie v posteli', hint: 'odvodené od zívať (od únavy)' }
   ],
 
-  // Level 4: Dvojice a chytáky (Rozlišujeme význam)
+  // Level 7: Dvojice a chytáky (Rozlišujeme význam)
   [
     { vypis: 'priepasť z_va (je hlboko prázdna)', odpoved: 'tvrde-dlhe', cele: 'priepasť zýva (je hlboko prázdna)', hint: 'zývať prázdnotou = vybrané slovo' },
     { vypis: 'ospalý chlapec z_va (od únavy)', odpoved: 'makke-dlhe', cele: 'ospalý chlapec zíva (od únavy)', hint: 'zívať od únavy = píše sa s mäkkým í!' },
@@ -75,7 +87,7 @@ export const VYBRANE_Z_GROUPS = [
     { vypis: 'z_mnica (triaška pri chrípke)', odpoved: 'makke', cele: 'zimnica (triaška pri chrípke)', hint: 'zimnica = chorobný stav chladu' }
   ],
 
-  // Level 5: Vety a slovné spojenia
+  // Level 8: Vety a slovné spojenia
   [
     { vypis: 'Laurika sa v škole učí cudzí jaz_k.', odpoved: 'tvrde', cele: 'Laurika sa v škole učí cudzí jazyk.', hint: 'jazyk = vybrané slovo' },
     { vypis: 'V z_me chodíme s rodinou lyžovať na svah.', odpoved: 'makke', cele: 'V zime chodíme s rodinou lyžovať na svah.', hint: 'zime = nie je vybrané slovo' },
@@ -93,7 +105,7 @@ export const VYBRANE_Z_GROUPS = [
     { vypis: 'Lekári priz_vajú na pomoc skúseného chirurga.', odpoved: 'tvrde-dlhe', cele: 'Lekári prizývajú na pomoc skúseného chirurga.', hint: 'prizývajú = vybrané slovo' }
   ],
 
-  // Level 6: Majstrovský mix (Všetky pravidlá spolu)
+  // Level 9: Majstrovský mix (Všetky pravidlá spolu)
   [
     { vypis: 'slovenský a anglický jaz_kovedec', odpoved: 'tvrde', cele: 'slovenský a anglický jazykovedec', hint: 'odvodené od jazyk' },
     { vypis: 'chladné a mrazivé z_mné ráno', odpoved: 'makke', cele: 'chladné a mrazivé zimné ráno', hint: 'odvodené od zima' },

@@ -1,5 +1,5 @@
 export const VYBRANE_V_GROUPS = [
-  // Level 1: Základné vybrané a bežné slová (Mix Y a I)
+  // Level 1: Základné vybrané a bežné slová 1 (Mix Y a I)
   [
     { vypis: 'v_soký', odpoved: 'tvrde', cele: 'vysoký', hint: 'vysoký = má veľkú výšku (vybrané slovo)' },
     { vypis: 'v_dieť', odpoved: 'makke', cele: 'vidieť', hint: 'vidieť = vnímať očami (nie je vybrané slovo)' },
@@ -8,7 +8,11 @@ export const VYBRANE_V_GROUPS = [
     { vypis: 'v_dra', odpoved: 'tvrde', cele: 'vydra', hint: 'vydra = vodná šelma plávajúca v rieke (vybrané slovo)' },
     { vypis: 'v_ťaz', odpoved: 'makke-dlhe', cele: 'víťaz', hint: 'víťaz = človek, ktorý vyhral prvé miesto' },
     { vypis: 'jaz_k', odpoved: 'tvrde', cele: 'jazyk', hint: 'jazyk = sval v ústach alebo reč národa (vybrané slovo)' },
-    { vypis: 'v_la', odpoved: 'makke-dlhe', cele: 'víla', hint: 'víla = rozprávková bytosť s krídlami' },
+    { vypis: 'v_la', odpoved: 'makke-dlhe', cele: 'víla', hint: 'víla = rozprávková bytosť s krídlami' }
+  ],
+
+  // Level 2: Základné vybrané a bežné slová 2 (Mix Y a I)
+  [
     { vypis: 'v_r (sova)', odpoved: 'tvrde-dlhe', cele: 'výr (sova)', hint: 'výr = nočný dravý vták sova (vybrané slovo)' },
     { vypis: 'v_r (vodný)', odpoved: 'makke-dlhe', cele: 'vír (vodný)', hint: 'vír = krútňava vody alebo vetra' },
     { vypis: 'v_ť (vlk vyje)', odpoved: 'tvrde', cele: 'vyť (vlk vyje)', hint: 'vyť = tiahlo a smutno kvíliť (vybrané slovo)' },
@@ -19,7 +23,7 @@ export const VYBRANE_V_GROUPS = [
     { vypis: 'v_sieť', odpoved: 'makke', cele: 'visieť', hint: 'visieť = byť zavesený (nie je vybrané slovo)' }
   ],
 
-  // Level 2: Odvodené a bežné slová (Mix Y a I)
+  // Level 3: Odvodené a bežné slová 1 (Mix Y a I)
   [
     { vypis: 'v_ška', odpoved: 'tvrde-dlhe', cele: 'výška', hint: 'odvodené od vysoký' },
     { vypis: 'v_dívať', odpoved: 'makke-dlhe', cele: 'vídavať', hint: 'odvodené od vidieť' },
@@ -28,7 +32,11 @@ export const VYBRANE_V_GROUPS = [
     { vypis: 'v_drí kožúšok', odpoved: 'tvrde', cele: 'vydrí kožúšok', hint: 'odvodené od vydra' },
     { vypis: 'v_nová réva', odpoved: 'makke-dlhe', cele: 'vínová réva', hint: 'odvodené od víno' },
     { vypis: 'jaz_čisko', odpoved: 'tvrde', cele: 'jazyčisko', hint: 'odvodené od jazyk' },
-    { vypis: 'v_sutý most', odpoved: 'makke', cele: 'visutý most', hint: 'odvodené od visieť' },
+    { vypis: 'v_sutý most', odpoved: 'makke', cele: 'visutý most', hint: 'odvodené od visieť' }
+  ],
+
+  // Level 4: Odvodené a bežné slová 2 (Mix Y a I)
+  [
     { vypis: 'v_skot detí', odpoved: 'tvrde-dlhe', cele: 'výskot detí', hint: 'odvodené od výskať' },
     { vypis: 'v_diek', odpoved: 'makke', cele: 'vidiek', hint: 'odvodené od vidieť (život na dedine)' },
     { vypis: 'v_let na hrad', odpoved: 'tvrde-dlhe', cele: 'výlet na hrad', hint: 'predpona vý- (vybrané pravidlo)' },
@@ -39,7 +47,7 @@ export const VYBRANE_V_GROUPS = [
     { vypis: 'v_r skalný', odpoved: 'tvrde-dlhe', cele: 'výr skalný', hint: 'výr = nočná sova (vybrané slovo)' }
   ],
 
-  // Level 3: Rozšírené a cudzie slová (Mix Y a I)
+  // Level 5: Rozšírené a cudzie slová 1 (Mix Y a I)
   [
     { vypis: 'v_žla', odpoved: 'tvrde', cele: 'vyžla', hint: 'vyžla = plemeno poľovného psa (vybrané slovo)' },
     { vypis: 'v_deo na internete', odpoved: 'makke', cele: 'video na internete', hint: 'video = záznam obrazu (cudzie slovo)' },
@@ -48,7 +56,11 @@ export const VYBRANE_V_GROUPS = [
     { vypis: 'cudzojaz_čný', odpoved: 'tvrde', cele: 'cudzojazyčný', hint: 'odvodené od jazyk' },
     { vypis: 'zv_ťaziť v súťaži', odpoved: 'makke-dlhe', cele: 'zvíťaziť v súťaži', hint: 'odvodené od víťaz' },
     { vypis: 'v_kať dospelým', odpoved: 'tvrde', cele: 'vykať dospelým', hint: 'vykať = oslovovať zámenom vy (vybrané slovo)' },
-    { vypis: 'v_rnik v povetrí', odpoved: 'makke-dlhe', cele: 'vírnik v povetrí', hint: 'vírnik = lietajúci stroj s rotorom' },
+    { vypis: 'v_rnik v povetrí', odpoved: 'makke-dlhe', cele: 'vírnik v povetrí', hint: 'vírnik = lietajúci stroj s rotorom' }
+  ],
+
+  // Level 6: Rozšírené a cudzie slová 2 (Mix Y a I)
+  [
     { vypis: 'v_borný obed', odpoved: 'tvrde-dlhe', cele: 'výborný obed', hint: 'predpona vý- (veľmi dobrý)' },
     { vypis: 'v_suť', odpoved: 'makke', cele: 'visieť', hint: 'visieť = visieť na stene' },
     { vypis: 'v_robok zo skla', odpoved: 'tvrde-dlhe', cele: 'výrobok zo skla', hint: 'predpona vý- (vyrobená vec)' },
@@ -59,7 +71,7 @@ export const VYBRANE_V_GROUPS = [
     { vypis: 'v_skanie od radosti', odpoved: 'tvrde-dlhe', cele: 'výskanie od radosti', hint: 'odvodené od výskať' }
   ],
 
-  // Level 4: Dvojice a chytáky (Rozlišujeme význam)
+  // Level 7: Dvojice a chytáky (Rozlišujeme význam)
   [
     { vypis: 'v_r (nočná sova)', odpoved: 'tvrde-dlhe', cele: 'výr (nočná sova)', hint: 'výr = nočný dravý vták (vybrané slovo)' },
     { vypis: 'v_r (vodná krútňava)', odpoved: 'makke-dlhe', cele: 'vír (vodná krútňava)', hint: 'vír = točiaci sa prúd vody alebo vetra' },
@@ -75,7 +87,7 @@ export const VYBRANE_V_GROUPS = [
     { vypis: 'v_dlička (príbor na tanieri)', odpoved: 'makke', cele: 'vidlička (príbor na tanieri)', hint: 'vidlička = stolovací príbor' }
   ],
 
-  // Level 5: Vety a slovné spojenia
+  // Level 8: Vety a slovné spojenia
   [
     { vypis: 'V_soké Tatry sú najvyššie pohorie na Slovensku.', odpoved: 'tvrde', cele: 'Vysoké Tatry sú najvyššie pohorie na Slovensku.', hint: 'Vysoké = vybrané slovo' },
     { vypis: 'Z okna triedy je pekne v_dieť zelený školský dvor.', odpoved: 'makke', cele: 'Z okna triedy je pekne vidieť zelený školský dvor.', hint: 'vidieť = nie je vybrané slovo' },
@@ -93,7 +105,7 @@ export const VYBRANE_V_GROUPS = [
     { vypis: 'Poľovník sa prechádzal po lese so svojou maďarskou v_žlou.', odpoved: 'tvrde', cele: 'Poľovník sa prechádzal po lese so svojou maďarskou vyžlou.', hint: 'vyžla = vybrané slovo' }
   ],
 
-  // Level 6: Majstrovský mix (Všetky pravidlá spolu)
+  // Level 9: Majstrovský mix (Všetky pravidlá spolu)
   [
     { vypis: 'v_sokoškolský profesor na prednáške', odpoved: 'tvrde', cele: 'vysokoškolský profesor na prednáške', hint: 'odvodené od vysoký' },
     { vypis: 'nebezpečný vodný v_r v rieke Dunaj', odpoved: 'makke-dlhe', cele: 'nebezpečný vodný vír v rieke Dunaj', hint: 'vodná krútňava' },

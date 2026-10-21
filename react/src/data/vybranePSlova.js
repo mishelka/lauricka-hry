@@ -1,5 +1,5 @@
 export const VYBRANE_P_GROUPS = [
-  // Level 1: Základné vybrané a bežné slová (Mix Y a I)
+  // Level 1: Základné vybrané a bežné slová 1 (Mix Y a I)
   [
     { vypis: 'p_cha', odpoved: 'tvrde-dlhe', cele: 'pýcha', hint: 'pýcha = namyslenosť, povýšenosť (vybrané slovo)' },
     { vypis: 'p_sať', odpoved: 'makke-dlhe', cele: 'písať', hint: 'písať = písať perom alebo ceruzkou (nie je vybrané slovo)' },
@@ -8,7 +8,11 @@ export const VYBRANE_P_GROUPS = [
     { vypis: 'p_šný', odpoved: 'tvrde', cele: 'pyšný', hint: 'pyšný = hrdý, namyslený (odvodené od pýcha)' },
     { vypis: 'p_stola', odpoved: 'makke', cele: 'pištoľ', hint: 'pištoľ = ručná zbraň (nie je vybrané slovo)' },
     { vypis: 'p_sk', odpoved: 'tvrde', cele: 'pysk', hint: 'pysk = papuľa zvieraťa, ústa zvierat (vybrané slovo)' },
-    { vypis: 'p_skot', odpoved: 'makke', cele: 'piskot', hint: 'piskot = zvuk píšťalky (od pískať)' },
+    { vypis: 'p_skot', odpoved: 'makke', cele: 'piskot', hint: 'piskot = zvuk píšťalky (od pískať)' }
+  ],
+
+  // Level 2: Základné vybrané a bežné slová 2 (Mix Y a I)
+  [
     { vypis: 'kop_to', odpoved: 'tvrde', cele: 'kopyto', hint: 'kopyto = rohovinové zakončenie nohy koňa (vybrané slovo)' },
     { vypis: 'p_chľavý', odpoved: 'makke', cele: 'pichľavý', hint: 'pichľavý = pichá ako ježko (nie je vybrané slovo)' },
     { vypis: 'p_kať', odpoved: 'tvrde', cele: 'pykať', hint: 'pykať = odpykávať si trest za chybu (vybrané slovo)' },
@@ -19,7 +23,7 @@ export const VYBRANE_P_GROUPS = [
     { vypis: 'p_lot', odpoved: 'makke', cele: 'pilot', hint: 'pilot = letec riadiaci lietadlo (cudzie slovo)' }
   ],
 
-  // Level 2: Odvodené a bežné slová (Mix Y a I)
+  // Level 3: Odvodené a bežné slová 1 (Mix Y a I)
   [
     { vypis: 'prep_ch', odpoved: 'tvrde', cele: 'prepych', hint: 'odvodené od pýcha (veľké bohatstvo, luxus)' },
     { vypis: 'p_smenko', odpoved: 'makke-dlhe', cele: 'písmenko', hint: 'odvodené od písať' },
@@ -28,7 +32,11 @@ export const VYBRANE_P_GROUPS = [
     { vypis: 'p_šiť sa', odpoved: 'tvrde-dlhe', cele: 'pýšiť sa', hint: 'odvodené od pýcha' },
     { vypis: 'p_šťalka', odpoved: 'makke-dlhe', cele: 'píšťalka', hint: 'odvodené od pískať' },
     { vypis: 'dop_t', odpoved: 'tvrde', cele: 'dopyt', hint: 'odvodené od pýtať sa (záujem o tovar)' },
-    { vypis: 'p_škóta', odpoved: 'makke', cele: 'piškóta', hint: 'piškóta = sladké pečivo (cudzie slovo)' },
+    { vypis: 'p_škóta', odpoved: 'makke', cele: 'piškóta', hint: 'piškóta = sladké pečivo (cudzie slovo)' }
+  ],
+
+  // Level 4: Odvodené a bežné slová 2 (Mix Y a I)
+  [
     { vypis: 'p_skatý', odpoved: 'tvrde', cele: 'pyskatý', hint: 'odvodené od pysk' },
     { vypis: 'p_chliačik', odpoved: 'makke', cele: 'pichliačik', hint: 'odvodené od pichnúť' },
     { vypis: 'odp_kať si', odpoved: 'tvrde', cele: 'odpykať si', hint: 'odvodené od pykať' },
@@ -39,7 +47,7 @@ export const VYBRANE_P_GROUPS = [
     { vypis: 'p_rat', odpoved: 'makke', cele: 'pirát', hint: 'pirát = morský zbojník (cudzie slovo)' }
   ],
 
-  // Level 3: Rozšírené a cudzie slová (Mix Y a I)
+  // Level 5: Rozšírené a cudzie slová 1 (Mix Y a I)
   [
     { vypis: 'slep_š', odpoved: 'tvrde-dlhe', cele: 'slepýš', hint: 'slepýš = beznohý jašter podobný hadovi (vybrané slovo)' },
     { vypis: 'p_nzeta', odpoved: 'makke', cele: 'pinzeta', hint: 'pinzeta = kovový nástroj na uchopenie drobností' },
@@ -48,7 +56,11 @@ export const VYBRANE_P_GROUPS = [
     { vypis: 'zap_riť sa', odpoved: 'tvrde-dlhe', cele: 'zapýriť sa', hint: 'odvodené od pýriť sa (očervenieť v tvári)' },
     { vypis: 'p_ng-pong', odpoved: 'makke', cele: 'ping-pong', hint: 'ping-pong = stolný tenis (cudzie slovo)' },
     { vypis: 'vyp_tovať sa', odpoved: 'tvrde', cele: 'vypytovať sa', hint: 'odvodené od pýtať sa' },
-    { vypis: 'p_liar', odpoved: 'makke', cele: 'piliar', hint: 'piliar = človek, ktorý píli drevo na píle' },
+    { vypis: 'p_liar', odpoved: 'makke', cele: 'piliar', hint: 'piliar = človek, ktorý píli drevo na píle' }
+  ],
+
+  // Level 6: Rozšírené a cudzie slová 2 (Mix Y a I)
+  [
     { vypis: 'p_rop', odpoved: 'tvrde', cele: 'pyrop', hint: 'pyrop = drahokam rubínovo červenej farby (minerál)' },
     { vypis: 'p_voňka', odpoved: 'makke', cele: 'pivoňka', hint: 'pivoňka = kvet pivonka' },
     { vypis: 'p_rit', odpoved: 'tvrde', cele: 'pyrit', hint: 'pyrit = lesklý zlatistý nerast' },
@@ -59,7 +71,7 @@ export const VYBRANE_P_GROUPS = [
     { vypis: 'p_knikový', odpoved: 'makke', cele: 'piknikový', hint: 'odvodené od piknik' }
   ],
 
-  // Level 4: Dvojice a chytáky (Rozlišujeme význam)
+  // Level 7: Dvojice a chytáky (Rozlišujeme význam)
   [
     { vypis: 'p_sk (papuľa psa)', odpoved: 'tvrde', cele: 'pysk (papuľa psa)', hint: 'pysk = papuľa zvieraťa (vybrané slovo)' },
     { vypis: 'p_sk (pískanie píšťalky)', odpoved: 'makke', cele: 'pisk (pískanie píšťalky)', hint: 'pisk = prenikavý zvuk, pískanie' },
@@ -75,7 +87,7 @@ export const VYBRANE_P_GROUPS = [
     { vypis: 'p_tliak (chytá zver v lese)', odpoved: 'tvrde', cele: 'pytliak (chytá zver v lese)', hint: 'pytliak = nelegálny lovec' }
   ],
 
-  // Level 5: Vety a slovné spojenia
+  // Level 8: Vety a slovné spojenia
   [
     { vypis: 'Páv sa rád p_ši svojím nádherným chvostom.', odpoved: 'tvrde-dlhe', cele: 'Páv sa rád pýši svojím nádherným chvostom.', hint: 'pýši sa = vybrané slovo (od pýcha)' },
     { vypis: 'Žiaci v škole sa p_tajú učiteľky na domácu úlohu.', odpoved: 'tvrde-dlhe', cele: 'Žiaci v škole sa pýtajú učiteľky na domácu úlohu.', hint: 'pýtajú sa = vybrané slovo' },
@@ -93,7 +105,7 @@ export const VYBRANE_P_GROUPS = [
     { vypis: 'Kráľ býval v obrovskom zámku plnom prep_chu.', odpoved: 'tvrde', cele: 'Kráľ býval v obrovskom zámku plnom prepychu.', hint: 'prepych = odvodené od pýcha' }
   ],
 
-  // Level 6: Majstrovský mix (Všetky pravidlá spolu)
+  // Level 9: Majstrovský mix (Všetky pravidlá spolu)
   [
     { vypis: 'veľký prep_chový palác kráľa', odpoved: 'tvrde', cele: 'veľký prepychový palác kráľa', hint: 'odvodené od pýcha' },
     { vypis: 'hlasný p_skot školskej píšťalky', odpoved: 'makke', cele: 'hlasný piskot školskej píšťalky', hint: 'odvodené od pískať' },

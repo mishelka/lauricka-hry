@@ -1,5 +1,5 @@
 export const VYBRANE_R_GROUPS = [
-  // Level 1: Základné vybrané a bežné slová (Mix Y a I)
+  // Level 1: Základné vybrané a bežné slová 1 (Mix Y a I)
   [
     { vypis: 'r_ba', odpoved: 'tvrde', cele: 'ryba', hint: 'ryba = vodný živočích s plutvami (vybrané slovo)' },
     { vypis: 'r_eka', odpoved: 'makke', cele: 'rieka', hint: 'rieka = tečúci vodný tok (nie je vybrané slovo)' },
@@ -8,7 +8,11 @@ export const VYBRANE_R_GROUPS = [
     { vypis: 'r_ža', odpoved: 'tvrde', cele: 'ryža', hint: 'ryža = biela obilnina a príloha k jedlu (vybrané slovo)' },
     { vypis: 'r_msa', odpoved: 'makke-dlhe', cele: 'rímsa', hint: 'rímsa = výčnelok na stene budovy' },
     { vypis: 'r_ľ', odpoved: 'tvrde-dlhe', cele: 'rýľ', hint: 'rýľ = záhradné náradie na kopanie zeme (vybrané slovo)' },
-    { vypis: 'r_ša', odpoved: 'makke-dlhe', cele: 'ríša', hint: 'ríša = kráľovstvo, panstvo' },
+    { vypis: 'r_ša', odpoved: 'makke-dlhe', cele: 'ríša', hint: 'ríša = kráľovstvo, panstvo' }
+  ],
+
+  // Level 2: Základné vybrané a bežné slová 2 (Mix Y a I)
+  [
     { vypis: 'r_ha', odpoved: 'tvrde', cele: 'ryha', hint: 'ryha = zárez, ryha v dreve (vybrané slovo)' },
     { vypis: 'r_aditeľ', odpoved: 'makke', cele: 'riaditeľ', hint: 'riaditeľ = vedúci školy alebo firmy' },
     { vypis: 'r_ť', odpoved: 'tvrde', cele: 'ryť', hint: 'ryť = rozrývať pôdu (vybrané slovo)' },
@@ -19,7 +23,7 @@ export const VYBRANE_R_GROUPS = [
     { vypis: 'r_chtár', odpoved: 'makke', cele: 'richtár', hint: 'richtár = starosta v minulosti' }
   ],
 
-  // Level 2: Odvodené a bežné slová (Mix Y a I)
+  // Level 3: Odvodené a bežné slová 1 (Mix Y a I)
   [
     { vypis: 'r_bár', odpoved: 'tvrde', cele: 'rybár', hint: 'odvodené od ryba (človek, čo loví ryby)' },
     { vypis: 'r_ečisko', odpoved: 'makke', cele: 'riečisko', hint: 'odvodené od rieka' },
@@ -28,7 +32,11 @@ export const VYBRANE_R_GROUPS = [
     { vypis: 'br_ndza', odpoved: 'tvrde', cele: 'bryndza', hint: 'bryndza = ovčí syr (vybrané slovo)' },
     { vypis: 'r_ng', odpoved: 'makke', cele: 'ring', hint: 'ring = boxerské ohraničené javisko (cudzie slovo)' },
     { vypis: 'kor_to', odpoved: 'tvrde', cele: 'koryto', hint: 'koryto = drevená nádoba alebo dno rieky (vybrané slovo)' },
-    { vypis: 'r_chtárka', odpoved: 'makke', cele: 'richtárka', hint: 'odvodené od richtár' },
+    { vypis: 'r_chtárka', odpoved: 'makke', cele: 'richtárka', hint: 'odvodené od richtár' }
+  ],
+
+  // Level 4: Odvodené a bežné slová 2 (Mix Y a I)
+  [
     { vypis: 'kor_tnačka', odpoved: 'tvrde', cele: 'korytnačka', hint: 'odvodené od koryto (plaz s pancierom)' },
     { vypis: 'r_adiť', odpoved: 'makke', cele: 'riadiť', hint: 'riadiť = šoférovať alebo viesť' },
     { vypis: 'kr_ť sa', odpoved: 'tvrde', cele: 'kryť sa', hint: 'kryť sa = schovávať sa (vybrané slovo)' },
@@ -39,7 +47,7 @@ export const VYBRANE_R_GROUPS = [
     { vypis: 'r_val', odpoved: 'makke', cele: 'rival', hint: 'rival = súper, protivník (cudzie slovo)' }
   ],
 
-  // Level 3: Rozšírené a cudzie slová (Mix Y a I)
+  // Level 5: Rozšírené a cudzie slová 1 (Mix Y a I)
   [
     { vypis: 'r_tier', odpoved: 'tvrde', cele: 'rytier', hint: 'rytier = stredoveký bojovník v brnení (vybrané slovo)' },
     { vypis: 'r_movať', odpoved: 'tvrde-dlhe', cele: 'rýmovať', hint: 'rýmovať = spájať rýmy v básničke' },
@@ -48,7 +56,11 @@ export const VYBRANE_R_GROUPS = [
     { vypis: 'r_tmus', odpoved: 'tvrde', cele: 'rytmus', hint: 'rytmus = pravidelný takt v hudbe (cudzie slovo s y)' },
     { vypis: 'r_ziko', odpoved: 'makke', cele: 'riziko', hint: 'riziko = nebezpečenstvo, hazard (cudzie slovo)' },
     { vypis: 'tr_zniť', odpoved: 'tvrde-dlhe', cele: 'trýzniť', hint: 'trýzniť = spôsobovať bolesť, trápiť (vybrané slovo)' },
-    { vypis: 'r_skovať', odpoved: 'makke', cele: 'riskovať', hint: 'riskovať = odvážiť sa do rizika (cudzie slovo)' },
+    { vypis: 'r_skovať', odpoved: 'makke', cele: 'riskovať', hint: 'riskovať = odvážiť sa do rizika (cudzie slovo)' }
+  ],
+
+  // Level 6: Rozšírené a cudzie slová 2 (Mix Y a I)
+  [
     { vypis: 'r_pak', odpoved: 'tvrde', cele: 'rypák', hint: 'rypák = nos diviaka na rozrývanie zeme (od ryť)' },
     { vypis: 'r_bička', odpoved: 'tvrde', cele: 'rybička', hint: 'odvodené od ryba' },
     { vypis: 'br_ndzový', odpoved: 'tvrde', cele: 'bryndzový', hint: 'odvodené od bryndza (bryndzové halušky)' },
@@ -59,7 +71,7 @@ export const VYBRANE_R_GROUPS = [
     { vypis: 'r_gól', odpoved: 'makke', cele: 'rigol', hint: 'rigol = priekopa pri ceste (cudzie slovo)' }
   ],
 
-  // Level 4: Dvojice a chytáky (Rozlišujeme význam)
+  // Level 7: Dvojice a chytáky (Rozlišujeme význam)
   [
     { vypis: 'r_m (básnický súzvuk slov)', odpoved: 'tvrde-dlhe', cele: 'rým (básnický súzvuk slov)', hint: 'rým = zvuková zhoda na konci veršov' },
     { vypis: 'R_m (hlavné mesto Talianska)', odpoved: 'makke-dlhe', cele: 'Rím (hlavné mesto Talianska)', hint: 'Rím = starobylé mesto' },
@@ -75,7 +87,7 @@ export const VYBRANE_R_GROUPS = [
     { vypis: 'r_zoto (obed so zeleninou)', odpoved: 'makke', cele: 'rizoto (obed so zeleninou)', hint: 'rizoto = jedlo (cudzie slovo)' }
   ],
 
-  // Level 5: Vety a slovné spojenia
+  // Level 8: Vety a slovné spojenia
   [
     { vypis: 'V horskom potoku pláva divá pstruhová r_ba.', odpoved: 'tvrde', cele: 'V horskom potoku pláva divá pstruhová ryba.', hint: 'ryba = vybrané slovo' },
     { vypis: 'Cez našu dedinu pokojne tečie čistá r_eka.', odpoved: 'makke', cele: 'Cez našu dedinu pokojne tečie čistá rieka.', hint: 'rieka = nie je vybrané slovo' },
@@ -93,7 +105,7 @@ export const VYBRANE_R_GROUPS = [
     { vypis: 'Šikovný r_tier ubránil kráľovský hrad pred nepriateľmi.', odpoved: 'tvrde', cele: 'Šikovný rytier ubránil kráľovský hrad pred nepriateľmi.', hint: 'rytier = vybrané slovo' }
   ],
 
-  // Level 6: Majstrovský mix (Všetky pravidlá spolu)
+  // Level 9: Majstrovský mix (Všetky pravidlá spolu)
   [
     { vypis: 'odvodené slovo r_bársky prút', odpoved: 'tvrde', cele: 'odvodené slovo rybársky prút', hint: 'odvodené od ryba' },
     { vypis: 'talianske hlavné mesto R_m', odpoved: 'makke-dlhe', cele: 'talianske hlavné mesto Rím', hint: 'Rím = názov mesta' },

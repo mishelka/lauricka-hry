@@ -1,5 +1,5 @@
 export const VYBRANE_S_GROUPS = [
-  // Level 1: Základné vybrané a bežné slová (Mix Y a I)
+  // Level 1: Základné vybrané a bežné slová 1 (Mix Y a I)
   [
     { vypis: 's_n', odpoved: 'tvrde', cele: 'syn', hint: 'syn = chlapec vo vzťahu k rodičom (vybrané slovo)' },
     { vypis: 's_rup', odpoved: 'makke', cele: 'sirup', hint: 'sirup = sladká ovocná šťava do vody (nie je vybrané slovo)' },
@@ -8,7 +8,11 @@ export const VYBRANE_S_GROUPS = [
     { vypis: 's_ty', odpoved: 'tvrde-dlhe', cele: 'sýty', hint: 'sýty = dobre najedený, necíti hlad (vybrané slovo)' },
     { vypis: 's_vý', odpoved: 'makke', cele: 'sivý', hint: 'sivý = sivá farba, napr. sivý holub' },
     { vypis: 's_pať', odpoved: 'tvrde', cele: 'sypať', hint: 'sypať = presýpať zrno, soľ alebo múku (vybrané slovo)' },
-    { vypis: 's_la', odpoved: 'makke', cele: 'sila', hint: 'sila = telesná mohutnosť, vláda' },
+    { vypis: 's_la', odpoved: 'makke', cele: 'sila', hint: 'sila = telesná mohutnosť, vláda' }
+  ],
+
+  // Level 2: Základné vybrané a bežné slová 2 (Mix Y a I)
+  [
     { vypis: 's_korka', odpoved: 'tvrde-dlhe', cele: 'sýkorka', hint: 'sýkorka = malý žlto-modrý vtáčik (vybrané slovo)' },
     { vypis: 's_lný', odpoved: 'makke', cele: 'silný', hint: 'silný = má veľkú silu' },
     { vypis: 's_seľ', odpoved: 'tvrde', cele: 'syseľ', hint: 'syseľ = drobný hlodavec žijúci na lúke (vybrané slovo)' },
@@ -19,7 +23,7 @@ export const VYBRANE_S_GROUPS = [
     { vypis: 's_lon', odpoved: 'makke', cele: 'silon', hint: 'silon = pevné umelé vlákno (cudzie slovo)' }
   ],
 
-  // Level 2: Odvodené a bežné slová (Mix Y a I)
+  // Level 3: Odvodené a bežné slová 1 (Mix Y a I)
   [
     { vypis: 's_nček', odpoved: 'tvrde', cele: 'synček', hint: 'odvodené od syn' },
     { vypis: 's_tkár', odpoved: 'makke', cele: 'sitkár', hint: 'odvodené od sito' },
@@ -28,7 +32,11 @@ export const VYBRANE_S_GROUPS = [
     { vypis: 'nas_tiť sa', odpoved: 'tvrde-dlhe', cele: 'nasýtiť sa', hint: 'odvodené od sýty (poriadne sa najesť)' },
     { vypis: 's_vasto', odpoved: 'makke', cele: 'sivasto', hint: 'odvodené od sivý' },
     { vypis: 'nas_pať', odpoved: 'tvrde', cele: 'nasypať', hint: 'odvodené od sypať (nasypať zrno sliepkam)' },
-    { vypis: 'pos_lňovňa', odpoved: 'makke', cele: 'posilňovňa', hint: 'odvodené od sila' },
+    { vypis: 'pos_lňovňa', odpoved: 'makke', cele: 'posilňovňa', hint: 'odvodené od sila' }
+  ],
+
+  // Level 4: Odvodené a bežné slová 2 (Mix Y a I)
+  [
     { vypis: 's_slia nora', odpoved: 'tvrde', cele: 'syslia nora', hint: 'odvodené od syseľ' },
     { vypis: 's_lvestrovský', odpoved: 'makke', cele: 'silvestrovský', hint: 'odvodené od Silvester' },
     { vypis: 's_pký', odpoved: 'tvrde', cele: 'sypký', hint: 'odvodené od sypať (sypký sneh alebo cukor)' },
@@ -39,7 +47,7 @@ export const VYBRANE_S_GROUPS = [
     { vypis: 's_tko', odpoved: 'makke', cele: 'sitko', hint: 'odvodené od sito (čajové sitko)' }
   ],
 
-  // Level 3: Rozšírené a cudzie slová (Mix Y a I)
+  // Level 5: Rozšírené a cudzie slová 1 (Mix Y a I)
   [
     { vypis: 'vys_chať', odpoved: 'tvrde', cele: 'vysychať', hint: 'odvodené od schnúť/sychravý (strácať vodu)' },
     { vypis: 's_nica', odpoved: 'makke', cele: 'sinica', hint: 'sinica = modrozelená vodná riasa (od siný)' },
@@ -48,7 +56,11 @@ export const VYBRANE_S_GROUPS = [
     { vypis: 'zás_p', odpoved: 'tvrde', cele: 'zásyp', hint: 'odvodené od sypať (detský zásyp)' },
     { vypis: 's_stém', odpoved: 'tvrde', cele: 'systém', hint: 'systém = usporiadanie celku (cudzie slovo s y)' },
     { vypis: 's_kať', odpoved: 'tvrde', cele: 'sykať', hint: 'sykať = vydávať tichý zvuk pri bolesti (vybrané slovo)' },
-    { vypis: 's_mpatický', odpoved: 'tvrde', cele: 'sympatický', hint: 'sympatický = príjemný človek (cudzie s y)' },
+    { vypis: 's_mpatický', odpoved: 'tvrde', cele: 'sympatický', hint: 'sympatický = príjemný človek (cudzie s y)' }
+  ],
+
+  // Level 6: Rozšírené a cudzie slová 2 (Mix Y a I)
+  [
     { vypis: 's_tosť', odpoved: 'tvrde-dlhe', cele: 'sýtosť', hint: 'odvodené od sýty' },
     { vypis: 's_gnál', odpoved: 'makke', cele: 'signál', hint: 'signál = znamenie, rádiový signál (cudzie slovo)' },
     { vypis: 'pres_tený', odpoved: 'tvrde-dlhe', cele: 'presýtený', hint: 'odvodené od sýty' },
@@ -59,7 +71,7 @@ export const VYBRANE_S_GROUPS = [
     { vypis: 's_fon', odpoved: 'makke', cele: 'sifón', hint: 'sifón = potrubný uzáver alebo fľaša (cudzie slovo)' }
   ],
 
-  // Level 4: Dvojice a chytáky (Rozlišujeme význam)
+  // Level 7: Dvojice a chytáky (Rozlišujeme význam)
   [
     { vypis: 's_r (chutný tvrdý syr)', odpoved: 'tvrde', cele: 'syr (chutný tvrdý syr)', hint: 'syr = potravina z mlieka (vybrané slovo)' },
     { vypis: 's_rup (sladký malinový sirup)', odpoved: 'makke', cele: 'sirup (sladký malinový sirup)', hint: 'sirup = ovocná šťava do nápoja' },
@@ -75,7 +87,7 @@ export const VYBRANE_S_GROUPS = [
     { vypis: 's_la (veľká svalová sila)', odpoved: 'makke', cele: 'sila (veľká svalová sila)', hint: 'sila = fyzická zdatnosť' }
   ],
 
-  // Level 5: Vety a slovné spojenia
+  // Level 8: Vety a slovné spojenia
   [
     { vypis: 'Starší s_n pomáha dedkovi opravovať plot.', odpoved: 'tvrde', cele: 'Starší syn pomáha dedkovi opravovať plot.', hint: 'syn = vybrané slovo' },
     { vypis: 'Do čaju s citrónom sme naliali sladký jahodový s_rup.', odpoved: 'makke', cele: 'Do čaju s citrónom sme naliali sladký jahodový sirup.', hint: 'sirup = nie je vybrané slovo' },
@@ -93,7 +105,7 @@ export const VYBRANE_S_GROUPS = [
     { vypis: 'Hasičské auto sa ponáhľalo so zapnutou s_rénou.', odpoved: 'makke', cele: 'Hasičské auto sa ponáhľalo so zapnutou sirénou.', hint: 'siréna = cudzie slovo' }
   ],
 
-  // Level 6: Majstrovský mix (Všetky pravidlá spolu)
+  // Level 9: Majstrovský mix (Všetky pravidlá spolu)
   [
     { vypis: 'malá s_korka chochlatá na strome', odpoved: 'tvrde-dlhe', cele: 'malá sýkorka chochlatá na strome', hint: 'vybrané slovo sýkorka' },
     { vypis: 'sladký bazový s_rup od babičky', odpoved: 'makke', cele: 'sladký bazový sirup od babičky', hint: 'nie je vybrané slovo' },

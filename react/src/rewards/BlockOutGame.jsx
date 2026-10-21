@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { BLOCK_OUT_LEVELS, COLOR_CONFIG, getBlockCells, getOccupiedCells, getBlockDimensions, isDirAllowedForBlock, isBlockFrozen, isDoorLocked, getLevelWalls } from './blockOutLevels';
 import { sounds } from './soundEffects';
 import { triggerFireworks } from '../utils/gameUtils';
-import { getLevelStars, updateLevelBestStars } from '../utils/player';
+import { getLevelStars, updateLevelBestStars, getLevelPlays, incrementLevelPlays } from '../utils/player';
 import { RestartIcon, NextLevelIcon, LevelsMenuIcon, BackIcon } from '../components/Icons';
 import './blockOut.css';
 
@@ -12,6 +12,7 @@ const DEFAULT_GAP = 8;
 const DEFAULT_PADDING = 12;
 const DEFAULT_DOOR_DEPTH = 22;
 const DRAG_THRESHOLD = 16;
+const MAX_LEVEL_PLAYS = 3;
 
 function DoorArrow({ side, color, size }) {
   const isLight = color === 'white' || color === 'yellow';
@@ -274,6 +275,9 @@ export default function BlockOutGame({
   const [levelStars, setLevelStars] = useState(() =>
     getLevelStars('blockOut', BLOCK_OUT_LEVELS.length)
   );
+  const [levelPlays, setLevelPlays] = useState(() =>
+    getLevelPlays('blockOut', BLOCK_OUT_LEVELS.length)
+  );
   const [currentLevelIndex, setCurrentLevelIndex] = useState(() =>
     rewardLevel !== null ? rewardLevel : 0
   );
@@ -405,16 +409,25 @@ export default function BlockOutGame({
     return () => window.removeEventListener('resize', handleResize);
   }, [level.width, level.height]);
 
-  // Dočasne odomknuté všetky levely pre testovanie
-  function highestUnlockedLevel(_stars) {
-    return BLOCK_OUT_LEVELS.length - 1;
-  }
+  // Level je odomknutý, kým nebol odohratý maximálne 3-krát
+  const isLevelUnlocked = useCallback((idx) => {
+    return (levelPlays[idx] || 0) < MAX_LEVEL_PLAYS;
+  }, [levelPlays]);
 
-  const isLevelUnlocked = (_idx) => true;
-
-  const startLevel = useCallback((lvlIndex) => {
+  const startLevel = useCallback((lvlIndex, countPlay = true) => {
     const lvl = BLOCK_OUT_LEVELS[lvlIndex];
     if (!lvl) return;
+
+    if (countPlay) {
+      const currentCounts = getLevelPlays('blockOut', BLOCK_OUT_LEVELS.length);
+      const curPlays = currentCounts[lvlIndex] || 0;
+      if (curPlays >= MAX_LEVEL_PLAYS) {
+        return;
+      }
+      const updatedPlays = incrementLevelPlays('blockOut', lvlIndex, BLOCK_OUT_LEVELS.length);
+      setLevelPlays(updatedPlays);
+    }
+
     setCurrentLevelIndex(lvlIndex);
     setBlocks(lvl.blocks.map(b => ({
       ...b,
@@ -437,12 +450,12 @@ export default function BlockOutGame({
 
   useEffect(() => {
     if (rewardLevel !== null) {
-      startLevel(rewardLevel);
+      startLevel(rewardLevel, true);
     }
   }, [rewardLevel, startLevel]);
 
   const resetCurrentLevel = () => {
-    startLevel(currentLevelIndex);
+    startLevel(currentLevelIndex, false);
   };
 
   const toggleMute = () => {
@@ -1253,20 +1266,32 @@ export default function BlockOutGame({
             {BLOCK_OUT_LEVELS.map((lvl, idx) => {
               const unlocked = isLevelUnlocked(idx);
               const stars = levelStars[idx] || 0;
+              const plays = levelPlays[idx] || 0;
               return (
                 <button
                   key={lvl.id}
-                  className="blockout-level-card"
+                  className={`blockout-level-card ${!unlocked ? 'locked' : ''}`}
                   disabled={!unlocked}
                   onClick={() => startLevel(idx)}
+                  title={!unlocked ? `Level je zamknutý (odohrané ${plays}/${MAX_LEVEL_PLAYS})` : `Level ${lvl.id} (odohrané ${plays}/${MAX_LEVEL_PLAYS})`}
                 >
                   <div className="blockout-level-number">{lvl.id}</div>
                   {unlocked ? (
-                    <div className="blockout-level-stars">
-                      {'★'.repeat(stars)}{'☆'.repeat(5 - stars)}
-                    </div>
+                    <>
+                      <div className="blockout-level-stars">
+                        {'★'.repeat(stars)}{'☆'.repeat(5 - stars)}
+                      </div>
+                      <div className="blockout-level-plays">
+                        {plays}/{MAX_LEVEL_PLAYS}
+                      </div>
+                    </>
                   ) : (
-                    <div className="blockout-level-lock">🔒</div>
+                    <>
+                      <div className="blockout-level-lock">🔒</div>
+                      <div className="blockout-level-plays maxed">
+                        {plays}/{MAX_LEVEL_PLAYS}
+                      </div>
+                    </>
                   )}
                 </button>
               );
@@ -1697,23 +1722,25 @@ export default function BlockOutGame({
                       </button>
                     )
                   ) : (
-                    currentLevelIndex + 1 < BLOCK_OUT_LEVELS.length && (
+                    currentLevelIndex + 1 < BLOCK_OUT_LEVELS.length && isLevelUnlocked(currentLevelIndex + 1) && (
                       <button
                         className="btn-blockout-primary"
-                        onClick={() => startLevel(currentLevelIndex + 1)}
+                        onClick={() => startLevel(currentLevelIndex + 1, true)}
                       >
                         <NextLevelIcon size={20} />
                         <span>Ďalší level</span>
                       </button>
                     )
                   )}
-                  <button
-                    className="btn-blockout-secondary"
-                    onClick={resetCurrentLevel}
-                  >
-                    <RestartIcon size={20} stroke="#334155" />
-                    <span>Hrať znova</span>
-                  </button>
+                  {isLevelUnlocked(currentLevelIndex) && (
+                    <button
+                      className="btn-blockout-secondary"
+                      onClick={() => startLevel(currentLevelIndex, true)}
+                    >
+                      <RestartIcon size={20} stroke="#334155" />
+                      <span>Hrať znova</span>
+                    </button>
+                  )}
                   {onBack || onCloseReward ? (
                     <button
                       className="btn-blockout-secondary"

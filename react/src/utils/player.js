@@ -111,10 +111,11 @@ function migrateLegacyIfNeeded(state) {
 
 function getRecord(state, gameId) {
   if (!state.games[gameId] || typeof state.games[gameId] !== 'object') {
-    state.games[gameId] = { bestStars: 0, levelStars: [] };
+    state.games[gameId] = { bestStars: 0, levelStars: [], levelPlays: [] };
   }
   const rec = state.games[gameId];
   if (!Array.isArray(rec.levelStars)) rec.levelStars = [];
+  if (!Array.isArray(rec.levelPlays)) rec.levelPlays = [];
   rec.bestStars = clampStars(rec.bestStars);
   return rec;
 }
@@ -161,4 +162,28 @@ export function updateLevelBestStars(gameId, levelIndex, stars, levelCount) {
   rec.bestStars = Math.max(rec.bestStars, levels.reduce((a, b) => Math.max(a, b), 0));
   saveState(state);
   return levels;
+}
+
+export function getLevelPlays(gameId, levelCount) {
+  const state = loadState();
+  migrateLegacyIfNeeded(state);
+  const rec = getRecord(state, gameId);
+  const out = new Array(levelCount).fill(0).map((_, i) => Math.max(0, Math.floor(Number(rec.levelPlays[i]) || 0)));
+  rec.levelPlays = out;
+  saveState(state);
+  return out;
+}
+
+export function incrementLevelPlays(gameId, levelIndex, levelCount) {
+  const state = loadState();
+  migrateLegacyIfNeeded(state);
+  const rec = getRecord(state, gameId);
+  const plays = new Array(levelCount).fill(0).map((_, i) => Math.max(0, Math.floor(Number(rec.levelPlays[i]) || 0)));
+  const idx = Number(levelIndex);
+  if (Number.isInteger(idx) && idx >= 0 && idx < levelCount) {
+    plays[idx] = (plays[idx] || 0) + 1;
+  }
+  rec.levelPlays = plays;
+  saveState(state);
+  return plays;
 }
