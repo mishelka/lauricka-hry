@@ -10,6 +10,24 @@ export function getStarCount(miss) {
   return 1;
 }
 
+export function getVybraneOptionId(task) {
+  if (!task) return null;
+  if (['tvrde', 'tvrde-dlhe', 'makke', 'makke-dlhe'].includes(task.odpoved)) {
+    return task.odpoved;
+  }
+  if (task.vypis && task.cele) {
+    const blankIdx = task.vypis.indexOf('_');
+    if (blankIdx !== -1 && blankIdx < task.cele.length) {
+      const ch = task.cele[blankIdx].toLowerCase();
+      if (ch === 'i') return 'makke';
+      if (ch === 'í') return 'makke-dlhe';
+      if (ch === 'y') return 'tvrde';
+      if (ch === 'ý') return 'tvrde-dlhe';
+    }
+  }
+  return task.odpoved || null;
+}
+
 export function triggerFireworks(overlay) {
   if (!overlay) return;
 

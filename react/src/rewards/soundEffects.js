@@ -219,6 +219,45 @@ class SoundEffects {
       // Audio fallback
     }
   }
+
+  playLockUnlock() {
+    if (this.muted) return;
+    this.init();
+    if (!this.ctx) return;
+
+    try {
+      const now = this.ctx.currentTime;
+      // Mechanical latch click + bright unlock chime
+      const osc1 = this.ctx.createOscillator();
+      const gain1 = this.ctx.createGain();
+      osc1.type = 'sawtooth';
+      osc1.frequency.setValueAtTime(540, now);
+      osc1.frequency.exponentialRampToValueAtTime(140, now + 0.05);
+      gain1.gain.setValueAtTime(0.18, now);
+      gain1.gain.exponentialRampToValueAtTime(0.001, now + 0.06);
+      osc1.connect(gain1);
+      gain1.connect(this.ctx.destination);
+      osc1.start(now);
+      osc1.stop(now + 0.06);
+
+      const notes = [587.33, 880, 1174.66]; // D5, A5, D6
+      notes.forEach((freq, idx) => {
+        const osc = this.ctx.createOscillator();
+        const gain = this.ctx.createGain();
+        osc.type = 'triangle';
+        const start = now + 0.035 + idx * 0.045;
+        osc.frequency.setValueAtTime(freq, start);
+        gain.gain.setValueAtTime(0.16, start);
+        gain.gain.exponentialRampToValueAtTime(0.001, start + 0.18);
+        osc.connect(gain);
+        gain.connect(this.ctx.destination);
+        osc.start(start);
+        osc.stop(start + 0.19);
+      });
+    } catch {
+      // Audio fallback
+    }
+  }
 }
 
 export const sounds = new SoundEffects();

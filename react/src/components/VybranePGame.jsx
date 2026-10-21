@@ -1,6 +1,6 @@
 import { useMemo, useRef, useState } from 'react';
 import { VYBRANE_P_GROUPS, VYBRANE_P_RULES, VYBRANE_P_CHYTAKY } from '../data/vybranePSlova';
-import { getStarCount, shuffleArray, triggerFireworks } from '../utils/gameUtils';
+import { getStarCount, getVybraneOptionId, shuffleArray, triggerFireworks } from '../utils/gameUtils';
 import { getLevelStars, updateLevelBestStars } from '../utils/player';
 import BlockOutGame from '../rewards/BlockOutGame';
 import { RestartIcon, NextLevelIcon, LevelsMenuIcon, GameIcon } from './Icons';
@@ -85,8 +85,8 @@ export default function VybranePGame() {
     const task = order[index];
     if (!task || resultVisible || disabledOptions.has(optionId)) return;
 
-    const answerGroup = optionId.startsWith('tvrde') ? 'tvrde' : 'makke';
-    if (answerGroup === task.odpoved) {
+    const correctOptionId = getVybraneOptionId(task);
+    if (optionId === correctOptionId) {
       setFeedbackMap(prev => ({ ...prev, [optionId]: 'correct' }));
       setDisabledOptions(new Set(['makke', 'makke-dlhe', 'tvrde', 'tvrde-dlhe']));
       if (mistakesOnCurrent === 0) setHit(prev => prev + 1);
@@ -126,72 +126,8 @@ export default function VybranePGame() {
     }
   }
 
-  if (selectedLevel === null && playingRewardLevel === null) {
-    return (
-      <div className="levels-screen">
-        <h1>Vybrané slová po P</h1>
-        <p className="level-menu-help">
-          Vyber si level a doplň správne i/í alebo y/ý po písmene P. Za každý splnený level na 5★ získaš odmenu v hre Block Out!
-        </p>
-
-        <div className="vybrane-rules-toggle">
-          <button
-            type="button"
-            className="btn-secondary"
-            onClick={() => setShowRules(prev => !prev)}
-          >
-            {showRules ? 'Skryť pravidlá a chytáky' : 'Zobraziť pravidlá a chytáky po P 📖'}
-          </button>
-        </div>
-
-        {showRules && (
-          <div className="vybrane-rules-container">
-            <div className="rules-section">
-              <h2>Základné vybrané slová po P</h2>
-              <div className="rules-list">
-                {VYBRANE_P_RULES.map(rule => (
-                  <div key={rule.word} className="rule-card">
-                    <div className="rule-word">{rule.word}</div>
-                    <div className="rule-desc">{rule.description}</div>
-                  </div>
-                ))}
-              </div>
-            </div>
-
-            <div className="rules-section">
-              <h2>Pozor na chytáky a podobné slová</h2>
-              <div className="chytaky-list">
-                {VYBRANE_P_CHYTAKY.map(chytak => (
-                  <div key={chytak.pair} className="chytak-card">
-                    <div className="chytak-pair">{chytak.pair}</div>
-                    <div className="chytak-desc">{chytak.desc}</div>
-                  </div>
-                ))}
-              </div>
-            </div>
-          </div>
-        )}
-
-        <div className="levels-grid">
-          {groups.map((_, lvl) => {
-            const unlocked = isLevelUnlocked(lvl);
-            const stars = levelStars[lvl] || 0;
-            return (
-              <button
-                key={lvl}
-                className={`level-btn ${unlocked ? '' : 'level-btn-locked'}`}
-                onClick={() => startLevel(lvl)}
-                disabled={!unlocked}
-              >
-                <div className="level-btn-number">{`Level ${lvl + 1}`}</div>
-                <div className="level-btn-stars">{unlocked ? renderStars(stars) : 'Zamknuté 🔒'}</div>
-              </button>
-            );
-          })}
-        </div>
-      </div>
-    );
-  }
+  const levelDone = selectedLevel !== null ? (levelStars[selectedLevel] || 0) === MAX_STARS : false;
+  const hasNextLevel = selectedLevel !== null && selectedLevel < groups.length - 1;
 
   if (playingRewardLevel !== null) {
     const hasNextVybraneLevel = playingRewardLevel < groups.length - 1;
@@ -199,22 +135,113 @@ export default function VybranePGame() {
       <div className="reward-game-view">
         <BlockOutGame
           rewardLevel={playingRewardLevel}
-          onBackToVybrane={() => setPlayingRewardLevel(null)}
-          onNextVybraneLevel={hasNextVybraneLevel ? () => {
-            const nextLvl = playingRewardLevel + 1;
-            setPlayingRewardLevel(null);
-            startLevel(nextLvl);
-          } : undefined}
+          onBack={() => setPlayingRewardLevel(null)}
+          onNextVybraneLevel={
+            hasNextVybraneLevel
+              ? () => {
+                  const nextLvl = playingRewardLevel + 1;
+                  setPlayingRewardLevel(null);
+                  startLevel(nextLvl);
+                }
+              : null
+          }
+          hasNextVybraneLevel={hasNextVybraneLevel}
         />
+      </div>
+    );
+  }
+
+  if (selectedLevel === null) {
+    return (
+      <div>
+        <h1>Vybrané slová po P</h1>
+        <p className="level-menu-help">Vyber si úroveň a precvič si vybrané slová po P. Získaj 5★ na odomknutie ďalšej úrovne a odmeny.</p>
+
+        <div style={{ marginBottom: '18px' }}>
+          <button
+            type="button"
+            className="btn-secondary"
+            style={{ fontSize: '18px', padding: '12px 18px', width: 'auto', borderRadius: '12px' }}
+            onClick={() => setShowRules(prev => !prev)}
+          >
+            {showRules ? '🔼 Skryť prehľad a pravidlá' : '📖 Prehľad vybraných slov po P'}
+          </button>
+        </div>
+
+        {showRules && (
+          <div className="rules-container" style={{
+            background: '#ffffff',
+            border: '2px solid #b8d4e8',
+            borderRadius: '16px',
+            padding: '16px',
+            marginBottom: '20px',
+            textAlign: 'left'
+          }}>
+            <h2 style={{ marginTop: 0, color: '#1f4e79', fontSize: '22px' }}>Vybrané slová po P:</h2>
+            <p style={{ fontWeight: 'bold', fontSize: '16px', color: '#2b6cb0', lineHeight: 1.5 }}>
+              pýcha, pyšný, pýšiť sa, prepych, prepychový, spychnúť, pýtať sa, opýtať sa, dopyt, vypytovať sa, pysk, pyskatý, kopyto, kopytník, pykať, odpykať, pýr, pýriť sa, zapýriť sa, pyžamo, slepýš, pytliak, pytliactvo, pyrop, pyrit
+            </p>
+
+            <h3 style={{ color: '#1f4e79', fontSize: '18px', marginTop: '16px', marginBottom: '8px' }}>Pravidlá a význam:</h3>
+            <ul style={{ paddingLeft: '20px', margin: 0, fontSize: '14px', lineHeight: 1.5 }}>
+              {VYBRANE_P_RULES.map((rule, idx) => (
+                <li key={idx} style={{ marginBottom: '6px' }}>
+                  <strong style={{ color: '#1a365d' }}>{rule.word}:</strong> {rule.description}
+                </li>
+              ))}
+            </ul>
+
+            <h3 style={{ color: '#c53030', fontSize: '18px', marginTop: '16px', marginBottom: '8px' }}>Pozor na chytáky (i / y):</h3>
+            <ul style={{ paddingLeft: '20px', margin: 0, fontSize: '14px', lineHeight: 1.5 }}>
+              {VYBRANE_P_CHYTAKY.map((chytak, idx) => (
+                <li key={idx} style={{ marginBottom: '6px' }}>
+                  <strong style={{ color: '#9b2c2c' }}>{chytak.pair}:</strong> {chytak.desc}
+                </li>
+              ))}
+            </ul>
+          </div>
+        )}
+
+        <div className="levels-grid">
+          {groups.map((_, level) => {
+            const best = levelStars[level] || 0;
+            const unlocked = isLevelUnlocked(level);
+            const classes = ['level-btn'];
+            if (best === MAX_STARS) classes.push('completed');
+            if (!unlocked && best < MAX_STARS) classes.push('locked');
+
+            return (
+              <div key={level} className="level-row">
+                <button
+                  className={classes.join(' ')}
+                  disabled={!unlocked}
+                  onClick={() => startLevel(level)}
+                >
+                  {`Level ${level + 1}`}
+                  <small>{renderStars(best)}</small>
+                  {!unlocked && <small>{`Najprv získaj 5★ v predchádzajúcom leveli`}</small>}
+                </button>
+                {best === MAX_STARS && (
+                  <button
+                    type="button"
+                    className="level-play-btn"
+                    onClick={() => setPlayingRewardLevel(level)}
+                    title={`Hrať odmenu: Block Out - Level ${level + 1}`}
+                    style={{ background: '#2563eb' }}
+                  >
+                    <GameIcon size={22} />
+                  </button>
+                )}
+              </div>
+            );
+          })}
+        </div>
       </div>
     );
   }
 
   if (resultVisible) {
     const stars = getStarCount(miss);
-    const hasNextLevel = selectedLevel < groups.length - 1;
-    const levelDone = stars === 5;
-
     return (
       <div className="result-box">
         <h2>Koniec hry!</h2>

@@ -1,9 +1,10 @@
 import { useState, useEffect, useRef, useCallback, useMemo } from 'react';
-import { BLOCK_OUT_LEVELS, COLOR_CONFIG, getBlockCells, getOccupiedCells, getBlockDimensions, isDirAllowedForBlock, isBlockFrozen, getLevelWalls } from './blockOutLevels';
+import { useNavigate } from 'react-router-dom';
+import { BLOCK_OUT_LEVELS, COLOR_CONFIG, getBlockCells, getOccupiedCells, getBlockDimensions, isDirAllowedForBlock, isBlockFrozen, isDoorLocked, getLevelWalls } from './blockOutLevels';
 import { sounds } from './soundEffects';
 import { triggerFireworks } from '../utils/gameUtils';
 import { getLevelStars, updateLevelBestStars } from '../utils/player';
-import { RestartIcon, NextLevelIcon, LevelsMenuIcon } from '../components/Icons';
+import { RestartIcon, NextLevelIcon, LevelsMenuIcon, BackIcon } from '../components/Icons';
 import './blockOut.css';
 
 const DEFAULT_CELL_SIZE = 54;
@@ -265,9 +266,11 @@ function FrozenBlockBadge({ block, cellSize, gap = 0 }) {
 export default function BlockOutGame({
   rewardLevel = null,
   onBack = null,
+  onCloseReward = null,
   onNextVybraneLevel = null,
   hasNextVybraneLevel = false
 }) {
+  const navigate = useNavigate();
   const [levelStars, setLevelStars] = useState(() =>
     getLevelStars('blockOut', BLOCK_OUT_LEVELS.length)
   );
@@ -278,6 +281,7 @@ export default function BlockOutGame({
     rewardLevel !== null ? 'playing' : 'levels'
   );
   const [blocks, setBlocks] = useState([]);
+  const [doors, setDoors] = useState([]);
   const [selectedBlockId, setSelectedBlockId] = useState(null);
   const [dragInfo, setDragInfo] = useState(null); // { blockId, offsetX, offsetY, activeDir }
   const [moves, setMoves] = useState(0);
@@ -299,14 +303,69 @@ export default function BlockOutGame({
   const levelWalls = useMemo(() => getLevelWalls(level), [level]);
   const { cellSize, gap, padding, doorDepth } = boardLayout;
 
+  // Lock viewport scroll & disable long-press/contextmenu/selection on HTML
+  useEffect(() => {
+    const prevBodyOverflow = document.body.style.overflow;
+    const prevBodyTouchAction = document.body.style.touchAction;
+    const prevBodyOverscroll = document.body.style.overscrollBehavior;
+    const prevDocOverflow = document.documentElement.style.overflow;
+    const prevDocOverscroll = document.documentElement.style.overscrollBehavior;
+
+    document.body.style.overflow = 'hidden';
+    document.body.style.touchAction = 'none';
+    document.body.style.overscrollBehavior = 'none';
+    document.documentElement.style.overflow = 'hidden';
+    document.documentElement.style.overscrollBehavior = 'none';
+
+    const handleContextMenu = (e) => {
+      e.preventDefault();
+      return false;
+    };
+
+    const handleSelectStart = (e) => {
+      e.preventDefault();
+      return false;
+    };
+
+    const handleDragStart = (e) => {
+      e.preventDefault();
+      return false;
+    };
+
+    const handleTouchMove = (e) => {
+      if (e.target && e.target.closest && e.target.closest('.blockout-levels-grid')) {
+        return;
+      }
+      e.preventDefault();
+    };
+
+    window.addEventListener('contextmenu', handleContextMenu, { passive: false });
+    window.addEventListener('selectstart', handleSelectStart, { passive: false });
+    window.addEventListener('dragstart', handleDragStart, { passive: false });
+    window.addEventListener('touchmove', handleTouchMove, { passive: false });
+
+    return () => {
+      document.body.style.overflow = prevBodyOverflow;
+      document.body.style.touchAction = prevBodyTouchAction;
+      document.body.style.overscrollBehavior = prevBodyOverscroll;
+      document.documentElement.style.overflow = prevDocOverflow;
+      document.documentElement.style.overscrollBehavior = prevDocOverscroll;
+
+      window.removeEventListener('contextmenu', handleContextMenu);
+      window.removeEventListener('selectstart', handleSelectStart);
+      window.removeEventListener('dragstart', handleDragStart);
+      window.removeEventListener('touchmove', handleTouchMove);
+    };
+  }, []);
+
   useEffect(() => {
     function handleResize() {
       if (typeof window === 'undefined') return;
 
       const winW = window.innerWidth;
       const winH = window.innerHeight;
-      const isSmallMobile = winW < 380;
-      const isMobile = winW < 540;
+      const isSmallMobile = winW < 380 || winH < 620;
+      const isMobile = winW < 540 || winH < 720;
 
       const currentGap = isSmallMobile ? 4 : isMobile ? 5 : 7;
       const currentPadding = isSmallMobile ? 6 : isMobile ? 8 : 10;
@@ -317,21 +376,21 @@ export default function BlockOutGame({
       const screenPadding = isSmallMobile ? 8 : isMobile ? 12 : 20;
       const wrapperPadding = isSmallMobile ? 12 : isMobile ? 16 : 24;
       const overheadW = screenPadding + wrapperPadding + (currentDoorDepth * 2);
-      const maxAvailableWidth = Math.min(winW, 520) - overheadW;
+      const maxAvailableWidth = Math.min(winW, 580) - overheadW;
       const cellFromWidth = Math.floor(
         (maxAvailableWidth - currentPadding * 2 - (level.width - 1) * currentGap) / level.width
       );
 
       // Available height calculation
-      // Space for header, status bar, controls/d-pad, padding
-      const overheadH = (isSmallMobile ? 200 : isMobile ? 220 : 260) + (currentDoorDepth * 2) + currentPadding * 2;
+      // Space for header (~46px), status bar (~36px), message banner (~28px), board margins & doors
+      const overheadH = (isSmallMobile ? 130 : isMobile ? 148 : 166) + (currentDoorDepth * 2) + currentPadding * 2;
       const maxAvailableHeight = winH - overheadH;
       const cellFromHeight = Math.floor(
-        (Math.max(120, maxAvailableHeight) - (level.height - 1) * currentGap) / level.height
+        (Math.max(100, maxAvailableHeight) - (level.height - 1) * currentGap) / level.height
       );
 
-      const calculated = Math.min(cellFromWidth, cellFromHeight > 24 ? cellFromHeight : cellFromWidth);
-      const safeCellSize = Math.max(24, Math.min(54, calculated));
+      const calculated = Math.min(cellFromWidth, cellFromHeight);
+      const safeCellSize = Math.max(18, Math.min(60, calculated));
 
       setBoardLayout({
         cellSize: safeCellSize,
@@ -363,6 +422,12 @@ export default function BlockOutGame({
       exiting: false,
       exitSide: null
     })));
+    setDoors((lvl.doors || []).map((d, idx) => ({
+      ...d,
+      id: d.id || `door_${idx}`,
+      locked: Number(d.locked ?? d.count ?? d.freezeCount ?? d.lockedCount ?? 0),
+      justUnlocked: false
+    })));
     setSelectedBlockId(lvl.blocks.length > 0 ? lvl.blocks[0].id : null);
     setMoves(0);
     setHistory([]);
@@ -387,12 +452,12 @@ export default function BlockOutGame({
   };
 
   const findDoorAt = useCallback((side, index) => {
-    return level.doors.find(d => {
+    return doors.find(d => {
       if (d.side !== side) return false;
       const span = d.span || 1;
       return index >= d.index && index < d.index + span;
     }) || null;
-  }, [level.doors]);
+  }, [doors]);
 
   const checkBlockStep = useCallback((block, fromR, fromC, toR, toC, currentBlocks) => {
     if (isBlockFrozen(block)) {
@@ -434,7 +499,7 @@ export default function BlockOutGame({
           door = findDoorAt('right', cell.r);
         }
 
-        if (!door || door.color !== block.color) {
+        if (!door || door.color !== block.color || isDoorLocked(door)) {
           return { valid: false, exit: false, exitSide: null };
         }
       }
@@ -555,7 +620,7 @@ export default function BlockOutGame({
               door = findDoorAt('right', cell.r);
             }
 
-            if (!door || door.color !== target.color) {
+            if (!door || door.color !== target.color || isDoorLocked(door)) {
               validExit = false;
               break;
             }
@@ -608,7 +673,7 @@ export default function BlockOutGame({
               door = findDoorAt('right', cell.r);
             }
 
-            if (!door || door.color !== target.color) {
+            if (!door || door.color !== target.color || isDoorLocked(door)) {
               validExit = false;
               break;
             }
@@ -630,6 +695,7 @@ export default function BlockOutGame({
         ...prevHist,
         {
           blocks: prevBlocks.map(b => ({ ...b })),
+          doors: doors.map(d => ({ ...d })),
           moves,
           selectedBlockId: target.id
         }
@@ -643,6 +709,24 @@ export default function BlockOutGame({
 
         let didUnfreeze = false;
         let didCrack = false;
+        let didUnlockDoor = false;
+        let didDoorCrack = false;
+
+        setDoors(prevDoors => prevDoors.map(d => {
+          const curLocked = d.locked ?? d.count ?? 0;
+          if (curLocked > 0) {
+            const nextLocked = Math.max(0, curLocked - 1);
+            if (nextLocked === 0) didUnlockDoor = true;
+            else didDoorCrack = true;
+            return {
+              ...d,
+              locked: nextLocked,
+              justUnlocked: nextLocked === 0
+            };
+          }
+          return { ...d, justUnlocked: false };
+        }));
+
         const updated = prevBlocks.map(b => {
           if (b.id === target.id) {
             return { ...b, r: curR, c: curC, exiting: true, exitSide };
@@ -661,9 +745,11 @@ export default function BlockOutGame({
           return b;
         });
 
-        if (didUnfreeze) {
+        if (didUnlockDoor) {
+          sounds.playLockUnlock();
+        } else if (didUnfreeze) {
           sounds.playIceShatter();
-        } else if (didCrack) {
+        } else if (didCrack || didDoorCrack) {
           sounds.playIceCrack();
         }
 
@@ -699,13 +785,16 @@ export default function BlockOutGame({
         b.id === target.id ? { ...b, r: curR, c: curC } : b
       );
     });
-  }, [gameState, findDoorAt, level.height, level.width, levelWalls, moves, currentLevelIndex]);
+  }, [gameState, findDoorAt, level.height, level.width, levelWalls, moves, currentLevelIndex, doors]);
 
   const undoMove = () => {
     if (history.length === 0 || gameState !== 'playing') return;
     const last = history[history.length - 1];
     setHistory(history.slice(0, -1));
     setBlocks(last.blocks);
+    if (last.doors) {
+      setDoors(last.doors.map(d => ({ ...d, justUnlocked: false })));
+    }
     setMoves(last.moves);
     setSelectedBlockId(last.selectedBlockId);
     sounds.playUndo();
@@ -1001,6 +1090,7 @@ export default function BlockOutGame({
         ...prevHist,
         {
           blocks: blocks.map(b => ({ ...b })),
+          doors: doors.map(d => ({ ...d })),
           moves,
           selectedBlockId: blockId
         }
@@ -1013,6 +1103,24 @@ export default function BlockOutGame({
 
       let didUnfreeze = false;
       let didCrack = false;
+      let didUnlockDoor = false;
+      let didDoorCrack = false;
+
+      setDoors(prevDoors => prevDoors.map(d => {
+        const curLocked = d.locked ?? d.count ?? 0;
+        if (curLocked > 0) {
+          const nextLocked = Math.max(0, curLocked - 1);
+          if (nextLocked === 0) didUnlockDoor = true;
+          else didDoorCrack = true;
+          return {
+            ...d,
+            locked: nextLocked,
+            justUnlocked: nextLocked === 0
+          };
+        }
+        return { ...d, justUnlocked: false };
+      }));
+
       const updated = blocks.map(b => {
         if (b.id === blockId) {
           return { ...b, r: currentR, c: currentC, exiting: true, exitSide };
@@ -1031,9 +1139,11 @@ export default function BlockOutGame({
         return b;
       });
 
-      if (didUnfreeze) {
+      if (didUnlockDoor) {
+        sounds.playLockUnlock();
+      } else if (didUnfreeze) {
         sounds.playIceShatter();
-      } else if (didCrack) {
+      } else if (didCrack || didDoorCrack) {
         sounds.playIceCrack();
       }
 
@@ -1069,6 +1179,7 @@ export default function BlockOutGame({
         ...prevHist,
         {
           blocks: blocks.map(b => ({ ...b })),
+          doors: doors.map(d => ({ ...d })),
           moves,
           selectedBlockId: blockId
         }
@@ -1095,15 +1206,37 @@ export default function BlockOutGame({
     }
   };
 
+  const handleExit = () => {
+    if (onBack) {
+      onBack();
+    } else if (onCloseReward) {
+      onCloseReward();
+    } else if (navigate) {
+      navigate('/');
+    }
+  };
+
   const selectedBlock = blocks.find(b => b.id === selectedBlockId && !b.exiting) || null;
 
   return (
-    <div className="blockout-container">
+    <div
+      className="blockout-container"
+      onContextMenu={(e) => e.preventDefault()}
+      onSelectStart={(e) => e.preventDefault()}
+      onDragStart={(e) => e.preventDefault()}
+    >
       <div ref={fireworksRef} />
 
       {gameState === 'levels' && (
         <>
           <div className="blockout-header">
+            <button
+              className="blockout-btn-icon"
+              onClick={handleExit}
+              title="Späť do menu"
+            >
+              <BackIcon size={20} stroke="#334155" />
+            </button>
             <h2 className="blockout-title">🧩 Block Out! - Výber levelu</h2>
             <div className="blockout-header-actions">
               <button
@@ -1148,15 +1281,15 @@ export default function BlockOutGame({
             <button
               className="blockout-btn-icon"
               onClick={() => {
-                if (onBack) {
-                  onBack();
+                if (rewardLevel !== null) {
+                  handleExit();
                 } else {
                   setGameState('levels');
                 }
               }}
-              title={onBack ? 'Späť' : 'Výber levelov'}
+              title={rewardLevel !== null ? 'Späť' : 'Výber levelov'}
             >
-              📋
+              {rewardLevel !== null ? <BackIcon size={20} stroke="#334155" /> : '📋'}
             </button>
             <h2 className="blockout-title">{level.name}</h2>
             <div className="blockout-header-actions">
@@ -1200,9 +1333,10 @@ export default function BlockOutGame({
               }}
             >
               {/* Doors */}
-              {level.doors.map((door, dIdx) => {
+              {doors.map((door, dIdx) => {
                 const conf = COLOR_CONFIG[door.color] || COLOR_CONFIG.red;
                 const span = door.span || 1;
+                const isLocked = isDoorLocked(door);
                 const doorWidth = door.side === 'top' || door.side === 'bottom'
                   ? span * cellSize + (span - 1) * gap
                   : doorDepth;
@@ -1237,8 +1371,8 @@ export default function BlockOutGame({
                   doorStyle.width = doorDepth;
                 }
 
-                // Otvor sa zvýrazní LEN vtedy, keď je pri ňom kocka rovnakej farby
-                const isMatchingBlockAdjacent = blocks.some(b => {
+                // Otvor sa zvýrazní LEN vtedy, keď je pri ňom kocka rovnakej farby a nie je zamknutý
+                const isMatchingBlockAdjacent = !isLocked && blocks.some(b => {
                   if (b.exiting || b.color !== door.color) return false;
                   const effectiveBlock = (dragInfo && dragInfo.blockId === b.id)
                     ? { ...b, r: dragInfo.currentR, c: dragInfo.currentC }
@@ -1253,7 +1387,7 @@ export default function BlockOutGame({
                   });
                 });
 
-                const isAbsorbing = blocks.some(b => {
+                const isAbsorbing = !isLocked && (blocks.some(b => {
                   if (!b.exiting || b.exitSide !== door.side || b.color !== door.color) return false;
                   const occupied = getOccupiedCells(b);
                   return occupied.some(cell => {
@@ -1270,21 +1404,31 @@ export default function BlockOutGame({
                     if (door.side === 'left' || door.side === 'right') return cell.r >= door.index && cell.r < door.index + span;
                     return false;
                   });
-                })());
+                })()));
 
                 return (
                   <div
-                    key={dIdx}
+                    key={door.id || dIdx}
                     className={`blockout-door blockout-door-${door.side} ${
+                      isLocked ? 'blockout-door-locked' : ''
+                    } ${door.justUnlocked ? 'just-unlocked' : ''} ${
                       isMatchingBlockAdjacent ? 'highlight' : ''
                     } ${isAbsorbing ? 'absorbing' : ''}`}
                     style={doorStyle}
+                    title={isLocked ? `Zamknutý východ (zostáva ${door.locked})` : undefined}
                   >
-                    <DoorArrow
-                      side={door.side}
-                      color={door.color}
-                      size={Math.max(12, Math.round(cellSize * 0.4))}
-                    />
+                    {isLocked ? (
+                      <div className="blockout-door-lock-badge">
+                        <span className="blockout-door-lock-icon">🔒</span>
+                        <span className="blockout-door-lock-count">{door.locked}</span>
+                      </div>
+                    ) : (
+                      <DoorArrow
+                        side={door.side}
+                        color={door.color}
+                        size={Math.max(12, Math.round(cellSize * 0.4))}
+                      />
+                    )}
                   </div>
                 );
               })}
@@ -1384,9 +1528,10 @@ export default function BlockOutGame({
                     </div>
                   );
                 })}
+              </div>
 
-                {/* Blocks */}
-                {blocks.map((block) => {
+              {/* Blocks */}
+              {blocks.map((block) => {
                   const conf = COLOR_CONFIG[block.color] || COLOR_CONFIG.red;
                   const isSelected = selectedBlockId === block.id;
                   const isDragging = dragInfo && dragInfo.blockId === block.id;
@@ -1520,71 +1665,14 @@ export default function BlockOutGame({
                   );
                 })}
               </div>
-            </div>
+          </div>
 
-            {/* Temporary feedback banner under the game board */}
-            <div
-              className={`blockout-message-banner ${message ? 'visible' : ''}`}
-              aria-live="polite"
-            >
-              {message || ' '}
-            </div>
-
-            {/* Controls hint & D-Pad */}
-            <div className="blockout-controls-panel">
-              <div className="blockout-control-tip">
-                👆 Ťahaj kocku prstom alebo myšou do dverí
-              </div>
-
-              {/* D-Pad Directional Controls for accessible touch/click */}
-              <div className="blockout-dpad">
-                <div />
-                <button
-                  className="blockout-dpad-btn"
-                  disabled={!selectedBlock || !canBlockMoveInDir(selectedBlock, -1, 0, blocks)}
-                  onClick={() => selectedBlock && moveBlock(selectedBlock.id, 'up')}
-                  title="Hore (alebo šípka Hore / W)"
-                >
-                  ▲
-                </button>
-                <div />
-                <button
-                  className="blockout-dpad-btn"
-                  disabled={!selectedBlock || !canBlockMoveInDir(selectedBlock, 0, -1, blocks)}
-                  onClick={() => selectedBlock && moveBlock(selectedBlock.id, 'left')}
-                  title="Vľavo (alebo šípka Vľavo / A)"
-                >
-                  ◀
-                </button>
-                <div className="blockout-dpad-center">
-                  {selectedBlock ? (
-                    isBlockFrozen(selectedBlock) ? (
-                      `❄️ ${selectedBlock.frozen ?? selectedBlock.freezeCount ?? selectedBlock.count}`
-                    ) : (
-                      COLOR_CONFIG[selectedBlock.color]?.label || '•'
-                    )
-                  ) : '•'}
-                </div>
-                <button
-                  className="blockout-dpad-btn"
-                  disabled={!selectedBlock || !canBlockMoveInDir(selectedBlock, 0, 1, blocks)}
-                  onClick={() => selectedBlock && moveBlock(selectedBlock.id, 'right')}
-                  title="Vpravo (alebo šípka Vpravo / D)"
-                >
-                  ▶
-                </button>
-                <div />
-                <button
-                  className="blockout-dpad-btn"
-                  disabled={!selectedBlock || !canBlockMoveInDir(selectedBlock, 1, 0, blocks)}
-                  onClick={() => selectedBlock && moveBlock(selectedBlock.id, 'down')}
-                  title="Dole (alebo šípka Dole / S)"
-                >
-                  ▼
-                </button>
-                <div />
-              </div>
-            </div>
+          {/* Temporary feedback banner under the game board */}
+          <div
+            className={`blockout-message-banner ${message ? 'visible' : ''}`}
+            aria-live="polite"
+          >
+            {message || ' '}
           </div>
 
           {/* Victory Modal */}
@@ -1626,13 +1714,13 @@ export default function BlockOutGame({
                     <RestartIcon size={20} stroke="#334155" />
                     <span>Hrať znova</span>
                   </button>
-                  {onBack ? (
+                  {onBack || onCloseReward ? (
                     <button
                       className="btn-blockout-secondary"
-                      onClick={onBack}
+                      onClick={handleExit}
                     >
                       <LevelsMenuIcon size={20} stroke="#334155" />
-                      <span>Späť do vybraných slov</span>
+                      <span>Späť</span>
                     </button>
                   ) : (
                     <button

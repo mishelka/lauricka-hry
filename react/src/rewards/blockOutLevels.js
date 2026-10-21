@@ -203,6 +203,15 @@ export function isBlockFrozen(block) {
   return Number(count) > 0;
 }
 
+/**
+ * Checks if an exit / door is currently locked by countdown number
+ */
+export function isDoorLocked(door) {
+  if (!door) return false;
+  const count = door.locked ?? door.lockCount ?? door.freezeCount ?? door.count ?? 0;
+  return Number(count) > 0;
+}
+
 function createLevel1Blocks() {
   const blocks = [
     { id: 'b_pink', color: 'pink', r: 0, c: 0, shape: '1x2' },

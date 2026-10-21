@@ -1,6 +1,6 @@
 import { useMemo, useRef, useState } from 'react';
 import { VYBRANE_M_GROUPS, VYBRANE_M_RULES, VYBRANE_M_CHYTAKY } from '../data/vybraneMSlova';
-import { getStarCount, shuffleArray, triggerFireworks } from '../utils/gameUtils';
+import { getStarCount, getVybraneOptionId, shuffleArray, triggerFireworks } from '../utils/gameUtils';
 import { getLevelStars, updateLevelBestStars } from '../utils/player';
 import BlockOutGame from '../rewards/BlockOutGame';
 import { RestartIcon, NextLevelIcon, LevelsMenuIcon, GameIcon } from './Icons';
@@ -85,8 +85,8 @@ export default function VybraneMGame() {
     const task = order[index];
     if (!task || resultVisible || disabledOptions.has(optionId)) return;
 
-    const answerGroup = optionId.startsWith('tvrde') ? 'tvrde' : 'makke';
-    if (answerGroup === task.odpoved) {
+    const correctOptionId = getVybraneOptionId(task);
+    if (optionId === correctOptionId) {
       setFeedbackMap(prev => ({ ...prev, [optionId]: 'correct' }));
       setDisabledOptions(new Set(['makke', 'makke-dlhe', 'tvrde', 'tvrde-dlhe']));
       if (mistakesOnCurrent === 0) setHit(prev => prev + 1);

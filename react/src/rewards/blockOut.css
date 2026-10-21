@@ -1,14 +1,37 @@
 .blockout-container {
+  position: fixed;
+  inset: 0;
+  width: 100vw;
+  height: 100vh;
+  height: 100dvh;
+  max-height: 100dvh;
+  background: #f0f8ff;
+  z-index: 1000;
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 14px;
-  width: 100%;
-  max-width: 520px;
-  margin: 0 auto;
-  user-select: none;
-  -webkit-user-select: none;
-  touch-action: manipulation;
+  justify-content: flex-start;
+  padding: 8px 12px;
+  margin: 0;
+  overflow: hidden;
+  overscroll-behavior: none;
+  touch-action: none;
+  -webkit-touch-callout: none !important;
+  -webkit-user-select: none !important;
+  -moz-user-select: none !important;
+  -ms-user-select: none !important;
+  user-select: none !important;
+  -webkit-user-drag: none !important;
+  box-sizing: border-box;
+}
+
+.blockout-container * {
+  -webkit-touch-callout: none !important;
+  -webkit-user-select: none !important;
+  -moz-user-select: none !important;
+  -ms-user-select: none !important;
+  user-select: none !important;
+  -webkit-user-drag: none !important;
 }
 
 .blockout-header {
@@ -16,10 +39,12 @@
   align-items: center;
   justify-content: space-between;
   width: 100%;
-  padding: 8px 12px;
+  max-width: 580px;
+  padding: 6px 12px;
   background: #ffffff;
   border-radius: 16px;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.06);
+  flex-shrink: 0;
 }
 
 .blockout-title {
@@ -67,14 +92,17 @@
   justify-content: center;
   align-items: center;
   width: 100%;
-  min-height: 42px;
-  padding: 8px 16px;
+  max-width: 580px;
+  min-height: 36px;
+  padding: 4px 14px;
+  margin-top: 6px;
   background: #ffffff;
-  border-radius: 14px;
+  border-radius: 12px;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
-  font-size: 15px;
+  font-size: 14px;
   font-weight: 600;
   color: #475569;
+  flex-shrink: 0;
 }
 
 .blockout-moves-badge {
@@ -90,17 +118,22 @@
   display: flex;
   flex-direction: column;
   align-items: center;
+  justify-content: center;
   background: #ffffff;
-  padding: 28px 16px 20px;
-  border-radius: 24px;
+  padding: 12px 14px 10px;
+  margin-top: 8px;
+  border-radius: 20px;
   box-shadow: 0 10px 25px rgba(0, 0, 0, 0.08);
-  width: 100%;
+  width: auto;
+  max-width: 100%;
+  flex-shrink: 0;
+  touch-action: none;
 }
 
 .blockout-board-outer {
   position: relative;
   display: inline-block;
-  margin: 26px auto 16px;
+  margin: 0 auto;
 }
 
 .blockout-grid {
@@ -253,6 +286,76 @@
 
 .blockout-door-arrow {
   font-size: 10px;
+}
+
+/* Locked door styles */
+.blockout-door.blockout-door-locked {
+  filter: brightness(0.8) saturate(0.85);
+  cursor: not-allowed;
+  box-shadow: inset 0 0 6px rgba(0, 0, 0, 0.4), 0 2px 6px rgba(0, 0, 0, 0.2) !important;
+}
+
+.blockout-door.blockout-door-locked::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: repeating-linear-gradient(
+    45deg,
+    rgba(0, 0, 0, 0.12),
+    rgba(0, 0, 0, 0.12) 3px,
+    transparent 3px,
+    transparent 6px
+  );
+  border-radius: inherit;
+  pointer-events: none;
+}
+
+.blockout-door-lock-badge {
+  position: relative;
+  z-index: 2;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
+  background: radial-gradient(circle at 35% 35%, #ffffff 0%, #fef3c7 60%, #fde68a 100%);
+  border: 1.5px solid #d97706;
+  border-radius: 999px;
+  padding: 1px 4px;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.35), inset 0 1px 2px rgba(255, 255, 255, 0.9);
+  animation: frozen-pulse 2.2s ease-in-out infinite;
+  pointer-events: none;
+}
+
+.blockout-door-lock-icon {
+  font-size: 10px;
+  line-height: 1;
+}
+
+.blockout-door-lock-count {
+  font-size: 11px;
+  font-weight: 900;
+  color: #78350f;
+  line-height: 1;
+  text-shadow: 0 1px 0 rgba(255, 255, 255, 0.8);
+}
+
+.blockout-door.just-unlocked {
+  animation: door-unlock-pop 0.7s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+}
+
+@keyframes door-unlock-pop {
+  0% {
+    transform: scale(0.9);
+    filter: brightness(2) drop-shadow(0 0 16px #fde68a);
+  }
+  40% {
+    transform: scale(1.25);
+    filter: brightness(1.6) drop-shadow(0 0 20px #ffffff);
+  }
+  100% {
+    transform: scale(1);
+    filter: brightness(1);
+  }
 }
 
 /* Blocks & Pieces */
@@ -664,78 +767,19 @@
   transform: scale(1);
 }
 
-/* Movement directional controls */
-.blockout-controls-panel {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 8px;
-  margin-top: 10px;
-  width: 100%;
-}
-
-.blockout-control-tip {
-  font-size: 13px;
-  color: #64748b;
-  font-weight: 600;
-  background: #f8fafc;
-  border: 1px solid #e2e8f0;
-  padding: 6px 14px;
-  border-radius: 20px;
-  text-align: center;
-}
-
-.blockout-dpad {
-  display: grid;
-  grid-template-columns: repeat(3, 48px);
-  grid-template-rows: repeat(3, 48px);
-  gap: 6px;
-  margin-top: 4px;
-  justify-content: center;
-}
-
-.blockout-dpad-center {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 16px;
-  color: #64748b;
-  font-weight: bold;
-}
-
-.blockout-dpad-btn {
-  width: 48px;
-  height: 48px;
-  padding: 0;
-  border-radius: 14px;
-  border: 1px solid #cbd5e1;
-  background: #ffffff;
-  color: #1e293b;
-  font-size: 20px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  box-shadow: 0 3px 8px rgba(0, 0, 0, 0.08);
-  transition: all 0.12s ease;
-}
-
-.blockout-dpad-btn:hover:not(:disabled) {
-  background: #f8fafc;
-  transform: translateY(-2px);
-}
-
-.blockout-dpad-btn:disabled {
-  opacity: 0.3;
-  cursor: not-allowed;
-  box-shadow: none;
-}
-
 /* Level Select */
 .blockout-levels-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
   gap: 12px;
   width: 100%;
+  max-width: 580px;
+  margin-top: 10px;
+  padding: 4px 4px 20px;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  touch-action: pan-y;
+  flex: 1;
 }
 
 .blockout-level-card {
@@ -939,24 +983,6 @@
     margin: 4px 0 2px;
   }
 
-  .blockout-control-tip {
-    font-size: 11px;
-    padding: 4px 10px;
-  }
-
-  .blockout-dpad {
-    grid-template-columns: repeat(3, 38px);
-    grid-template-rows: repeat(3, 38px);
-    gap: 4px;
-  }
-
-  .blockout-dpad-btn {
-    width: 38px;
-    height: 38px;
-    font-size: 16px;
-    border-radius: 10px;
-  }
-
   .blockout-levels-grid {
     grid-template-columns: repeat(3, 1fr);
     gap: 8px;
@@ -1019,19 +1045,6 @@
     width: 34px;
     height: 34px;
     font-size: 15px;
-    border-radius: 8px;
-  }
-
-  .blockout-dpad {
-    grid-template-columns: repeat(3, 34px);
-    grid-template-rows: repeat(3, 34px);
-    gap: 3px;
-  }
-
-  .blockout-dpad-btn {
-    width: 34px;
-    height: 34px;
-    font-size: 14px;
     border-radius: 8px;
   }
 
