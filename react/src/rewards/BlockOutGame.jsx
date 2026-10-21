@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { BLOCK_OUT_LEVELS, COLOR_CONFIG, getBlockCells, getOccupiedCells, getBlockDimensions, isDirAllowedForBlock, isBlockFrozen, isDoorLocked, getLevelWalls } from './blockOutLevels';
 import { sounds } from './soundEffects';
 import { triggerFireworks } from '../utils/gameUtils';
-import { getLevelStars, updateLevelBestStars, getLevelPlays, incrementLevelPlays } from '../utils/player';
+import { getLevelStars, updateLevelBestStars, getLevelPlays, incrementLevelPlays, getBlockOutSavedState, saveBlockOutSavedState, clearBlockOutSavedState, getBlockOutSavedStates } from '../utils/player';
 import { RestartIcon, NextLevelIcon, LevelsMenuIcon, BackIcon } from '../components/Icons';
 import './blockOut.css';
 
@@ -278,6 +278,9 @@ export default function BlockOutGame({
   const [levelPlays, setLevelPlays] = useState(() =>
     getLevelPlays('blockOut', BLOCK_OUT_LEVELS.length)
   );
+  const [savedStates, setSavedStates] = useState(() =>
+    getBlockOutSavedStates()
+  );
   const [currentLevelIndex, setCurrentLevelIndex] = useState(() =>
     rewardLevel !== null ? rewardLevel : 0
   );
@@ -414,9 +417,29 @@ export default function BlockOutGame({
     return (levelPlays[idx] || 0) < MAX_LEVEL_PLAYS;
   }, [levelPlays]);
 
-  const startLevel = useCallback((lvlIndex, countPlay = true) => {
+  const startLevel = useCallback((lvlIndex, options = true) => {
+    const isOptionsObj = typeof options === 'object' && options !== null;
+    const forceReset = isOptionsObj ? Boolean(options.forceReset) : false;
+    let countPlay = isOptionsObj ? (options.countPlay !== undefined ? options.countPlay : true) : Boolean(options);
+
     const lvl = BLOCK_OUT_LEVELS[lvlIndex];
     if (!lvl) return;
+
+    if (forceReset) {
+      clearBlockOutSavedState(lvlIndex);
+      setSavedStates(getBlockOutSavedStates());
+    }
+
+    const saved = !forceReset ? getBlockOutSavedState(lvlIndex) : null;
+    const isSavedValid = saved &&
+      Array.isArray(saved.blocks) &&
+      saved.blocks.length > 0 &&
+      saved.blocks.every(b => b && b.id !== undefined && typeof b.r === 'number' && typeof b.c === 'number');
+
+    // Pokiaľ pokračujeme v rozohranom leveli, neodrátavame ďalšie hranie
+    if (isSavedValid) {
+      countPlay = false;
+    }
 
     if (countPlay) {
       const currentCounts = getLevelPlays('blockOut', BLOCK_OUT_LEVELS.length);
@@ -429,33 +452,111 @@ export default function BlockOutGame({
     }
 
     setCurrentLevelIndex(lvlIndex);
-    setBlocks(lvl.blocks.map(b => ({
-      ...b,
-      frozen: b.frozen ?? b.freezeCount ?? b.count ?? 0,
-      exiting: false,
-      exitSide: null
-    })));
-    setDoors((lvl.doors || []).map((d, idx) => ({
-      ...d,
-      id: d.id || `door_${idx}`,
-      locked: Number(d.locked ?? d.count ?? d.freezeCount ?? d.lockedCount ?? 0),
-      justUnlocked: false
-    })));
-    setSelectedBlockId(lvl.blocks.length > 0 ? lvl.blocks[0].id : null);
-    setMoves(0);
-    setHistory([]);
+
+    if (isSavedValid) {
+      setBlocks(saved.blocks.map(b => ({
+        ...b,
+        frozen: b.frozen ?? b.freezeCount ?? b.count ?? 0,
+        exiting: false,
+        exitSide: null
+      })));
+      setDoors((Array.isArray(saved.doors) ? saved.doors : (lvl.doors || [])).map((d, idx) => ({
+        ...d,
+        id: d.id || `door_${idx}`,
+        locked: Number(d.locked ?? d.count ?? d.freezeCount ?? d.lockedCount ?? 0),
+        justUnlocked: false
+      })));
+      setSelectedBlockId(saved.selectedBlockId || saved.blocks[0]?.id || null);
+      setMoves(Number(saved.moves) || 0);
+      setHistory(Array.isArray(saved.history) ? saved.history : []);
+    } else {
+      setBlocks(lvl.blocks.map(b => ({
+        ...b,
+        frozen: b.frozen ?? b.freezeCount ?? b.count ?? 0,
+        exiting: false,
+        exitSide: null
+      })));
+      setDoors((lvl.doors || []).map((d, idx) => ({
+        ...d,
+        id: d.id || `door_${idx}`,
+        locked: Number(d.locked ?? d.count ?? d.freezeCount ?? d.lockedCount ?? 0),
+        justUnlocked: false
+      })));
+      setSelectedBlockId(lvl.blocks.length > 0 ? lvl.blocks[0].id : null);
+      setMoves(0);
+      setHistory([]);
+    }
+
     setMessage('');
     setGameState('playing');
   }, []);
 
   useEffect(() => {
     if (rewardLevel !== null) {
-      startLevel(rewardLevel, true);
+      startLevel(rewardLevel, { countPlay: true });
     }
   }, [rewardLevel, startLevel]);
 
+  // Auto-save rozohraného stavu levelu do lokálnej pamäte
+  useEffect(() => {
+    if (gameState !== 'playing') return;
+    if (!blocks || blocks.length === 0) return;
+
+    const cleanBlocks = blocks
+      .filter(b => !b.exiting)
+      .map(b => ({
+        id: b.id,
+        shape: b.shape,
+        r: b.r,
+        c: b.c,
+        color: b.color,
+        direction: b.direction,
+        axis: b.axis,
+        frozen: b.frozen ?? 0,
+        arrowRow: b.arrowRow,
+        arrowCol: b.arrowCol,
+        innerColor: b.innerColor
+      }));
+
+    if (cleanBlocks.length === 0) {
+      clearBlockOutSavedState(currentLevelIndex);
+      setSavedStates(getBlockOutSavedStates());
+      return;
+    }
+
+    if (moves > 0 || history.length > 0) {
+      saveBlockOutSavedState(currentLevelIndex, {
+        blocks: cleanBlocks,
+        doors: doors.map(d => ({
+          id: d.id,
+          side: d.side,
+          index: d.index,
+          span: d.span,
+          color: d.color,
+          locked: d.locked ?? 0
+        })),
+        moves,
+        history: history.map(h => ({
+          blocks: Array.isArray(h.blocks)
+            ? h.blocks.filter(b => !b.exiting).map(b => ({ ...b, exiting: false, exitSide: null }))
+            : [],
+          doors: Array.isArray(h.doors)
+            ? h.doors.map(d => ({ ...d, justUnlocked: false }))
+            : [],
+          moves: h.moves,
+          selectedBlockId: h.selectedBlockId
+        })),
+        selectedBlockId,
+        timestamp: Date.now()
+      });
+      setSavedStates(getBlockOutSavedStates());
+    }
+  }, [gameState, currentLevelIndex, blocks, doors, moves, history, selectedBlockId]);
+
   const resetCurrentLevel = () => {
-    startLevel(currentLevelIndex, false);
+    clearBlockOutSavedState(currentLevelIndex);
+    setSavedStates(getBlockOutSavedStates());
+    startLevel(currentLevelIndex, { forceReset: true, countPlay: false });
   };
 
   const toggleMute = () => {
@@ -604,6 +705,8 @@ export default function BlockOutGame({
       const blockCells = getBlockCells(target);
       let curR = target.r;
       let curC = target.c;
+      let boardR = target.r;
+      let boardC = target.c;
       let exited = false;
       let stepsRemaining = Math.max(1, requestedSteps);
 
@@ -641,6 +744,8 @@ export default function BlockOutGame({
 
           if (validExit) {
             exited = true;
+            boardR = curR;
+            boardC = curC;
             curR = nextR;
             curC = nextC;
           }
@@ -657,6 +762,8 @@ export default function BlockOutGame({
           break;
         }
 
+        boardR = curR;
+        boardC = curC;
         curR = nextR;
         curC = nextC;
         stepsRemaining -= 1;
@@ -693,6 +800,8 @@ export default function BlockOutGame({
           }
           if (validExit) {
             exited = true;
+            boardR = curR;
+            boardC = curC;
             curR = nextR;
             curC = nextC;
           }
@@ -766,11 +875,36 @@ export default function BlockOutGame({
           sounds.playIceCrack();
         }
 
-        // Allow smooth absorption animation to finish before removing
+        // Allow smooth absorption animation to finish before removing or revealing inner layer
         setTimeout(() => {
           setBlocks(current => {
-            const remaining = current.filter(b => b.id !== target.id);
+            let remaining;
+            if (target.innerColor) {
+              remaining = current.map(b => {
+                if (b.id === target.id) {
+                  return {
+                    ...b,
+                    color: target.innerColor,
+                    innerColor: undefined,
+                    r: boardR,
+                    c: boardC,
+                    exiting: false,
+                    exitSide: undefined,
+                    justRevealed: true
+                  };
+                }
+                return b;
+              });
+              setTimeout(() => {
+                setBlocks(cur => cur.map(b => b.id === target.id ? { ...b, justRevealed: false } : b));
+              }, 400);
+            } else {
+              remaining = current.filter(b => b.id !== target.id);
+            }
+
             if (remaining.length === 0) {
+              clearBlockOutSavedState(currentLevelIndex);
+              setSavedStates(getBlockOutSavedStates());
               const updatedStars = updateLevelBestStars(
                 'blockOut',
                 currentLevelIndex,
@@ -784,7 +918,7 @@ export default function BlockOutGame({
                 triggerFireworks(fireworksRef.current);
               }
             } else {
-              setSelectedBlockId(prev => (prev === target.id ? remaining[0].id : prev));
+              setSelectedBlockId(prev => (prev === target.id ? (target.innerColor ? target.id : (remaining[0]?.id || null)) : prev));
             }
             return remaining;
           });
@@ -1164,8 +1298,34 @@ export default function BlockOutGame({
 
       setTimeout(() => {
         setBlocks(current => {
-          const remaining = current.filter(b => b.id !== blockId);
+          const target = current.find(b => b.id === blockId);
+          let remaining;
+          if (target && target.innerColor) {
+            remaining = current.map(b => {
+              if (b.id === blockId) {
+                return {
+                  ...b,
+                  color: target.innerColor,
+                  innerColor: undefined,
+                  r: currentR,
+                  c: currentC,
+                  exiting: false,
+                  exitSide: undefined,
+                  justRevealed: true
+                };
+              }
+              return b;
+            });
+            setTimeout(() => {
+              setBlocks(cur => cur.map(b => b.id === blockId ? { ...b, justRevealed: false } : b));
+            }, 400);
+          } else {
+            remaining = current.filter(b => b.id !== blockId);
+          }
+
           if (remaining.length === 0) {
+            clearBlockOutSavedState(currentLevelIndex);
+            setSavedStates(getBlockOutSavedStates());
             const updatedStars = updateLevelBestStars(
               'blockOut',
               currentLevelIndex,
@@ -1179,7 +1339,7 @@ export default function BlockOutGame({
               triggerFireworks(fireworksRef.current);
             }
           } else {
-            setSelectedBlockId(prev => (prev === blockId ? remaining[0].id : prev));
+            setSelectedBlockId(prev => (prev === blockId ? (target && target.innerColor ? blockId : (remaining[0]?.id || null)) : prev));
           }
           return remaining;
         });
@@ -1267,13 +1427,18 @@ export default function BlockOutGame({
               const unlocked = isLevelUnlocked(idx);
               const stars = levelStars[idx] || 0;
               const plays = levelPlays[idx] || 0;
+              const saved = savedStates[idx];
+              const hasSavedProgress = Boolean(
+                unlocked && saved && (saved.moves > 0 || (Array.isArray(saved.blocks) && saved.blocks.length < lvl.blocks.length))
+              );
+
               return (
                 <button
                   key={lvl.id}
-                  className={`blockout-level-card ${!unlocked ? 'locked' : ''}`}
+                  className={`blockout-level-card ${!unlocked ? 'locked' : ''} ${hasSavedProgress ? 'has-saved-progress' : ''}`}
                   disabled={!unlocked}
-                  onClick={() => startLevel(idx)}
-                  title={!unlocked ? `Level je zamknutý (odohrané ${plays}/${MAX_LEVEL_PLAYS})` : `Level ${lvl.id} (odohrané ${plays}/${MAX_LEVEL_PLAYS})`}
+                  onClick={() => startLevel(idx, { countPlay: true })}
+                  title={!unlocked ? `Level je zamknutý (odohrané ${plays}/${MAX_LEVEL_PLAYS})` : (hasSavedProgress ? `Level ${lvl.id} - rozohraný (odohrané ${plays}/${MAX_LEVEL_PLAYS})` : `Level ${lvl.id} (odohrané ${plays}/${MAX_LEVEL_PLAYS})`)}
                 >
                   <div className="blockout-level-number">{lvl.id}</div>
                   {unlocked ? (
@@ -1284,6 +1449,11 @@ export default function BlockOutGame({
                       <div className="blockout-level-plays">
                         {plays}/{MAX_LEVEL_PLAYS}
                       </div>
+                      {hasSavedProgress && (
+                        <div className="blockout-level-in-progress" title="Rozohraný level">
+                          ▶ Rozohrané
+                        </div>
+                      )}
                     </>
                   ) : (
                     <>
@@ -1309,6 +1479,7 @@ export default function BlockOutGame({
                 if (rewardLevel !== null) {
                   handleExit();
                 } else {
+                  setSavedStates(getBlockOutSavedStates());
                   setGameState('levels');
                 }
               }}
@@ -1558,6 +1729,7 @@ export default function BlockOutGame({
               {/* Blocks */}
               {blocks.map((block) => {
                   const conf = COLOR_CONFIG[block.color] || COLOR_CONFIG.red;
+                  const innerConf = block.innerColor ? (COLOR_CONFIG[block.innerColor] || COLOR_CONFIG.red) : null;
                   const isSelected = selectedBlockId === block.id;
                   const isDragging = dragInfo && dragInfo.blockId === block.id;
                   const isFrozen = isBlockFrozen(block);
@@ -1583,12 +1755,14 @@ export default function BlockOutGame({
 
                   const exitClass = block.exiting ? `exiting exit-${block.exitSide}` : '';
                   const frozenClass = isFrozen ? 'is-frozen' : (block.justUnfrozen ? 'just-unfrozen' : '');
+                  const revealedClass = block.justRevealed ? 'just-revealed' : '';
                   const cellRadius = Math.max(8, Math.round(cellSize * 0.24));
+                  const innerInset = Math.max(6, Math.min(Math.round(cellSize * 0.24), Math.round(Math.min(containerW, containerH) * 0.22)));
 
                   return (
                     <div
                       key={block.id}
-                      className={`blockout-piece-container ${isSelected ? 'selected' : ''} ${exitClass} ${frozenClass} ${
+                      className={`blockout-piece-container ${isSelected ? 'selected' : ''} ${exitClass} ${frozenClass} ${revealedClass} ${
                         isDragging ? 'dragging' : ''
                       }`}
                       style={pieceStyle}
@@ -1612,6 +1786,22 @@ export default function BlockOutGame({
                         cellSize={cellSize}
                         gap={gap}
                       />
+
+                      {/* Inner block layer for two-color blocks */}
+                      {innerConf && (
+                        <div
+                          className="blockout-inner-block"
+                          style={{
+                            top: `${innerInset}px`,
+                            left: `${innerInset}px`,
+                            width: `${containerW - 2 * innerInset}px`,
+                            height: `${containerH - 2 * innerInset}px`,
+                            backgroundColor: innerConf.bg,
+                            borderColor: innerConf.border,
+                            borderRadius: `${Math.max(6, Math.round(cellRadius * 0.75))}px`,
+                          }}
+                        />
+                      )}
 
                       {cells.map(([dr, dc], cellIdx) => {
                         const hasTop = cells.some(([r, c]) => r === dr - 1 && c === dc);
@@ -1752,7 +1942,10 @@ export default function BlockOutGame({
                   ) : (
                     <button
                       className="btn-blockout-secondary"
-                      onClick={() => setGameState('levels')}
+                      onClick={() => {
+                        setSavedStates(getBlockOutSavedStates());
+                        setGameState('levels');
+                      }}
                     >
                       <LevelsMenuIcon size={20} stroke="#334155" />
                       <span>Výber levelov</span>

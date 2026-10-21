@@ -561,6 +561,36 @@
   }
 }
 
+/* Reveal pop animation when inner block layer becomes active */
+.blockout-piece-container.just-revealed {
+  animation: reveal-pop 0.4s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+}
+
+@keyframes reveal-pop {
+  0% {
+    transform: scale(0.72);
+    filter: brightness(1.6) drop-shadow(0 0 12px rgba(255, 255, 255, 0.9));
+  }
+  60% {
+    transform: scale(1.08);
+    filter: brightness(1.25);
+  }
+  100% {
+    transform: scale(1);
+    filter: brightness(1);
+  }
+}
+
+/* Two-color inner block styling */
+.blockout-inner-block {
+  position: absolute;
+  border: 3px solid;
+  box-shadow: inset 0 2px 4px rgba(255, 255, 255, 0.45), 0 2px 6px rgba(0, 0, 0, 0.28);
+  z-index: 5;
+  pointer-events: none;
+  box-sizing: border-box;
+}
+
 /* Backward-compatibility for single square pieces */
 .blockout-piece {
   position: absolute;
@@ -802,9 +832,11 @@
   box-shadow: 0 8px 18px rgba(56, 189, 248, 0.15);
 }
 
-.blockout-level-card:disabled {
-  background: #f8fafc;
-  opacity: 0.6;
+.blockout-level-card:disabled,
+.blockout-level-card.locked {
+  background: #f1f5f9;
+  border-color: #cbd5e1;
+  opacity: 0.72;
   cursor: not-allowed;
 }
 
@@ -815,6 +847,10 @@
   margin-bottom: 6px;
 }
 
+.blockout-level-card.locked .blockout-level-number {
+  color: #64748b;
+}
+
 .blockout-level-stars {
   font-size: 14px;
   color: #eab308;
@@ -822,7 +858,45 @@
 
 .blockout-level-lock {
   font-size: 24px;
-  color: #94a3b8;
+  color: #64748b;
+  line-height: 1.1;
+}
+
+.blockout-level-plays {
+  font-size: 11px;
+  font-weight: 700;
+  color: #64748b;
+  margin-top: 4px;
+  background: #f1f5f9;
+  padding: 1px 6px;
+  border-radius: 999px;
+  letter-spacing: 0.2px;
+}
+
+.blockout-level-plays.maxed {
+  color: #dc2626;
+  background: #fee2e2;
+  border: 1px solid #fecaca;
+}
+
+.blockout-level-card.has-saved-progress {
+  border-color: #38bdf8;
+  background: linear-gradient(180deg, #ffffff 0%, #f0f9ff 100%);
+  box-shadow: 0 4px 12px rgba(56, 189, 248, 0.15);
+}
+
+.blockout-level-in-progress {
+  font-size: 10px;
+  font-weight: 800;
+  color: #0284c7;
+  background: #e0f2fe;
+  padding: 2px 6px;
+  border-radius: 999px;
+  margin-top: 4px;
+  letter-spacing: 0.2px;
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
 }
 
 /* Modal Victory */
@@ -1005,6 +1079,12 @@
 
   .blockout-level-lock {
     font-size: 18px;
+  }
+
+  .blockout-level-plays {
+    font-size: 10px;
+    padding: 1px 4px;
+    margin-top: 2px;
   }
 
   .blockout-modal-card {

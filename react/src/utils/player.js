@@ -116,6 +116,9 @@ function getRecord(state, gameId) {
   const rec = state.games[gameId];
   if (!Array.isArray(rec.levelStars)) rec.levelStars = [];
   if (!Array.isArray(rec.levelPlays)) rec.levelPlays = [];
+  if (!rec.savedStates || typeof rec.savedStates !== 'object' || Array.isArray(rec.savedStates)) {
+    rec.savedStates = {};
+  }
   rec.bestStars = clampStars(rec.bestStars);
   return rec;
 }
@@ -186,4 +189,49 @@ export function incrementLevelPlays(gameId, levelIndex, levelCount) {
   rec.levelPlays = plays;
   saveState(state);
   return plays;
+}
+
+export function getBlockOutSavedState(levelIndex) {
+  const state = loadState();
+  migrateLegacyIfNeeded(state);
+  const rec = getRecord(state, 'blockOut');
+  const saved = rec.savedStates ? rec.savedStates[levelIndex] : null;
+  if (!saved || typeof saved !== 'object') return null;
+  return saved;
+}
+
+export function saveBlockOutSavedState(levelIndex, levelState) {
+  const state = loadState();
+  migrateLegacyIfNeeded(state);
+  const rec = getRecord(state, 'blockOut');
+  if (!rec.savedStates || typeof rec.savedStates !== 'object' || Array.isArray(rec.savedStates)) {
+    rec.savedStates = {};
+  }
+  rec.savedStates[levelIndex] = levelState;
+  saveState(state);
+}
+
+export function clearBlockOutSavedState(levelIndex) {
+  const state = loadState();
+  migrateLegacyIfNeeded(state);
+  const rec = getRecord(state, 'blockOut');
+  if (rec.savedStates && rec.savedStates[levelIndex]) {
+    delete rec.savedStates[levelIndex];
+    saveState(state);
+  }
+}
+
+export function getBlockOutSavedStates() {
+  const state = loadState();
+  migrateLegacyIfNeeded(state);
+  const rec = getRecord(state, 'blockOut');
+  return rec.savedStates ? { ...rec.savedStates } : {};
+}
+
+export function clearAllBlockOutSavedStates() {
+  const state = loadState();
+  migrateLegacyIfNeeded(state);
+  const rec = getRecord(state, 'blockOut');
+  rec.savedStates = {};
+  saveState(state);
 }
