@@ -7,15 +7,6 @@ import { RestartIcon, NextLevelIcon, LevelsMenuIcon, GameIcon } from './Icons';
 
 const MAX_STARS = 5;
 
-const LEVEL_NAMES = [
-  'Level 1: Základné vybrané a bežné slová',
-  'Level 2: Odvodené a bežné slová',
-  'Level 3: Rozšírené a cudzie slová',
-  'Level 4: Dvojice a chytáky',
-  'Level 5: Vety a slovné spojenia',
-  'Level 6: Majstrovský mix'
-];
-
 function renderStars(stars) {
   return `${'★'.repeat(stars)}${'☆'.repeat(MAX_STARS - stars)}`;
 }
@@ -133,11 +124,22 @@ export default function VybraneBGame() {
   const hasNextLevel = selectedLevel !== null && selectedLevel < groups.length - 1;
 
   if (playingRewardLevel !== null) {
+    const hasNextVybraneLevel = playingRewardLevel < groups.length - 1;
     return (
       <div className="reward-game-view">
         <BlockOutGame
           rewardLevel={playingRewardLevel}
           onBack={() => setPlayingRewardLevel(null)}
+          onNextVybraneLevel={
+            hasNextVybraneLevel
+              ? () => {
+                  const nextLvl = playingRewardLevel + 1;
+                  setPlayingRewardLevel(null);
+                  startLevel(nextLvl);
+                }
+              : null
+          }
+          hasNextVybraneLevel={hasNextVybraneLevel}
         />
       </div>
     );
@@ -209,7 +211,7 @@ export default function VybraneBGame() {
                   disabled={!unlocked}
                   onClick={() => startLevel(level)}
                 >
-                  {LEVEL_NAMES[level] || `Level ${level + 1}`}
+                  {`Level ${level + 1}`}
                   <small>{renderStars(best)}</small>
                   {!unlocked && <small>{`Najprv získaj 5★ v predchádzajúcom leveli`}</small>}
                 </button>
@@ -288,7 +290,7 @@ export default function VybraneBGame() {
       <div className="game-ui">
         <h1>Vybrané slová po B</h1>
         <div className="current-level">
-          {`${LEVEL_NAMES[selectedLevel]} • Úloha ${index + 1} z ${order.length}`}
+          {`Level ${selectedLevel + 1} • Úloha ${index + 1}/${order.length}`}
         </div>
         <div className="score-board">
           Správne: <span className="score-hit">{hit}</span> | Chyby: <span className="score-miss">{miss}</span>

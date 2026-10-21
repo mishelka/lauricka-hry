@@ -27,18 +27,20 @@ export function DoplnovackyMenu() {
       <p className="level-menu-help">Vyber si doplňovačku a precvič si správne dopĺňanie písmen po leveloch:</p>
 
       <div className="menu-container">
-        <div className="menu-row">
-          <button className="btn-menu-doplnovacky-dtnl" onClick={() => navigate('/doplnovacky/dtnl')}>
-            <span className="menu-title">Doplňovačky dtnl</span>
-            <span className="menu-stars">{`${dtnlFinished} z ${DOPLNOVACKY_DTNL_GROUPS.length}`}</span>
-          </button>
-        </div>
+        <div className="menu-cards">
+          <div className="menu-card">
+            <button className="btn-menu-doplnovacky-dtnl menu-card-btn" onClick={() => navigate('/doplnovacky/dtnl')}>
+              <span className="menu-title">Doplňovačky dtnl</span>
+              <span className="menu-stars">{`${dtnlFinished} z ${DOPLNOVACKY_DTNL_GROUPS.length}`}</span>
+            </button>
+          </div>
 
-        <div className="menu-row">
-          <button className="btn-menu-doplnovacky-b" onClick={() => navigate('/doplnovacky/b')}>
-            <span className="menu-title">Doplňovačky B</span>
-            <span className="menu-stars">{`${bFinished} z ${DOPLNOVACKY_B_GROUPS.length}`}</span>
-          </button>
+          <div className="menu-card">
+            <button className="btn-menu-doplnovacky-b menu-card-btn" onClick={() => navigate('/doplnovacky/b')}>
+              <span className="menu-title">Doplňovačky B</span>
+              <span className="menu-stars">{`${bFinished} z ${DOPLNOVACKY_B_GROUPS.length}`}</span>
+            </button>
+          </div>
         </div>
       </div>
     </div>

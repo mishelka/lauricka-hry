@@ -1,13 +1,13 @@
 import React from 'react';
 
-export function BackIcon({ size = 20, className = 'btn-icon', ...props }) {
+export function BackIcon({ size = 20, stroke = '#ffffff', className = 'btn-icon', ...props }) {
   return (
     <svg
       width={size}
       height={size}
       viewBox="0 0 24 24"
       fill="none"
-      stroke="#ffffff"
+      stroke={stroke}
       strokeWidth="2.5"
       strokeLinecap="round"
       strokeLinejoin="round"
@@ -21,14 +21,14 @@ export function BackIcon({ size = 20, className = 'btn-icon', ...props }) {
   );
 }
 
-export function RestartIcon({ size = 22, className = 'btn-icon', ...props }) {
+export function RestartIcon({ size = 22, stroke = '#ffffff', className = 'btn-icon', ...props }) {
   return (
     <svg
       width={size}
       height={size}
       viewBox="0 0 24 24"
       fill="none"
-      stroke="#ffffff"
+      stroke={stroke}
       strokeWidth="2.5"
       strokeLinecap="round"
       strokeLinejoin="round"
@@ -42,14 +42,14 @@ export function RestartIcon({ size = 22, className = 'btn-icon', ...props }) {
   );
 }
 
-export function NextLevelIcon({ size = 22, className = 'btn-icon', ...props }) {
+export function NextLevelIcon({ size = 22, stroke = '#ffffff', className = 'btn-icon', ...props }) {
   return (
     <svg
       width={size}
       height={size}
       viewBox="0 0 24 24"
       fill="none"
-      stroke="#ffffff"
+      stroke={stroke}
       strokeWidth="2.5"
       strokeLinecap="round"
       strokeLinejoin="round"
@@ -63,14 +63,14 @@ export function NextLevelIcon({ size = 22, className = 'btn-icon', ...props }) {
   );
 }
 
-export function LevelsMenuIcon({ size = 22, className = 'btn-icon', ...props }) {
+export function LevelsMenuIcon({ size = 22, stroke = '#ffffff', className = 'btn-icon', ...props }) {
   return (
     <svg
       width={size}
       height={size}
       viewBox="0 0 24 24"
       fill="none"
-      stroke="#ffffff"
+      stroke={stroke}
       strokeWidth="2.2"
       strokeLinecap="round"
       strokeLinejoin="round"
@@ -86,14 +86,14 @@ export function LevelsMenuIcon({ size = 22, className = 'btn-icon', ...props }) 
   );
 }
 
-export function HeadphonesIcon({ size = 22, className = 'btn-icon', ...props }) {
+export function HeadphonesIcon({ size = 22, stroke = '#ffffff', className = 'btn-icon', ...props }) {
   return (
     <svg
       width={size}
       height={size}
       viewBox="0 0 24 24"
       fill="none"
-      stroke="#ffffff"
+      stroke={stroke}
       strokeWidth="2.2"
       strokeLinecap="round"
       strokeLinejoin="round"
@@ -107,14 +107,14 @@ export function HeadphonesIcon({ size = 22, className = 'btn-icon', ...props }) 
   );
 }
 
-export function PauseIcon({ size = 22, className = 'btn-icon', ...props }) {
+export function PauseIcon({ size = 22, stroke = '#ffffff', className = 'btn-icon', ...props }) {
   return (
     <svg
       width={size}
       height={size}
       viewBox="0 0 24 24"
       fill="none"
-      stroke="#ffffff"
+      stroke={stroke}
       strokeWidth="2.5"
       strokeLinecap="round"
       strokeLinejoin="round"
@@ -128,14 +128,14 @@ export function PauseIcon({ size = 22, className = 'btn-icon', ...props }) {
   );
 }
 
-export function PlayIcon({ size = 22, className = 'btn-icon', ...props }) {
+export function PlayIcon({ size = 22, stroke = '#ffffff', className = 'btn-icon', ...props }) {
   return (
     <svg
       width={size}
       height={size}
       viewBox="0 0 24 24"
       fill="none"
-      stroke="#ffffff"
+      stroke={stroke}
       strokeWidth="2.2"
       strokeLinecap="round"
       strokeLinejoin="round"
@@ -148,14 +148,14 @@ export function PlayIcon({ size = 22, className = 'btn-icon', ...props }) {
   );
 }
 
-export function GameIcon({ size = 22, className = 'btn-icon', ...props }) {
+export function GameIcon({ size = 22, stroke = '#ffffff', className = 'btn-icon', ...props }) {
   return (
     <svg
       width={size}
       height={size}
       viewBox="0 0 24 24"
       fill="none"
-      stroke="#ffffff"
+      stroke={stroke}
       strokeWidth="2.2"
       strokeLinecap="round"
       strokeLinejoin="round"

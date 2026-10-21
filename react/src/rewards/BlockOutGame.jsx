@@ -1,8 +1,9 @@
-import { useState, useEffect, useRef, useCallback } from 'react';
-import { BLOCK_OUT_LEVELS, COLOR_CONFIG } from './blockOutLevels';
+import { useState, useEffect, useRef, useCallback, useMemo } from 'react';
+import { BLOCK_OUT_LEVELS, COLOR_CONFIG, getBlockCells, getOccupiedCells, getBlockDimensions, isDirAllowedForBlock, isBlockFrozen, getLevelWalls } from './blockOutLevels';
 import { sounds } from './soundEffects';
 import { triggerFireworks } from '../utils/gameUtils';
 import { getLevelStars, updateLevelBestStars } from '../utils/player';
+import { RestartIcon, NextLevelIcon, LevelsMenuIcon } from '../components/Icons';
 import './blockOut.css';
 
 const DEFAULT_CELL_SIZE = 54;
@@ -11,7 +12,262 @@ const DEFAULT_PADDING = 12;
 const DEFAULT_DOOR_DEPTH = 22;
 const DRAG_THRESHOLD = 16;
 
-export default function BlockOutGame({ rewardLevel = null, onBack = null }) {
+function DoorArrow({ side, color, size }) {
+  const isLight = color === 'white' || color === 'yellow';
+  const fill = isLight ? '#334155' : '#ffffff';
+
+  let rotation = 0;
+  if (side === 'top') rotation = -90;
+  if (side === 'right') rotation = 0;
+  if (side === 'bottom') rotation = 90;
+  if (side === 'left') rotation = 180;
+
+  return (
+    <svg
+      width={size}
+      height={size}
+      viewBox="0 0 24 24"
+      className="blockout-door-arrow-svg"
+      style={{
+        transform: `rotate(${rotation}deg)`,
+        display: 'block'
+      }}
+    >
+      <path
+        d="M8 5.5c0-.75.85-1.2 1.5-.8l9 6.5c.55.4.55 1.2 0 1.6l-9 6.5c-.65.4-1.5-.05-1.5-.8z"
+        fill={fill}
+      />
+    </svg>
+  );
+}
+
+function BlockArrowOverlay({ block, width, height, cellSize, gap = 0 }) {
+  const dir = block.direction || block.axis;
+  if (!dir) return null;
+
+  const cells = getBlockCells(block);
+  const arrowPadding = Math.max(6, Math.round(cellSize * 0.18));
+  const headSize = Math.max(7, Math.round(cellSize * 0.22));
+  const strokeW = Math.max(3.5, Math.round(cellSize * 0.08));
+
+  // Determine best row for horizontal arrows (row with most cells)
+  let targetRow = block.arrowRow;
+  if (targetRow === undefined) {
+    const rowCounts = {};
+    for (const [r] of cells) {
+      rowCounts[r] = (rowCounts[r] || 0) + 1;
+    }
+    let maxCount = -1;
+    for (const [rStr, count] of Object.entries(rowCounts)) {
+      const r = Number(rStr);
+      if (count > maxCount) {
+        maxCount = count;
+        targetRow = r;
+      }
+    }
+  }
+
+  // Determine best col for vertical arrows (col with most cells)
+  let targetCol = block.arrowCol;
+  if (targetCol === undefined) {
+    const colCounts = {};
+    for (const [_, c] of cells) {
+      colCounts[c] = (colCounts[c] || 0) + 1;
+    }
+    let maxCount = -1;
+    for (const [cStr, count] of Object.entries(colCounts)) {
+      const c = Number(cStr);
+      if (count > maxCount) {
+        maxCount = count;
+        targetCol = c;
+      }
+    }
+  }
+
+  const rowCells = cells.filter(([r]) => r === targetRow);
+  const rowCols = rowCells.map(([_, c]) => c);
+  const minC = rowCols.length > 0 ? Math.min(...rowCols) : 0;
+  const maxC = rowCols.length > 0 ? Math.max(...rowCols) : 0;
+
+  const cy = (targetRow || 0) * (cellSize + gap) + cellSize / 2;
+  const xLeft = minC * (cellSize + gap) + arrowPadding;
+  const xRight = maxC * (cellSize + gap) + cellSize - arrowPadding;
+
+  const colCells = cells.filter(([_, c]) => c === targetCol);
+  const colRows = colCells.map(([r]) => r);
+  const minR = colRows.length > 0 ? Math.min(...colRows) : 0;
+  const maxR = colRows.length > 0 ? Math.max(...colRows) : 0;
+
+  const cx = (targetCol || 0) * (cellSize + gap) + cellSize / 2;
+  const yTop = minR * (cellSize + gap) + arrowPadding;
+  const yBottom = maxR * (cellSize + gap) + cellSize - arrowPadding;
+
+  if (dir === 'vertical' || dir === 'v' || dir === 'y') {
+    return (
+      <svg className="blockout-direction-arrow" width={width} height={height} viewBox={`0 0 ${width} ${height}`}>
+        <defs>
+          <filter id={`arrow-glow-${block.id}`} x="-20%" y="-20%" width="140%" height="140%">
+            <feDropShadow dx="0" dy="1" stdDeviation="1.5" floodColor="#000" floodOpacity="0.45" />
+          </filter>
+        </defs>
+        <g filter={`url(#arrow-glow-${block.id})`}>
+          <line
+            x1={cx}
+            y1={yTop + headSize * 0.6}
+            x2={cx}
+            y2={yBottom - headSize * 0.6}
+            stroke="white"
+            strokeWidth={strokeW}
+            strokeLinecap="round"
+          />
+          <polygon
+            points={`${cx},${yTop} ${cx - headSize},${yTop + headSize * 1.3} ${cx + headSize},${yTop + headSize * 1.3}`}
+            fill="white"
+          />
+          <polygon
+            points={`${cx},${yBottom} ${cx - headSize},${yBottom - headSize * 1.3} ${cx + headSize},${yBottom - headSize * 1.3}`}
+            fill="white"
+          />
+        </g>
+      </svg>
+    );
+  }
+
+  if (dir === 'horizontal' || dir === 'h' || dir === 'x') {
+    return (
+      <svg className="blockout-direction-arrow" width={width} height={height} viewBox={`0 0 ${width} ${height}`}>
+        <defs>
+          <filter id={`arrow-glow-${block.id}`} x="-20%" y="-20%" width="140%" height="140%">
+            <feDropShadow dx="0" dy="1" stdDeviation="1.5" floodColor="#000" floodOpacity="0.45" />
+          </filter>
+        </defs>
+        <g filter={`url(#arrow-glow-${block.id})`}>
+          <line
+            x1={xLeft + headSize * 0.6}
+            y1={cy}
+            x2={xRight - headSize * 0.6}
+            y2={cy}
+            stroke="white"
+            strokeWidth={strokeW}
+            strokeLinecap="round"
+          />
+          <polygon
+            points={`${xLeft},${cy} ${xLeft + headSize * 1.3},${cy - headSize} ${xLeft + headSize * 1.3},${cy + headSize}`}
+            fill="white"
+          />
+          <polygon
+            points={`${xRight},${cy} ${xRight - headSize * 1.3},${cy - headSize} ${xRight - headSize * 1.3},${cy + headSize}`}
+            fill="white"
+          />
+        </g>
+      </svg>
+    );
+  }
+
+  if (dir === 'up') {
+    return (
+      <svg className="blockout-direction-arrow" width={width} height={height} viewBox={`0 0 ${width} ${height}`}>
+        <defs>
+          <filter id={`arrow-glow-${block.id}`} x="-20%" y="-20%" width="140%" height="140%">
+            <feDropShadow dx="0" dy="1" stdDeviation="1.5" floodColor="#000" floodOpacity="0.45" />
+          </filter>
+        </defs>
+        <g filter={`url(#arrow-glow-${block.id})`}>
+          <line x1={cx} y1={yTop + headSize * 0.6} x2={cx} y2={yBottom} stroke="white" strokeWidth={strokeW} strokeLinecap="round" />
+          <polygon points={`${cx},${yTop} ${cx - headSize},${yTop + headSize * 1.4} ${cx + headSize},${yTop + headSize * 1.4}`} fill="white" />
+        </g>
+      </svg>
+    );
+  }
+
+  if (dir === 'down') {
+    return (
+      <svg className="blockout-direction-arrow" width={width} height={height} viewBox={`0 0 ${width} ${height}`}>
+        <defs>
+          <filter id={`arrow-glow-${block.id}`} x="-20%" y="-20%" width="140%" height="140%">
+            <feDropShadow dx="0" dy="1" stdDeviation="1.5" floodColor="#000" floodOpacity="0.45" />
+          </filter>
+        </defs>
+        <g filter={`url(#arrow-glow-${block.id})`}>
+          <line x1={cx} y1={yTop} x2={cx} y2={yBottom - headSize * 0.6} stroke="white" strokeWidth={strokeW} strokeLinecap="round" />
+          <polygon points={`${cx},${yBottom} ${cx - headSize},${yBottom - headSize * 1.4} ${cx + headSize},${yBottom - headSize * 1.4}`} fill="white" />
+        </g>
+      </svg>
+    );
+  }
+
+  if (dir === 'left') {
+    return (
+      <svg className="blockout-direction-arrow" width={width} height={height} viewBox={`0 0 ${width} ${height}`}>
+        <defs>
+          <filter id={`arrow-glow-${block.id}`} x="-20%" y="-20%" width="140%" height="140%">
+            <feDropShadow dx="0" dy="1" stdDeviation="1.5" floodColor="#000" floodOpacity="0.45" />
+          </filter>
+        </defs>
+        <g filter={`url(#arrow-glow-${block.id})`}>
+          <line x1={xLeft + headSize * 0.6} y1={cy} x2={xRight} y2={cy} stroke="white" strokeWidth={strokeW} strokeLinecap="round" />
+          <polygon points={`${xLeft},${cy} ${xLeft + headSize * 1.4},${cy - headSize} ${xLeft + headSize * 1.4},${cy + headSize}`} fill="white" />
+        </g>
+      </svg>
+    );
+  }
+
+  if (dir === 'right') {
+    return (
+      <svg className="blockout-direction-arrow" width={width} height={height} viewBox={`0 0 ${width} ${height}`}>
+        <defs>
+          <filter id={`arrow-glow-${block.id}`} x="-20%" y="-20%" width="140%" height="140%">
+            <feDropShadow dx="0" dy="1" stdDeviation="1.5" floodColor="#000" floodOpacity="0.45" />
+          </filter>
+        </defs>
+        <g filter={`url(#arrow-glow-${block.id})`}>
+          <line x1={xLeft} y1={cy} x2={xRight - headSize * 0.6} y2={cy} stroke="white" strokeWidth={strokeW} strokeLinecap="round" />
+          <polygon points={`${xRight},${cy} ${xRight - headSize * 1.4},${cy - headSize} ${xRight - headSize * 1.4},${cy + headSize}`} fill="white" />
+        </g>
+      </svg>
+    );
+  }
+
+  return null;
+}
+
+function FrozenBlockBadge({ block, cellSize, gap = 0 }) {
+  const count = block.frozen ?? block.freezeCount ?? block.count ?? 0;
+  if (!count || count <= 0) return null;
+
+  const cells = getBlockCells(block);
+  const avgR = cells.reduce((sum, [r]) => sum + r, 0) / cells.length;
+  const avgC = cells.reduce((sum, [_, c]) => sum + c, 0) / cells.length;
+
+  const cx = avgC * (cellSize + gap) + cellSize / 2;
+  const cy = avgR * (cellSize + gap) + cellSize / 2;
+  const badgeSize = Math.max(24, Math.round(cellSize * 0.52));
+
+  return (
+    <div
+      className="blockout-frozen-badge"
+      style={{
+        left: `${cx}px`,
+        top: `${cy}px`,
+        width: `${badgeSize}px`,
+        height: `${badgeSize}px`,
+        fontSize: `${Math.max(13, Math.round(badgeSize * 0.52))}px`
+      }}
+    >
+      <div className="blockout-frozen-badge-inner">
+        <span className="blockout-frozen-snowflake">❄</span>
+        <span className="blockout-frozen-number">{count}</span>
+      </div>
+    </div>
+  );
+}
+
+export default function BlockOutGame({
+  rewardLevel = null,
+  onBack = null,
+  onNextVybraneLevel = null,
+  hasNextVybraneLevel = false
+}) {
   const [levelStars, setLevelStars] = useState(() =>
     getLevelStars('blockOut', BLOCK_OUT_LEVELS.length)
   );
@@ -40,6 +296,7 @@ export default function BlockOutGame({ rewardLevel = null, onBack = null }) {
   const dragRef = useRef(null);
 
   const level = BLOCK_OUT_LEVELS[currentLevelIndex] || BLOCK_OUT_LEVELS[0];
+  const levelWalls = useMemo(() => getLevelWalls(level), [level]);
   const { cellSize, gap, padding, doorDepth } = boardLayout;
 
   useEffect(() => {
@@ -51,30 +308,30 @@ export default function BlockOutGame({ rewardLevel = null, onBack = null }) {
       const isSmallMobile = winW < 380;
       const isMobile = winW < 540;
 
-      const currentGap = isSmallMobile ? 5 : isMobile ? 6 : 8;
-      const currentPadding = isSmallMobile ? 8 : isMobile ? 10 : 12;
-      const currentDoorDepth = isSmallMobile ? 16 : isMobile ? 18 : 22;
+      const currentGap = isSmallMobile ? 4 : isMobile ? 5 : 7;
+      const currentPadding = isSmallMobile ? 6 : isMobile ? 8 : 10;
+      const currentDoorDepth = isSmallMobile ? 14 : isMobile ? 16 : 20;
 
       // Available width calculation
       // Screen padding + board wrapper padding + doors on left and right
-      const screenPadding = isSmallMobile ? 12 : isMobile ? 16 : 24;
-      const wrapperPadding = isSmallMobile ? 16 : isMobile ? 20 : 28;
+      const screenPadding = isSmallMobile ? 8 : isMobile ? 12 : 20;
+      const wrapperPadding = isSmallMobile ? 12 : isMobile ? 16 : 24;
       const overheadW = screenPadding + wrapperPadding + (currentDoorDepth * 2);
-      const maxAvailableWidth = Math.min(winW, 500) - overheadW;
+      const maxAvailableWidth = Math.min(winW, 520) - overheadW;
       const cellFromWidth = Math.floor(
         (maxAvailableWidth - currentPadding * 2 - (level.width - 1) * currentGap) / level.width
       );
 
       // Available height calculation
-      // Space for header, status bar, hint, controls/d-pad, padding
-      const overheadH = (isSmallMobile ? 240 : isMobile ? 260 : 300) + (currentDoorDepth * 2) + currentPadding * 2;
+      // Space for header, status bar, controls/d-pad, padding
+      const overheadH = (isSmallMobile ? 200 : isMobile ? 220 : 260) + (currentDoorDepth * 2) + currentPadding * 2;
       const maxAvailableHeight = winH - overheadH;
       const cellFromHeight = Math.floor(
-        (Math.max(150, maxAvailableHeight) - (level.height - 1) * currentGap) / level.height
+        (Math.max(120, maxAvailableHeight) - (level.height - 1) * currentGap) / level.height
       );
 
-      const calculated = Math.min(cellFromWidth, cellFromHeight > 28 ? cellFromHeight : cellFromWidth);
-      const safeCellSize = Math.max(28, Math.min(58, calculated));
+      const calculated = Math.min(cellFromWidth, cellFromHeight > 24 ? cellFromHeight : cellFromWidth);
+      const safeCellSize = Math.max(24, Math.min(54, calculated));
 
       setBoardLayout({
         cellSize: safeCellSize,
@@ -89,22 +346,23 @@ export default function BlockOutGame({ rewardLevel = null, onBack = null }) {
     return () => window.removeEventListener('resize', handleResize);
   }, [level.width, level.height]);
 
-  function highestUnlockedLevel(stars) {
-    let highest = 0;
-    for (let i = 0; i < stars.length - 1; i++) {
-      if (stars[i] >= 3) highest = i + 1;
-      else break;
-    }
-    return highest;
+  // Dočasne odomknuté všetky levely pre testovanie
+  function highestUnlockedLevel(_stars) {
+    return BLOCK_OUT_LEVELS.length - 1;
   }
 
-  const isLevelUnlocked = (idx) => idx <= highestUnlockedLevel(levelStars);
+  const isLevelUnlocked = (_idx) => true;
 
   const startLevel = useCallback((lvlIndex) => {
     const lvl = BLOCK_OUT_LEVELS[lvlIndex];
     if (!lvl) return;
     setCurrentLevelIndex(lvlIndex);
-    setBlocks(lvl.blocks.map(b => ({ ...b, exiting: false, exitSide: null })));
+    setBlocks(lvl.blocks.map(b => ({
+      ...b,
+      frozen: b.frozen ?? b.freezeCount ?? b.count ?? 0,
+      exiting: false,
+      exitSide: null
+    })));
     setSelectedBlockId(lvl.blocks.length > 0 ? lvl.blocks[0].id : null);
     setMoves(0);
     setHistory([]);
@@ -129,15 +387,97 @@ export default function BlockOutGame({ rewardLevel = null, onBack = null }) {
   };
 
   const findDoorAt = useCallback((side, index) => {
-    return level.doors.find(d => d.side === side && d.index === index) || null;
+    return level.doors.find(d => {
+      if (d.side !== side) return false;
+      const span = d.span || 1;
+      return index >= d.index && index < d.index + span;
+    }) || null;
   }, [level.doors]);
 
+  const checkBlockStep = useCallback((block, fromR, fromC, toR, toC, currentBlocks) => {
+    if (isBlockFrozen(block)) {
+      return { valid: false, exit: false, exitSide: null };
+    }
+
+    const dr = toR - fromR;
+    const dc = toC - fromC;
+    let dirName = null;
+    if (dr === -1 && dc === 0) dirName = 'up';
+    else if (dr === 1 && dc === 0) dirName = 'down';
+    else if (dr === 0 && dc === -1) dirName = 'left';
+    else if (dr === 0 && dc === 1) dirName = 'right';
+
+    if (!dirName || !isDirAllowedForBlock(block, dirName)) {
+      return { valid: false, exit: false, exitSide: null };
+    }
+
+    const blockCells = getBlockCells(block);
+    const nextCells = blockCells.map(([rOff, cOff]) => ({
+      r: toR + rOff,
+      c: toC + cOff
+    }));
+
+    const exitingCells = nextCells.filter(
+      c => c.r < 0 || c.r >= level.height || c.c < 0 || c.c >= level.width
+    );
+
+    if (exitingCells.length > 0) {
+      for (const cell of exitingCells) {
+        let door = null;
+        if (dr === -1 && cell.r === -1 && cell.c >= 0 && cell.c < level.width) {
+          door = findDoorAt('top', cell.c);
+        } else if (dr === 1 && cell.r === level.height && cell.c >= 0 && cell.c < level.width) {
+          door = findDoorAt('bottom', cell.c);
+        } else if (dc === -1 && cell.c === -1 && cell.r >= 0 && cell.r < level.height) {
+          door = findDoorAt('left', cell.r);
+        } else if (dc === 1 && cell.c === level.width && cell.r >= 0 && cell.r < level.height) {
+          door = findDoorAt('right', cell.r);
+        }
+
+        if (!door || door.color !== block.color) {
+          return { valid: false, exit: false, exitSide: null };
+        }
+      }
+      const exitSide = dirName === 'up' ? 'top' : dirName === 'down' ? 'bottom' : dirName;
+      return { valid: true, exit: true, exitSide };
+    }
+
+    if (nextCells.some(nc => levelWalls.some(w => w.r === nc.r && w.c === nc.c))) {
+      return { valid: false, exit: false, exitSide: null };
+    }
+
+    const collidesWithOther = currentBlocks.some(other => {
+      if (other.exiting || other.id === block.id) return false;
+      const otherCells = getOccupiedCells(other);
+      return nextCells.some(nc => otherCells.some(oc => oc.r === nc.r && oc.c === nc.c));
+    });
+
+    if (collidesWithOther) {
+      return { valid: false, exit: false, exitSide: null };
+    }
+
+    return { valid: true, exit: false, exitSide: null };
+  }, [findDoorAt, level.height, level.width, levelWalls]);
+
+  const canBlockMoveInDir = useCallback((block, dr, dc, currentBlocks) => {
+    return checkBlockStep(block, block.r, block.c, block.r + dr, block.c + dc, currentBlocks).valid;
+  }, [checkBlockStep]);
+
   const getMovementLimits = useCallback((block, allBlocks) => {
+    if (isBlockFrozen(block)) {
+      return {
+        up: { maxCells: 0, canExit: false, canMove: false },
+        down: { maxCells: 0, canExit: false, canMove: false },
+        left: { maxCells: 0, canExit: false, canMove: false },
+        right: { maxCells: 0, canExit: false, canMove: false }
+      };
+    }
+
     const directions = {
-      up: { dr: -1, dc: 0, exitSide: 'top' },
-      down: { dr: 1, dc: 0, exitSide: 'bottom' },
-      left: { dr: 0, dc: -1, exitSide: 'left' },
-      right: { dr: 0, dc: 1, exitSide: 'right' }
+      up: { dr: -1, dc: 0 },
+      down: { dr: 1, dc: 0 },
+      left: { dr: 0, dc: -1 },
+      right: { dr: 0, dc: 1 }
     };
 
     const limits = {};
@@ -149,47 +489,14 @@ export default function BlockOutGame({ rewardLevel = null, onBack = null }) {
       let canExit = false;
 
       while (true) {
-        const nextR = curR + dr;
-        const nextC = curC + dc;
-
-        if (nextR < 0) {
-          const door = findDoorAt('top', curC);
-          if (door && door.color === block.color) {
-            canExit = true;
-          }
+        const res = checkBlockStep(block, curR, curC, curR + dr, curC + dc, allBlocks);
+        if (!res.valid) break;
+        if (res.exit) {
+          canExit = true;
           break;
         }
-        if (nextR >= level.height) {
-          const door = findDoorAt('bottom', curC);
-          if (door && door.color === block.color) {
-            canExit = true;
-          }
-          break;
-        }
-        if (nextC < 0) {
-          const door = findDoorAt('left', curR);
-          if (door && door.color === block.color) {
-            canExit = true;
-          }
-          break;
-        }
-        if (nextC >= level.width) {
-          const door = findDoorAt('right', curR);
-          if (door && door.color === block.color) {
-            canExit = true;
-          }
-          break;
-        }
-
-        const isOccupied = allBlocks.some(
-          b => !b.exiting && b.id !== block.id && b.r === nextR && b.c === nextC
-        );
-        if (isOccupied) {
-          break;
-        }
-
-        curR = nextR;
-        curC = nextC;
+        curR += dr;
+        curC += dc;
         maxCells += 1;
       }
 
@@ -197,33 +504,7 @@ export default function BlockOutGame({ rewardLevel = null, onBack = null }) {
     }
 
     return limits;
-  }, [findDoorAt, level.height, level.width]);
-
-  const canBlockMoveInDir = useCallback((block, dr, dc, currentBlocks) => {
-    const curR = block.r;
-    const curC = block.c;
-    const nextR = curR + dr;
-    const nextC = curC + dc;
-
-    if (nextR < 0) {
-      const door = findDoorAt('top', curC);
-      return door && door.color === block.color;
-    }
-    if (nextR >= level.height) {
-      const door = findDoorAt('bottom', curC);
-      return door && door.color === block.color;
-    }
-    if (nextC < 0) {
-      const door = findDoorAt('left', curR);
-      return door && door.color === block.color;
-    }
-    if (nextC >= level.width) {
-      const door = findDoorAt('right', curR);
-      return door && door.color === block.color;
-    }
-
-    return !currentBlocks.some(b => !b.exiting && b.id !== block.id && b.r === nextR && b.c === nextC);
-  }, [findDoorAt, level.height, level.width]);
+  }, [checkBlockStep]);
 
   const moveBlock = useCallback((blockId, direction, requestedSteps = 1, forceExit = false) => {
     if (gameState !== 'playing') return;
@@ -239,8 +520,10 @@ export default function BlockOutGame({ rewardLevel = null, onBack = null }) {
 
     setBlocks((prevBlocks) => {
       const target = prevBlocks.find(b => b.id === blockId && !b.exiting);
-      if (!target) return prevBlocks;
+      if (!target || isBlockFrozen(target)) return prevBlocks;
+      if (!isDirAllowedForBlock(target, direction)) return prevBlocks;
 
+      const blockCells = getBlockCells(target);
       let curR = target.r;
       let curC = target.c;
       let exited = false;
@@ -249,63 +532,92 @@ export default function BlockOutGame({ rewardLevel = null, onBack = null }) {
       while (stepsRemaining > 0 && !exited) {
         const nextR = curR + dr;
         const nextC = curC + dc;
+        const nextCells = blockCells.map(([rOff, cOff]) => ({
+          r: nextR + rOff,
+          c: nextC + cOff
+        }));
 
-        if (nextR < 0) {
-          const door = findDoorAt('top', curC);
-          if (door && door.color === target.color) {
+        const exitingCells = nextCells.filter(
+          c => c.r < 0 || c.r >= level.height || c.c < 0 || c.c >= level.width
+        );
+
+        if (exitingCells.length > 0) {
+          let validExit = true;
+          for (const cell of exitingCells) {
+            let door = null;
+            if (dr === -1 && cell.r === -1 && cell.c >= 0 && cell.c < level.width) {
+              door = findDoorAt('top', cell.c);
+            } else if (dr === 1 && cell.r === level.height && cell.c >= 0 && cell.c < level.width) {
+              door = findDoorAt('bottom', cell.c);
+            } else if (dc === -1 && cell.c === -1 && cell.r >= 0 && cell.r < level.height) {
+              door = findDoorAt('left', cell.r);
+            } else if (dc === 1 && cell.c === level.width && cell.r >= 0 && cell.r < level.height) {
+              door = findDoorAt('right', cell.r);
+            }
+
+            if (!door || door.color !== target.color) {
+              validExit = false;
+              break;
+            }
+          }
+
+          if (validExit) {
             exited = true;
-            curR = -1;
+            curR = nextR;
+            curC = nextC;
           }
           break;
-        } else if (nextR >= level.height) {
-          const door = findDoorAt('bottom', curC);
-          if (door && door.color === target.color) {
-            exited = true;
-            curR = level.height;
-          }
-          break;
-        } else if (nextC < 0) {
-          const door = findDoorAt('left', curR);
-          if (door && door.color === target.color) {
-            exited = true;
-            curC = -1;
-          }
-          break;
-        } else if (nextC >= level.width) {
-          const door = findDoorAt('right', curR);
-          if (door && door.color === target.color) {
-            exited = true;
-            curC = level.width;
-          }
-          break;
-        } else {
-          const isOccupied = prevBlocks.some(
-            b => !b.exiting && b.id !== target.id && b.r === nextR && b.c === nextC
-          );
-          if (isOccupied) {
-            break;
-          }
-          curR = nextR;
-          curC = nextC;
-          stepsRemaining -= 1;
         }
+
+        const isOccupied = prevBlocks.some(other => {
+          if (other.exiting || other.id === target.id) return false;
+          const otherCells = getOccupiedCells(other);
+          return nextCells.some(nc => otherCells.some(oc => oc.r === nc.r && oc.c === nc.c));
+        }) || nextCells.some(nc => levelWalls.some(w => w.r === nc.r && w.c === nc.c));
+
+        if (isOccupied) {
+          break;
+        }
+
+        curR = nextR;
+        curC = nextC;
+        stepsRemaining -= 1;
       }
 
       if (forceExit && !exited) {
         const nextR = curR + dr;
         const nextC = curC + dc;
-        if (nextR < 0 && findDoorAt('top', curC)?.color === target.color) {
-          exited = true;
-          curR = -1;
-        } else if (nextR >= level.height && findDoorAt('bottom', curC)?.color === target.color) {
-          exited = true;
-          curR = level.height;
-        } else if (nextC < 0 && findDoorAt('left', curR)?.color === target.color) {
-          exited = true;
-          curC = -1;
-        } else if (nextC >= level.width && findDoorAt('right', curR)?.color === target.color) {
-          exited = true;
-          curC = level.width;
+        const nextCells = blockCells.map(([rOff, cOff]) => ({
+          r: nextR + rOff,
+          c: nextC + cOff
+        }));
+        const exitingCells = nextCells.filter(
+          c => c.r < 0 || c.r >= level.height || c.c < 0 || c.c >= level.width
+        );
+        if (exitingCells.length > 0) {
+          let validExit = true;
+          for (const cell of exitingCells) {
+            let door = null;
+            if (dr === -1 && cell.r === -1 && cell.c >= 0 && cell.c < level.width) {
+              door = findDoorAt('top', cell.c);
+            } else if (dr === 1 && cell.r === level.height && cell.c >= 0 && cell.c < level.width) {
+              door = findDoorAt('bottom', cell.c);
+            } else if (dc === -1 && cell.c === -1 && cell.r >= 0 && cell.r < level.height) {
+              door = findDoorAt('left', cell.r);
+            } else if (dc === 1 && cell.c === level.width && cell.r >= 0 && cell.r < level.height) {
+              door = findDoorAt('right', cell.r);
+            }
+
+            if (!door || door.color !== target.color) {
+              validExit = false;
+              break;
+            }
+          }
+          if (validExit) {
+            exited = true;
+            curR = nextR;
+            curC = nextC;
+          }
         }
       }
 
@@ -329,11 +641,31 @@ export default function BlockOutGame({ rewardLevel = null, onBack = null }) {
         setMessage('Pohltené! ✨');
         setTimeout(() => setMessage(''), 1200);
 
-        const updated = prevBlocks.map(b =>
-          b.id === target.id
-            ? { ...b, r: curR, c: curC, exiting: true, exitSide }
-            : b
-        );
+        let didUnfreeze = false;
+        let didCrack = false;
+        const updated = prevBlocks.map(b => {
+          if (b.id === target.id) {
+            return { ...b, r: curR, c: curC, exiting: true, exitSide };
+          }
+          const curFrozen = b.frozen ?? b.freezeCount ?? b.count ?? 0;
+          if (curFrozen > 0) {
+            const nextFrozen = Math.max(0, curFrozen - 1);
+            if (nextFrozen === 0) didUnfreeze = true;
+            else didCrack = true;
+            return {
+              ...b,
+              frozen: nextFrozen,
+              justUnfrozen: nextFrozen === 0
+            };
+          }
+          return b;
+        });
+
+        if (didUnfreeze) {
+          sounds.playIceShatter();
+        } else if (didCrack) {
+          sounds.playIceCrack();
+        }
 
         // Allow smooth absorption animation to finish before removing
         setTimeout(() => {
@@ -367,7 +699,7 @@ export default function BlockOutGame({ rewardLevel = null, onBack = null }) {
         b.id === target.id ? { ...b, r: curR, c: curC } : b
       );
     });
-  }, [gameState, findDoorAt, level.height, level.width, moves, currentLevelIndex]);
+  }, [gameState, findDoorAt, level.height, level.width, levelWalls, moves, currentLevelIndex]);
 
   const undoMove = () => {
     if (history.length === 0 || gameState !== 'playing') return;
@@ -412,6 +744,13 @@ export default function BlockOutGame({ rewardLevel = null, onBack = null }) {
     if (gameState !== 'playing' || block.exiting) return;
     e.preventDefault();
 
+    setSelectedBlockId(block.id);
+
+    if (isBlockFrozen(block)) {
+      sounds.playIceCrack();
+      return;
+    }
+
     const targetEl = e.currentTarget;
     if (targetEl && targetEl.setPointerCapture) {
       try {
@@ -421,110 +760,225 @@ export default function BlockOutGame({ rewardLevel = null, onBack = null }) {
       }
     }
 
-    setSelectedBlockId(block.id);
-    const limits = getMovementLimits(block, blocks);
-
     dragRef.current = {
       pointerId: e.pointerId,
+      targetEl,
+      block,
       blockId: block.id,
+      startR: block.r,
+      startC: block.c,
+      currentR: block.r,
+      currentC: block.c,
       startX: e.clientX,
       startY: e.clientY,
-      limits,
       isDragging: false,
-      targetEl
+      isExiting: false,
+      exitSide: null
     };
+
+    setDragInfo({
+      blockId: block.id,
+      offsetX: 0,
+      offsetY: 0,
+      currentR: block.r,
+      currentC: block.c,
+      isExiting: false,
+      exitSide: null
+    });
   };
 
   const handlePointerMove = (e) => {
     if (!dragRef.current || dragRef.current.pointerId !== e.pointerId) return;
 
-    const { startX, startY, blockId, limits } = dragRef.current;
-    const rawDx = e.clientX - startX;
-    const rawDy = e.clientY - startY;
-    const dist = Math.hypot(rawDx, rawDy);
+    const drag = dragRef.current;
+    const totalDist = Math.hypot(e.clientX - drag.startX, e.clientY - drag.startY);
 
-    if (dist < 5 && !dragRef.current.isDragging) {
-      return; // Small deadzone to prevent accidental drag on simple tap
+    if (totalDist < 5 && !drag.isDragging) {
+      return; // Small deadzone for simple clicks/taps
     }
 
-    dragRef.current.isDragging = true;
+    drag.isDragging = true;
     const step = cellSize + gap;
-    const isHoriz = Math.abs(rawDx) >= Math.abs(rawDy);
+    const threshold = step * 0.5;
 
-    let offsetX = 0;
-    let offsetY = 0;
-    let activeDir = null;
+    let maxLoops = 10;
+    while (maxLoops-- > 0) {
+      if (drag.isExiting) {
+        // If block entered an exit door, check if user is pulling back onto the board
+        const expectedX = drag.startX + (drag.currentC - drag.startC) * step;
+        const expectedY = drag.startY + (drag.currentR - drag.startR) * step;
+        const localDx = e.clientX - expectedX;
+        const localDy = e.clientY - expectedY;
 
-    if (isHoriz) {
-      if (rawDx > 0) {
-        activeDir = 'right';
-        const limit = limits.right;
-        const maxDist = limit.maxCells * step + (limit.canExit ? doorDepth + cellSize * 0.35 : 0);
-        if (limit.canMove) {
-          if (rawDx <= maxDist) {
-            offsetX = rawDx;
-          } else {
-            offsetX = maxDist + Math.min((rawDx - maxDist) * 0.12, 10);
-          }
-        } else {
-          offsetX = Math.min(rawDx * 0.12, 8);
+        let pullBack = false;
+        if (drag.exitSide === 'right' && localDx <= -threshold) pullBack = true;
+        else if (drag.exitSide === 'left' && localDx >= threshold) pullBack = true;
+        else if (drag.exitSide === 'bottom' && localDy <= -threshold) pullBack = true;
+        else if (drag.exitSide === 'top' && localDy >= threshold) pullBack = true;
+
+        if (pullBack) {
+          drag.isExiting = false;
+          drag.exitSide = null;
+          continue;
+        }
+        break;
+      }
+
+      const expectedX = drag.startX + (drag.currentC - drag.startC) * step;
+      const expectedY = drag.startY + (drag.currentR - drag.startR) * step;
+      const localDx = e.clientX - expectedX;
+      const localDy = e.clientY - expectedY;
+      const absDx = Math.abs(localDx);
+      const absDy = Math.abs(localDy);
+
+      let pDr = 0, pDc = 0;
+      let sDr = 0, sDc = 0;
+
+      if (absDx >= absDy) {
+        if (absDx >= threshold) {
+          pDc = localDx > 0 ? 1 : -1;
+        }
+        if (absDy >= threshold) {
+          pDr = localDy > 0 ? 1 : -1;
         }
       } else {
-        activeDir = 'left';
-        const limit = limits.left;
-        const maxDist = limit.maxCells * step + (limit.canExit ? doorDepth + cellSize * 0.35 : 0);
-        if (limit.canMove) {
-          if (-rawDx <= maxDist) {
-            offsetX = rawDx;
-          } else {
-            offsetX = -maxDist - Math.min((-rawDx - maxDist) * 0.12, 10);
-          }
-        } else {
-          offsetX = Math.max(rawDx * 0.12, -8);
+        if (absDy >= threshold) {
+          pDr = localDy > 0 ? 1 : -1;
         }
+        if (absDx >= threshold) {
+          pDc = localDx > 0 ? 1 : -1;
+        }
+      }
+
+      if (pDr === 0 && pDc === 0) break;
+
+      let moved = false;
+      // Try primary direction first
+      if (pDc !== 0 && absDx >= absDy) {
+        const res = checkBlockStep(drag.block, drag.currentR, drag.currentC, drag.currentR, drag.currentC + pDc, blocks);
+        if (res.valid) {
+          if (res.exit) {
+            drag.isExiting = true;
+            drag.exitSide = res.exitSide;
+          } else {
+            drag.currentC += pDc;
+          }
+          moved = true;
+        }
+      } else if (pDr !== 0) {
+        const res = checkBlockStep(drag.block, drag.currentR, drag.currentC, drag.currentR + pDr, drag.currentC, blocks);
+        if (res.valid) {
+          if (res.exit) {
+            drag.isExiting = true;
+            drag.exitSide = res.exitSide;
+          } else {
+            drag.currentR += pDr;
+          }
+          moved = true;
+        }
+      }
+
+      // If primary direction was blocked, try secondary direction
+      if (!moved) {
+        if (sDr !== 0 && absDx >= absDy) {
+          const res = checkBlockStep(drag.block, drag.currentR, drag.currentC, drag.currentR + sDr, drag.currentC, blocks);
+          if (res.valid) {
+            if (res.exit) {
+              drag.isExiting = true;
+              drag.exitSide = res.exitSide;
+            } else {
+              drag.currentR += sDr;
+            }
+            moved = true;
+          }
+        } else if (sDc !== 0 && absDy > absDx) {
+          const res = checkBlockStep(drag.block, drag.currentR, drag.currentC, drag.currentR, drag.currentC + sDc, blocks);
+          if (res.valid) {
+            if (res.exit) {
+              drag.isExiting = true;
+              drag.exitSide = res.exitSide;
+            } else {
+              drag.currentC += sDc;
+            }
+            moved = true;
+          }
+        }
+      }
+
+      if (!moved) break;
+    }
+
+    // Sub-pixel drag visual offset calculation
+    const expectedX = drag.startX + (drag.currentC - drag.startC) * step;
+    const expectedY = drag.startY + (drag.currentR - drag.startR) * step;
+    const localDx = e.clientX - expectedX;
+    const localDy = e.clientY - expectedY;
+
+    let subOffsetX = 0;
+    let subOffsetY = 0;
+
+    if (drag.isExiting) {
+      if (drag.exitSide === 'right') {
+        subOffsetX = Math.max(0, Math.min(localDx, doorDepth + cellSize * 0.25));
+        subOffsetY = Math.max(-6, Math.min(6, localDy * 0.1));
+      } else if (drag.exitSide === 'left') {
+        subOffsetX = Math.min(0, Math.max(localDx, -(doorDepth + cellSize * 0.25)));
+        subOffsetY = Math.max(-6, Math.min(6, localDy * 0.1));
+      } else if (drag.exitSide === 'bottom') {
+        subOffsetY = Math.max(0, Math.min(localDy, doorDepth + cellSize * 0.25));
+        subOffsetX = Math.max(-6, Math.min(6, localDx * 0.1));
+      } else if (drag.exitSide === 'top') {
+        subOffsetY = Math.min(0, Math.max(localDy, -(doorDepth + cellSize * 0.25)));
+        subOffsetX = Math.max(-6, Math.min(6, localDx * 0.1));
       }
     } else {
-      if (rawDy > 0) {
-        activeDir = 'down';
-        const limit = limits.down;
-        const maxDist = limit.maxCells * step + (limit.canExit ? doorDepth + cellSize * 0.35 : 0);
-        if (limit.canMove) {
-          if (rawDy <= maxDist) {
-            offsetY = rawDy;
-          } else {
-            offsetY = maxDist + Math.min((rawDy - maxDist) * 0.12, 10);
-          }
-        } else {
-          offsetY = Math.min(rawDy * 0.12, 8);
-        }
-      } else {
-        activeDir = 'up';
-        const limit = limits.up;
-        const maxDist = limit.maxCells * step + (limit.canExit ? doorDepth + cellSize * 0.35 : 0);
-        if (limit.canMove) {
-          if (-rawDy <= maxDist) {
-            offsetY = rawDy;
-          } else {
-            offsetY = -maxDist - Math.min((-rawDy - maxDist) * 0.12, 10);
-          }
-        } else {
-          offsetY = Math.max(rawDy * 0.12, -8);
-        }
+      const canRight = checkBlockStep(drag.block, drag.currentR, drag.currentC, drag.currentR, drag.currentC + 1, blocks).valid;
+      const canLeft = checkBlockStep(drag.block, drag.currentR, drag.currentC, drag.currentR, drag.currentC - 1, blocks).valid;
+      const canDown = checkBlockStep(drag.block, drag.currentR, drag.currentC, drag.currentR + 1, drag.currentC, blocks).valid;
+      const canUp = checkBlockStep(drag.block, drag.currentR, drag.currentC, drag.currentR - 1, drag.currentC, blocks).valid;
+
+      if (localDx > 0) {
+        subOffsetX = canRight ? Math.min(localDx, step * 0.5) : Math.min(localDx * 0.15, 8);
+      } else if (localDx < 0) {
+        subOffsetX = canLeft ? Math.max(localDx, -step * 0.5) : Math.max(localDx * 0.15, -8);
+      }
+
+      if (localDy > 0) {
+        subOffsetY = canDown ? Math.min(localDy, step * 0.5) : Math.min(localDy * 0.15, 8);
+      } else if (localDy < 0) {
+        subOffsetY = canUp ? Math.max(localDy, -step * 0.5) : Math.max(localDy * 0.15, -8);
       }
     }
 
+    const totalOffsetX = (drag.currentC - drag.startC) * step + subOffsetX;
+    const totalOffsetY = (drag.currentR - drag.startR) * step + subOffsetY;
+
     setDragInfo({
-      blockId,
-      offsetX,
-      offsetY,
-      activeDir
+      blockId: drag.blockId,
+      offsetX: totalOffsetX,
+      offsetY: totalOffsetY,
+      currentR: drag.currentR,
+      currentC: drag.currentC,
+      isExiting: drag.isExiting,
+      exitSide: drag.exitSide
     });
   };
 
   const handlePointerUp = (e) => {
     if (!dragRef.current || dragRef.current.pointerId !== e.pointerId) return;
 
-    const { startX, startY, blockId, limits, isDragging, targetEl } = dragRef.current;
+    const {
+      targetEl,
+      blockId,
+      startR,
+      startC,
+      currentR,
+      currentC,
+      isDragging,
+      isExiting,
+      exitSide
+    } = dragRef.current;
+
     if (targetEl && targetEl.releasePointerCapture) {
       try {
         targetEl.releasePointerCapture(e.pointerId);
@@ -541,66 +995,90 @@ export default function BlockOutGame({ rewardLevel = null, onBack = null }) {
       return;
     }
 
-    const rawDx = e.clientX - startX;
-    const rawDy = e.clientY - startY;
-    const isHoriz = Math.abs(rawDx) >= Math.abs(rawDy);
-    const step = cellSize + gap;
-    const threshold = Math.min(DRAG_THRESHOLD, cellSize * 0.28);
+    if (isExiting) {
+      // Save history snapshot before the drag started
+      setHistory(prevHist => [
+        ...prevHist,
+        {
+          blocks: blocks.map(b => ({ ...b })),
+          moves,
+          selectedBlockId: blockId
+        }
+      ]);
+      setMoves(m => m + 1);
 
-    let directionToMove = null;
-    let stepsToMove = 1;
-    let forceExit = false;
+      sounds.playBlockOut();
+      setMessage('Pohltené! ✨');
+      setTimeout(() => setMessage(''), 1200);
 
-    if (isHoriz) {
-      if (rawDx > threshold && limits.right.canMove) {
-        directionToMove = 'right';
-        const limit = limits.right;
-        const exitDistThreshold = limit.maxCells * step + threshold;
-        if (limit.canExit && rawDx >= exitDistThreshold) {
-          forceExit = true;
-          stepsToMove = limit.maxCells + 1;
-        } else {
-          stepsToMove = Math.min(limit.maxCells, Math.max(1, Math.round(rawDx / step)));
+      let didUnfreeze = false;
+      let didCrack = false;
+      const updated = blocks.map(b => {
+        if (b.id === blockId) {
+          return { ...b, r: currentR, c: currentC, exiting: true, exitSide };
         }
-      } else if (rawDx < -threshold && limits.left.canMove) {
-        directionToMove = 'left';
-        const limit = limits.left;
-        const dist = -rawDx;
-        const exitDistThreshold = limit.maxCells * step + threshold;
-        if (limit.canExit && dist >= exitDistThreshold) {
-          forceExit = true;
-          stepsToMove = limit.maxCells + 1;
-        } else {
-          stepsToMove = Math.min(limit.maxCells, Math.max(1, Math.round(dist / step)));
+        const curFrozen = b.frozen ?? b.freezeCount ?? b.count ?? 0;
+        if (curFrozen > 0) {
+          const nextFrozen = Math.max(0, curFrozen - 1);
+          if (nextFrozen === 0) didUnfreeze = true;
+          else didCrack = true;
+          return {
+            ...b,
+            frozen: nextFrozen,
+            justUnfrozen: nextFrozen === 0
+          };
         }
+        return b;
+      });
+
+      if (didUnfreeze) {
+        sounds.playIceShatter();
+      } else if (didCrack) {
+        sounds.playIceCrack();
       }
-    } else {
-      if (rawDy > threshold && limits.down.canMove) {
-        directionToMove = 'down';
-        const limit = limits.down;
-        const exitDistThreshold = limit.maxCells * step + threshold;
-        if (limit.canExit && rawDy >= exitDistThreshold) {
-          forceExit = true;
-          stepsToMove = limit.maxCells + 1;
-        } else {
-          stepsToMove = Math.min(limit.maxCells, Math.max(1, Math.round(rawDy / step)));
-        }
-      } else if (rawDy < -threshold && limits.up.canMove) {
-        directionToMove = 'up';
-        const limit = limits.up;
-        const dist = -rawDy;
-        const exitDistThreshold = limit.maxCells * step + threshold;
-        if (limit.canExit && dist >= exitDistThreshold) {
-          forceExit = true;
-          stepsToMove = limit.maxCells + 1;
-        } else {
-          stepsToMove = Math.min(limit.maxCells, Math.max(1, Math.round(dist / step)));
-        }
-      }
+
+      setBlocks(updated);
+
+      setTimeout(() => {
+        setBlocks(current => {
+          const remaining = current.filter(b => b.id !== blockId);
+          if (remaining.length === 0) {
+            const updatedStars = updateLevelBestStars(
+              'blockOut',
+              currentLevelIndex,
+              5,
+              BLOCK_OUT_LEVELS.length
+            );
+            setLevelStars(updatedStars);
+            setGameState('win');
+            sounds.playVictory();
+            if (fireworksRef.current) {
+              triggerFireworks(fireworksRef.current);
+            }
+          } else {
+            setSelectedBlockId(prev => (prev === blockId ? remaining[0].id : prev));
+          }
+          return remaining;
+        });
+      }, 450);
+      return;
     }
 
-    if (directionToMove && (stepsToMove > 0 || forceExit)) {
-      moveBlock(blockId, directionToMove, stepsToMove, forceExit);
+    if (currentR !== startR || currentC !== startC) {
+      setHistory(prevHist => [
+        ...prevHist,
+        {
+          blocks: blocks.map(b => ({ ...b })),
+          moves,
+          selectedBlockId: blockId
+        }
+      ]);
+      setMoves(m => m + 1);
+      sounds.playSlide();
+
+      setBlocks(prev =>
+        prev.map(b => (b.id === blockId ? { ...b, r: currentR, c: currentC } : b))
+      );
     }
   };
 
@@ -636,10 +1114,6 @@ export default function BlockOutGame({ rewardLevel = null, onBack = null }) {
                 {muted ? '🔇' : '🔊'}
               </button>
             </div>
-          </div>
-
-          <div className="blockout-hint">
-            Hraj vlastným tempom bez akéhokoľvek časovača! Posuň kocky do dverí rovnakej farby.
           </div>
 
           <div className="blockout-levels-grid">
@@ -712,7 +1186,6 @@ export default function BlockOutGame({ rewardLevel = null, onBack = null }) {
           </div>
 
           <div className="blockout-status-bar">
-            <span>{level.hint}</span>
             <span className="blockout-moves-badge">Ťahy: {moves}</span>
           </div>
 
@@ -729,6 +1202,14 @@ export default function BlockOutGame({ rewardLevel = null, onBack = null }) {
               {/* Doors */}
               {level.doors.map((door, dIdx) => {
                 const conf = COLOR_CONFIG[door.color] || COLOR_CONFIG.red;
+                const span = door.span || 1;
+                const doorWidth = door.side === 'top' || door.side === 'bottom'
+                  ? span * cellSize + (span - 1) * gap
+                  : doorDepth;
+                const doorHeight = door.side === 'left' || door.side === 'right'
+                  ? span * cellSize + (span - 1) * gap
+                  : doorDepth;
+
                 let doorStyle = {
                   backgroundColor: conf.bg,
                   boxShadow: `0 0 10px ${conf.glow}`
@@ -736,22 +1217,22 @@ export default function BlockOutGame({ rewardLevel = null, onBack = null }) {
 
                 if (door.side === 'top') {
                   doorStyle.left = padding + door.index * (cellSize + gap);
-                  doorStyle.width = cellSize;
+                  doorStyle.width = doorWidth;
                   doorStyle.top = -doorDepth;
                   doorStyle.height = doorDepth;
                 } else if (door.side === 'bottom') {
                   doorStyle.left = padding + door.index * (cellSize + gap);
-                  doorStyle.width = cellSize;
+                  doorStyle.width = doorWidth;
                   doorStyle.bottom = -doorDepth;
                   doorStyle.height = doorDepth;
                 } else if (door.side === 'left') {
                   doorStyle.top = padding + door.index * (cellSize + gap);
-                  doorStyle.height = cellSize;
+                  doorStyle.height = doorHeight;
                   doorStyle.left = -doorDepth;
                   doorStyle.width = doorDepth;
                 } else if (door.side === 'right') {
                   doorStyle.top = padding + door.index * (cellSize + gap);
-                  doorStyle.height = cellSize;
+                  doorStyle.height = doorHeight;
                   doorStyle.right = -doorDepth;
                   doorStyle.width = doorDepth;
                 }
@@ -759,19 +1240,37 @@ export default function BlockOutGame({ rewardLevel = null, onBack = null }) {
                 // Otvor sa zvýrazní LEN vtedy, keď je pri ňom kocka rovnakej farby
                 const isMatchingBlockAdjacent = blocks.some(b => {
                   if (b.exiting || b.color !== door.color) return false;
-                  if (door.side === 'top') return b.r === 0 && b.c === door.index;
-                  if (door.side === 'bottom') return b.r === level.height - 1 && b.c === door.index;
-                  if (door.side === 'left') return b.c === 0 && b.r === door.index;
-                  if (door.side === 'right') return b.c === level.width - 1 && b.r === door.index;
-                  return false;
+                  const effectiveBlock = (dragInfo && dragInfo.blockId === b.id)
+                    ? { ...b, r: dragInfo.currentR, c: dragInfo.currentC }
+                    : b;
+                  const occupied = getOccupiedCells(effectiveBlock);
+                  return occupied.some(cell => {
+                    if (door.side === 'top') return cell.r === 0 && cell.c >= door.index && cell.c < door.index + span;
+                    if (door.side === 'bottom') return cell.r === level.height - 1 && cell.c >= door.index && cell.c < door.index + span;
+                    if (door.side === 'left') return cell.c === 0 && cell.r >= door.index && cell.r < door.index + span;
+                    if (door.side === 'right') return cell.c === level.width - 1 && cell.r >= door.index && cell.r < door.index + span;
+                    return false;
+                  });
                 });
 
                 const isAbsorbing = blocks.some(b => {
                   if (!b.exiting || b.exitSide !== door.side || b.color !== door.color) return false;
-                  if (door.side === 'top' || door.side === 'bottom') return b.c === door.index;
-                  if (door.side === 'left' || door.side === 'right') return b.r === door.index;
-                  return false;
-                });
+                  const occupied = getOccupiedCells(b);
+                  return occupied.some(cell => {
+                    if (door.side === 'top' || door.side === 'bottom') return cell.c >= door.index && cell.c < door.index + span;
+                    if (door.side === 'left' || door.side === 'right') return cell.r >= door.index && cell.r < door.index + span;
+                    return false;
+                  });
+                }) || (dragInfo && dragInfo.isExiting && dragInfo.exitSide === door.side && (() => {
+                  const activeB = blocks.find(b => b.id === dragInfo.blockId);
+                  if (!activeB || activeB.color !== door.color) return false;
+                  const occ = getOccupiedCells({ ...activeB, r: dragInfo.currentR, c: dragInfo.currentC });
+                  return occ.some(cell => {
+                    if (door.side === 'top' || door.side === 'bottom') return cell.c >= door.index && cell.c < door.index + span;
+                    if (door.side === 'left' || door.side === 'right') return cell.r >= door.index && cell.r < door.index + span;
+                    return false;
+                  });
+                })());
 
                 return (
                   <div
@@ -781,17 +1280,16 @@ export default function BlockOutGame({ rewardLevel = null, onBack = null }) {
                     } ${isAbsorbing ? 'absorbing' : ''}`}
                     style={doorStyle}
                   >
-                    <span
-                      className="blockout-door-icon"
-                      style={{ fontSize: Math.max(10, Math.round(cellSize * 0.34)) + 'px' }}
-                    >
-                      {conf.icon}
-                    </span>
+                    <DoorArrow
+                      side={door.side}
+                      color={door.color}
+                      size={Math.max(12, Math.round(cellSize * 0.4))}
+                    />
                   </div>
                 );
               })}
 
-              {/* Grid Background Cells */}
+              {/* Grid Background Cells & Walls */}
               <div
                 className="blockout-grid"
                 style={{
@@ -801,21 +1299,102 @@ export default function BlockOutGame({ rewardLevel = null, onBack = null }) {
                   gridTemplateRows: `repeat(${level.height}, ${cellSize}px)`
                 }}
               >
-                {Array.from({ length: level.height * level.width }).map((_, cIdx) => (
-                  <div
-                    key={cIdx}
-                    className="blockout-cell"
-                    style={{
-                      borderRadius: Math.max(6, Math.round(cellSize * 0.22)) + 'px'
-                    }}
-                  />
-                ))}
+                {Array.from({ length: level.height * level.width }).map((_, cIdx) => {
+                  const r = Math.floor(cIdx / level.width);
+                  const c = cIdx % level.width;
+                  const isWall = levelWalls.some(w => w.r === r && w.c === c);
+
+                  if (!isWall) {
+                    return (
+                      <div
+                        key={cIdx}
+                        className="blockout-cell"
+                        style={{
+                          borderRadius: Math.max(6, Math.round(cellSize * 0.22)) + 'px'
+                        }}
+                      />
+                    );
+                  }
+
+                  const hasTop = levelWalls.some(w => w.r === r - 1 && w.c === c);
+                  const hasBottom = levelWalls.some(w => w.r === r + 1 && w.c === c);
+                  const hasLeft = levelWalls.some(w => w.r === r && w.c === c - 1);
+                  const hasRight = levelWalls.some(w => w.r === r && w.c === c + 1);
+                  const hasBottomRight = levelWalls.some(w => w.r === r + 1 && w.c === c + 1);
+                  const wallRadius = Math.max(8, Math.round(cellSize * 0.24));
+
+                  return (
+                    <div
+                      key={cIdx}
+                      className="blockout-cell blockout-cell-wall"
+                      style={{
+                        borderTopLeftRadius: !hasTop && !hasLeft ? `${wallRadius}px` : '0px',
+                        borderTopRightRadius: !hasTop && !hasRight ? `${wallRadius}px` : '0px',
+                        borderBottomLeftRadius: !hasBottom && !hasLeft ? `${wallRadius}px` : '0px',
+                        borderBottomRightRadius: !hasBottom && !hasRight ? `${wallRadius}px` : '0px',
+                        borderTop: !hasTop ? '2px solid #090d16' : 'none',
+                        borderBottom: !hasBottom ? '2px solid #090d16' : 'none',
+                        borderLeft: !hasLeft ? '2px solid #090d16' : 'none',
+                        borderRight: !hasRight ? '2px solid #090d16' : 'none',
+                      }}
+                      title="Stena"
+                    >
+                      {/* Seamless bridge between adjacent horizontal wall cells */}
+                      {hasRight && (
+                        <div
+                          className="blockout-wall-bridge blockout-wall-bridge-h"
+                          style={{
+                            top: 0,
+                            left: 'calc(100% - 1px)',
+                            width: gap + 2,
+                            height: cellSize,
+                            borderTop: (!levelWalls.some(w => w.r === r - 1 && w.c === c) && !levelWalls.some(w => w.r === r - 1 && w.c === c + 1)) ? '2px solid #090d16' : 'none',
+                            borderBottom: (!levelWalls.some(w => w.r === r + 1 && w.c === c) && !levelWalls.some(w => w.r === r + 1 && w.c === c + 1)) ? '2px solid #090d16' : 'none',
+                          }}
+                        />
+                      )}
+
+                      {/* Seamless bridge between adjacent vertical wall cells */}
+                      {hasBottom && (
+                        <div
+                          className="blockout-wall-bridge blockout-wall-bridge-v"
+                          style={{
+                            top: 'calc(100% - 1px)',
+                            left: 0,
+                            width: cellSize,
+                            height: gap + 2,
+                            borderLeft: (!levelWalls.some(w => w.r === r && w.c === c - 1) && !levelWalls.some(w => w.r === r + 1 && w.c === c - 1)) ? '2px solid #090d16' : 'none',
+                            borderRight: (!levelWalls.some(w => w.r === r && w.c === c + 1) && !levelWalls.some(w => w.r === r + 1 && w.c === c + 1)) ? '2px solid #090d16' : 'none',
+                          }}
+                        />
+                      )}
+
+                      {/* Seamless center bridge for 2x2 wall clusters */}
+                      {hasRight && hasBottom && hasBottomRight && (
+                        <div
+                          className="blockout-wall-bridge blockout-wall-bridge-c"
+                          style={{
+                            top: 'calc(100% - 1px)',
+                            left: 'calc(100% - 1px)',
+                            width: gap + 2,
+                            height: gap + 2,
+                          }}
+                        />
+                      )}
+                    </div>
+                  );
+                })}
 
                 {/* Blocks */}
                 {blocks.map((block) => {
                   const conf = COLOR_CONFIG[block.color] || COLOR_CONFIG.red;
                   const isSelected = selectedBlockId === block.id;
                   const isDragging = dragInfo && dragInfo.blockId === block.id;
+                  const cells = getBlockCells(block);
+                  const dims = getBlockDimensions(block);
+
+                  const containerW = dims.cols * cellSize + (dims.cols - 1) * gap;
+                  const containerH = dims.rows * cellSize + (dims.rows - 1) * gap;
 
                   let top = padding + block.r * (cellSize + gap);
                   let left = padding + block.c * (cellSize + gap);
@@ -823,11 +1402,8 @@ export default function BlockOutGame({ rewardLevel = null, onBack = null }) {
                   const pieceStyle = {
                     top,
                     left,
-                    width: cellSize,
-                    height: cellSize,
-                    backgroundColor: conf.bg,
-                    borderColor: conf.border,
-                    borderRadius: Math.max(8, Math.round(cellSize * 0.24)) + 'px'
+                    width: containerW,
+                    height: containerH
                   };
 
                   if (isDragging) {
@@ -835,11 +1411,12 @@ export default function BlockOutGame({ rewardLevel = null, onBack = null }) {
                   }
 
                   const exitClass = block.exiting ? `exiting exit-${block.exitSide}` : '';
+                  const cellRadius = Math.max(8, Math.round(cellSize * 0.24));
 
                   return (
                     <div
                       key={block.id}
-                      className={`blockout-piece ${isSelected ? 'selected' : ''} ${exitClass} ${
+                      className={`blockout-piece-container ${isSelected ? 'selected' : ''} ${exitClass} ${
                         isDragging ? 'dragging' : ''
                       }`}
                       style={pieceStyle}
@@ -848,12 +1425,86 @@ export default function BlockOutGame({ rewardLevel = null, onBack = null }) {
                       onPointerUp={handlePointerUp}
                       onPointerCancel={handlePointerCancel}
                     >
-                      <span
-                        className="blockout-piece-icon"
-                        style={{ fontSize: Math.max(13, Math.round(cellSize * 0.42)) + 'px' }}
-                      >
-                        {conf.icon}
-                      </span>
+                      {/* Directional arrow overlay for restricted blocks (↕, ↔, ↑, ↓, etc.) */}
+                      <BlockArrowOverlay
+                        block={block}
+                        width={containerW}
+                        height={containerH}
+                        cellSize={cellSize}
+                        gap={gap}
+                      />
+
+                      {cells.map(([dr, dc], cellIdx) => {
+                        const hasTop = cells.some(([r, c]) => r === dr - 1 && c === dc);
+                        const hasBottom = cells.some(([r, c]) => r === dr + 1 && c === dc);
+                        const hasLeft = cells.some(([r, c]) => r === dr && c === dc - 1);
+                        const hasRight = cells.some(([r, c]) => r === dr && c === dc + 1);
+
+                        const subStyle = {
+                          top: dr * (cellSize + gap),
+                          left: dc * (cellSize + gap),
+                          width: cellSize,
+                          height: cellSize,
+                          backgroundColor: conf.bg,
+                          borderColor: conf.border,
+                          borderTopLeftRadius: !hasTop && !hasLeft ? `${cellRadius}px` : '4px',
+                          borderTopRightRadius: !hasTop && !hasRight ? `${cellRadius}px` : '4px',
+                          borderBottomLeftRadius: !hasBottom && !hasLeft ? `${cellRadius}px` : '4px',
+                          borderBottomRightRadius: !hasBottom && !hasRight ? `${cellRadius}px` : '4px',
+                        };
+
+                        return (
+                          <div key={cellIdx} className="blockout-subcell-wrapper">
+                            <div className="blockout-subcell" style={subStyle} />
+
+                            {/* Seamless bridge between adjacent horizontal cells */}
+                            {hasRight && (
+                              <div
+                                className="blockout-cell-bridge blockout-cell-bridge-h"
+                                style={{
+                                  top: dr * (cellSize + gap),
+                                  left: dc * (cellSize + gap) + cellSize - 1,
+                                  width: gap + 2,
+                                  height: cellSize,
+                                  backgroundColor: conf.bg,
+                                  borderTop: `2px solid ${conf.border}`,
+                                  borderBottom: `2px solid ${conf.border}`
+                                }}
+                              />
+                            )}
+
+                            {/* Seamless bridge between adjacent vertical cells */}
+                            {hasBottom && (
+                              <div
+                                className="blockout-cell-bridge blockout-cell-bridge-v"
+                                style={{
+                                  top: dr * (cellSize + gap) + cellSize - 1,
+                                  left: dc * (cellSize + gap),
+                                  width: cellSize,
+                                  height: gap + 2,
+                                  backgroundColor: conf.bg,
+                                  borderLeft: `2px solid ${conf.border}`,
+                                  borderRight: `2px solid ${conf.border}`
+                                }}
+                              />
+                            )}
+
+                            {/* Seamless center bridge for 2x2 blocks */}
+                            {hasRight && hasBottom && cells.some(([r, c]) => r === dr + 1 && c === dc + 1) && (
+                              <div
+                                className="blockout-cell-bridge blockout-cell-bridge-c"
+                                style={{
+                                  top: dr * (cellSize + gap) + cellSize - 1,
+                                  left: dc * (cellSize + gap) + cellSize - 1,
+                                  width: gap + 2,
+                                  height: gap + 2,
+                                  backgroundColor: conf.bg
+                                }}
+                              />
+                            )}
+                          </div>
+                        );
+                      })}
                     </div>
                   );
                 })}
@@ -895,7 +1546,7 @@ export default function BlockOutGame({ rewardLevel = null, onBack = null }) {
                   ◀
                 </button>
                 <div className="blockout-dpad-center">
-                  {selectedBlock ? COLOR_CONFIG[selectedBlock.color]?.icon : '•'}
+                  {selectedBlock ? (COLOR_CONFIG[selectedBlock.color]?.label || '•') : '•'}
                 </div>
                 <button
                   className="blockout-dpad-btn"
@@ -930,33 +1581,49 @@ export default function BlockOutGame({ rewardLevel = null, onBack = null }) {
                   Všetky kocky úspešne vyradené na {moves} {moves === 1 ? 'ťah' : (moves < 5 ? 'ťahy' : 'ťahov')}!
                 </p>
                 <div className="blockout-modal-buttons">
-                  {currentLevelIndex + 1 < BLOCK_OUT_LEVELS.length && (
-                    <button
-                      className="btn-blockout-primary"
-                      onClick={() => startLevel(currentLevelIndex + 1)}
-                    >
-                      Ďalší level ➔
-                    </button>
+                  {onNextVybraneLevel ? (
+                    hasNextVybraneLevel && (
+                      <button
+                        className="btn-blockout-primary"
+                        onClick={onNextVybraneLevel}
+                      >
+                        <NextLevelIcon size={20} />
+                        <span>Ďalší level</span>
+                      </button>
+                    )
+                  ) : (
+                    currentLevelIndex + 1 < BLOCK_OUT_LEVELS.length && (
+                      <button
+                        className="btn-blockout-primary"
+                        onClick={() => startLevel(currentLevelIndex + 1)}
+                      >
+                        <NextLevelIcon size={20} />
+                        <span>Ďalší level</span>
+                      </button>
+                    )
                   )}
                   <button
                     className="btn-blockout-secondary"
                     onClick={resetCurrentLevel}
                   >
-                    Hrať znova 🔄
+                    <RestartIcon size={20} stroke="#334155" />
+                    <span>Hrať znova</span>
                   </button>
                   {onBack ? (
                     <button
                       className="btn-blockout-secondary"
                       onClick={onBack}
                     >
-                      Späť do vybraných slov 📋
+                      <LevelsMenuIcon size={20} stroke="#334155" />
+                      <span>Späť do vybraných slov</span>
                     </button>
                   ) : (
                     <button
                       className="btn-blockout-secondary"
                       onClick={() => setGameState('levels')}
                     >
-                      Výber levelov 📋
+                      <LevelsMenuIcon size={20} stroke="#334155" />
+                      <span>Výber levelov</span>
                     </button>
                   )}
                 </div>

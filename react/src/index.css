@@ -13,7 +13,7 @@ body {
 }
 
 .app-container {
-  max-width: 500px;
+  max-width: 860px;
   margin: 0 auto;
   padding-top: 24px;
 }
@@ -29,12 +29,47 @@ h1 {
   margin-bottom: 8px;
 }
 
-.menu-container,
+.menu-container {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  width: 100%;
+  padding: 0 10px;
+}
+
+.menu-section {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  width: 100%;
+}
+
+.menu-cards {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+  gap: 14px;
+  width: 100%;
+  align-items: stretch;
+}
+
+.menu-card {
+  flex: 1 1 240px;
+  min-width: 220px;
+  max-width: 100%;
+  display: flex;
+  align-items: stretch;
+  gap: 8px;
+}
+
 .button-container {
   display: flex;
   flex-direction: column;
   gap: 14px;
   padding: 0 10px;
+  max-width: 500px;
+  margin: 0 auto;
+  width: 100%;
 }
 
 .menu-row {
@@ -50,10 +85,10 @@ h1 {
 .menu-divider {
   display: flex;
   align-items: center;
-  gap: 10px;
-  margin: 2rem 0 2px 0;
+  gap: 12px;
+  margin: 1.25rem 0 2px 0;
   color: #5f6f80;
-  font-size: 14px;
+  font-size: 15px;
   font-weight: bold;
   text-transform: uppercase;
   letter-spacing: 0.06em;
@@ -92,8 +127,16 @@ button:disabled {
 .btn-menu-yi { background-color: #4682b4; }
 .btn-menu-obojake { background-color: #32cd32; }
 .btn-menu-ratanie { background-color: #f08c00; }
+.btn-menu-nasobenie { background-color: #d97706; }
+.btn-menu-delenie { background-color: #0284c7; }
 .btn-menu-slova { background-color: #8430ce; }
 .btn-menu-vybrane-b { background-color: #e11d48; }
+.btn-menu-vybrane-m { background-color: #db2777; }
+.btn-menu-vybrane-p { background-color: #c026d3; }
+.btn-menu-vybrane-r { background-color: #9333ea; }
+.btn-menu-vybrane-s { background-color: #4f46e5; }
+.btn-menu-vybrane-v { background-color: #2563eb; }
+.btn-menu-vybrane-z { background-color: #0284c7; }
 .btn-menu-doplnovacky { background-color: #0f766e; }
 .btn-menu-doplnovacky-dtnl { background-color: #0f766e; }
 .btn-menu-doplnovacky-b { background-color: #0284c7; }
@@ -103,8 +146,16 @@ button:disabled {
 .btn-menu-yi,
 .btn-menu-obojake,
 .btn-menu-ratanie,
+.btn-menu-nasobenie,
+.btn-menu-delenie,
 .btn-menu-slova,
 .btn-menu-vybrane-b,
+.btn-menu-vybrane-m,
+.btn-menu-vybrane-p,
+.btn-menu-vybrane-r,
+.btn-menu-vybrane-s,
+.btn-menu-vybrane-v,
+.btn-menu-vybrane-z,
 .btn-menu-doplnovacky,
 .btn-menu-doplnovacky-dtnl,
 .btn-menu-doplnovacky-b,
@@ -116,6 +167,30 @@ button:disabled {
   text-align: left;
 }
 
+.menu-card-btn {
+  flex: 1;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px 14px;
+  padding: 20px 22px;
+  min-height: 84px;
+  border-radius: 18px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+  transition: transform 0.15s ease, box-shadow 0.15s ease, filter 0.15s ease;
+}
+
+.menu-card-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.12);
+  filter: brightness(1.03);
+}
+
+.menu-card-btn:active {
+  transform: scale(0.98);
+}
+
 .menu-title,
 .menu-stars {
   display: inline-block;
@@ -124,11 +199,16 @@ button:disabled {
 
 .menu-title {
   flex: 1;
+  font-size: 20px;
+  font-weight: bold;
+  letter-spacing: -0.01em;
+  text-align: left;
+  line-height: 1.25;
 }
 
 .menu-stars {
-  margin-left: 16px;
-  font-size: 22px;
+  margin-left: 8px;
+  font-size: 18px;
   opacity: 0.95;
   text-align: right;
   white-space: nowrap;
@@ -275,6 +355,60 @@ button:disabled {
   box-shadow: 0 0 0 3px rgba(42, 146, 204, 0.2);
 }
 
+.math-horizontal-container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  margin: 18px 0 22px;
+  min-height: 84px;
+}
+
+.math-expr-text {
+  font-size: 52px;
+  font-weight: 800;
+  color: #1e293b;
+  letter-spacing: 2px;
+}
+
+.math-input-box {
+  min-width: 90px;
+  height: 72px;
+  padding: 0 18px;
+  border-radius: 14px;
+  border: 3px solid #8da5ba;
+  background: #ffffff;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 48px;
+  font-weight: 800;
+  color: #0f172a;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.06);
+  transition: all 0.2s ease;
+}
+
+.math-input-box.correct {
+  border-color: #22c55e;
+  background: #f0fdf4;
+  color: #15803d;
+  box-shadow: 0 0 0 4px rgba(34, 197, 94, 0.25);
+  transform: scale(1.05);
+}
+
+.math-input-box.wrong {
+  border-color: #ef4444;
+  background: #fef2f2;
+  color: #b91c1c;
+  box-shadow: 0 0 0 4px rgba(239, 68, 68, 0.25);
+  animation: shake 0.4s ease-in-out;
+}
+
+.math-cursor {
+  color: #94a3b8;
+  animation: blink-cursor 1s step-start infinite;
+}
+
 .answer-display {
   min-height: 56px;
   line-height: 56px;
@@ -408,11 +542,21 @@ button:disabled {
 .result-actions button,
 .btn-restart,
 .btn-next-level,
-.btn-secondary {
+.btn-secondary,
+.btn-confirm,
+.btn-levels-menu {
   display: inline-flex;
   align-items: center;
   justify-content: center;
   gap: 10px;
+}
+
+.btn-confirm {
+  background-color: #28a745;
+}
+
+.btn-levels-menu {
+  background-color: #6c757d;
 }
 
 .btn-next-level {
@@ -593,19 +737,28 @@ button:disabled {
     padding: 24px;
   }
 
-  .btn-menu-yi,
-  .btn-menu-obojake,
-  .btn-menu-ratanie,
-  .btn-menu-slova,
-  .btn-menu-vybrane-b,
-  .btn-menu-doplnovacky,
-  .btn-menu-doplnovacky-dtnl,
-  .btn-menu-doplnovacky-b,
-  .btn-menu-cudzie,
-  .btn-menu-blockout {
-    flex-direction: column;
-    align-items: flex-start;
+  .menu-cards {
     gap: 10px;
+  }
+
+  .menu-card {
+    flex: 1 1 200px;
+    min-width: 0;
+  }
+
+  .menu-card-btn {
+    padding: 16px 18px;
+    min-height: 74px;
+    gap: 8px 10px;
+  }
+
+  .menu-title {
+    font-size: 18px;
+  }
+
+  .menu-stars {
+    font-size: 16px;
+    margin-left: 0;
   }
 
   .menu-row {
@@ -613,19 +766,15 @@ button:disabled {
   }
 
   .menu-play-btn {
-    min-width: 52px;
-    font-size: 24px;
-    padding: 10px 12px 10px 14px;
-  }
-
-  .menu-stars {
-    margin-left: 0;
-    text-align: left;
+    min-width: 50px;
+    font-size: 22px;
+    padding: 0 10px;
+    border-radius: 16px;
   }
 
   .menu-divider {
-    margin: -2px 0;
-    font-size: 12px;
+    margin: 4px 0 0 0;
+    font-size: 13px;
   }
 
   .levels-grid {
@@ -661,5 +810,23 @@ button:disabled {
 
   .math-line {
     margin-left: 42px;
+  }
+
+  .math-horizontal-container {
+    gap: 10px;
+    margin: 14px 0 16px;
+    min-height: 68px;
+  }
+
+  .math-expr-text {
+    font-size: 38px;
+    letter-spacing: 1px;
+  }
+
+  .math-input-box {
+    min-width: 70px;
+    height: 58px;
+    padding: 0 12px;
+    font-size: 36px;
   }
 }

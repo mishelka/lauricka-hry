@@ -64,7 +64,7 @@
 
 .blockout-status-bar {
   display: flex;
-  justify-content: space-between;
+  justify-content: center;
   align-items: center;
   width: 100%;
   min-height: 42px;
@@ -82,17 +82,6 @@
   padding: 4px 12px;
   border-radius: 20px;
   color: #0f172a;
-}
-
-.blockout-hint {
-  font-size: 14px;
-  color: #475569;
-  background: #eff6ff;
-  border: 1px solid #bfdbfe;
-  padding: 8px 14px;
-  border-radius: 12px;
-  width: 100%;
-  text-align: center;
 }
 
 /* Board Layout */
@@ -130,6 +119,35 @@
   background: #e2e8f0;
   border-radius: 12px;
   transition: background 0.15s ease;
+}
+
+/* Wall / Obstacle Tiles (Nepriechodné tmavé steny) */
+.blockout-cell.blockout-cell-wall {
+  background: #1e293b;
+  position: relative;
+  box-sizing: border-box;
+  z-index: 2;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.28);
+}
+
+.blockout-wall-bridge {
+  position: absolute;
+  background: #1e293b;
+  pointer-events: none;
+  z-index: 2;
+  box-sizing: border-box;
+}
+
+.blockout-wall-bridge-h {
+  z-index: 2;
+}
+
+.blockout-wall-bridge-v {
+  z-index: 2;
+}
+
+.blockout-wall-bridge-c {
+  z-index: 2;
 }
 
 /* Doors around grid */
@@ -176,8 +194,14 @@
   animation: blockout-door-ready-pulse 0.9s infinite alternate ease-in-out;
 }
 
-.blockout-door.highlight .blockout-door-icon {
+.blockout-door.highlight .blockout-door-icon,
+.blockout-door.highlight .blockout-door-arrow-svg {
   animation: blockout-door-icon-pulse 0.9s infinite alternate ease-in-out;
+}
+
+.blockout-door-arrow-svg {
+  pointer-events: none;
+  transition: transform 0.2s ease;
 }
 
 @keyframes blockout-door-ready-pulse {
@@ -231,7 +255,90 @@
   font-size: 10px;
 }
 
-/* Blocks */
+/* Blocks & Pieces */
+.blockout-piece-container {
+  position: absolute;
+  cursor: grab;
+  z-index: 10;
+  transition: top 0.18s cubic-bezier(0.25, 1, 0.5, 1),
+              left 0.18s cubic-bezier(0.25, 1, 0.5, 1),
+              transform 0.15s ease,
+              opacity 0.25s ease;
+  touch-action: none;
+  -webkit-touch-callout: none;
+  -webkit-user-select: none;
+  user-select: none;
+}
+
+.blockout-piece-container:hover .blockout-subcell,
+.blockout-piece-container:hover .blockout-cell-bridge {
+  filter: brightness(1.08);
+}
+
+.blockout-piece-container.selected .blockout-subcell {
+  outline: 3px solid #38bdf8;
+  outline-offset: 1px;
+  box-shadow: 0 8px 20px rgba(56, 189, 248, 0.45);
+  z-index: 15;
+}
+
+.blockout-piece-container.dragging {
+  cursor: grabbing !important;
+  transition: none !important;
+  z-index: 30 !important;
+}
+
+.blockout-piece-container.dragging .blockout-subcell,
+.blockout-piece-container.dragging .blockout-cell-bridge {
+  filter: brightness(1.12);
+  box-shadow: 0 14px 28px rgba(0, 0, 0, 0.3), inset 0 2px 4px rgba(255, 255, 255, 0.5) !important;
+}
+
+.blockout-subcell-wrapper {
+  position: relative;
+}
+
+.blockout-direction-arrow {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  z-index: 20;
+  overflow: visible;
+}
+
+.blockout-direction-arrow line,
+.blockout-direction-arrow polygon {
+  transition: opacity 0.2s ease;
+}
+
+.blockout-subcell {
+  position: absolute;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  font-size: 20px;
+  font-weight: 800;
+  color: white;
+  border-width: 2px;
+  border-style: solid;
+  box-shadow: 0 6px 14px rgba(0, 0, 0, 0.18), inset 0 2px 4px rgba(255, 255, 255, 0.35);
+  transition: box-shadow 0.18s ease, filter 0.18s ease;
+  z-index: 12;
+  box-sizing: border-box;
+}
+
+.blockout-cell-bridge {
+  position: absolute;
+  z-index: 11;
+  pointer-events: none;
+  box-sizing: border-box;
+}
+
+/* Backward-compatibility for single square pieces */
 .blockout-piece {
   position: absolute;
   border-radius: 14px;
@@ -283,25 +390,30 @@
 }
 
 /* Animácia postupného pohltenia kocky dverami */
-.blockout-piece.exiting {
+.blockout-piece.exiting,
+.blockout-piece-container.exiting {
   z-index: 25 !important;
   pointer-events: none !important;
   box-shadow: 0 0 25px rgba(255, 255, 255, 0.95), 0 0 35px currentColor !important;
 }
 
-.blockout-piece.exiting.exit-top {
+.blockout-piece.exiting.exit-top,
+.blockout-piece-container.exiting.exit-top {
   animation: absorbTop 0.45s cubic-bezier(0.2, 0.8, 0.35, 1) forwards !important;
 }
 
-.blockout-piece.exiting.exit-bottom {
+.blockout-piece.exiting.exit-bottom,
+.blockout-piece-container.exiting.exit-bottom {
   animation: absorbBottom 0.45s cubic-bezier(0.2, 0.8, 0.35, 1) forwards !important;
 }
 
-.blockout-piece.exiting.exit-left {
+.blockout-piece.exiting.exit-left,
+.blockout-piece-container.exiting.exit-left {
   animation: absorbLeft 0.45s cubic-bezier(0.2, 0.8, 0.35, 1) forwards !important;
 }
 
-.blockout-piece.exiting.exit-right {
+.blockout-piece.exiting.exit-right,
+.blockout-piece-container.exiting.exit-right {
   animation: absorbRight 0.45s cubic-bezier(0.2, 0.8, 0.35, 1) forwards !important;
 }
 
@@ -599,6 +711,10 @@
 }
 
 .btn-blockout-primary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
   background: #3b82f6;
   color: white;
   padding: 16px;
@@ -616,6 +732,10 @@
 }
 
 .btn-blockout-secondary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
   background: #f1f5f9;
   color: #334155;
   padding: 14px;
@@ -685,12 +805,6 @@
   .blockout-moves-badge {
     padding: 3px 8px;
     font-size: 12px;
-  }
-
-  .blockout-hint {
-    font-size: 12px;
-    padding: 6px 10px;
-    border-radius: 10px;
   }
 
   .blockout-board-wrapper {
