@@ -5,7 +5,8 @@ export default function AudioTalePlayer({
   taleUrl,
   className = 'btn-secondary',
   playLabel = null,
-  pauseLabel = null
+  pauseLabel = null,
+  title = null
 }) {
   const audioRef = useRef(null);
   const [isPlaying, setIsPlaying] = useState(false);
@@ -38,7 +39,12 @@ export default function AudioTalePlayer({
 
   return (
     <>
-      <button className={className} onClick={togglePlayback}>
+      <button
+        type="button"
+        className={className}
+        onClick={togglePlayback}
+        title={title ?? (isPlaying ? 'Pozastaviť rozprávku' : 'Prehrať rozprávku')}
+      >
         {isPlaying ? (
           pauseLabel ?? (
             <>

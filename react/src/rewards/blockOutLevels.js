@@ -117,6 +117,11 @@ export function getBlockCells(block) {
       case '1x4': return [[0, 0], [0, 1], [0, 2], [0, 3]];
       case '4x1': return [[0, 0], [1, 0], [2, 0], [3, 0]];
       case '2x2': return [[0, 0], [0, 1], [1, 0], [1, 1]];
+      case '3x3': return [
+        [0, 0], [0, 1], [0, 2],
+        [1, 0], [1, 1], [1, 2],
+        [2, 0], [2, 1], [2, 2]
+      ];
       case 'L':
       case 'L1': return [[0, 0], [1, 0], [1, 1]]; // L pointing right-bottom
       case 'L2': return [[0, 0], [0, 1], [1, 0]]; // L pointing top-left
@@ -481,6 +486,194 @@ function createLevel5Blocks() {
   ];
 }
 
+function createLevel6Blocks() {
+  return [
+    // Stĺpec 0 (riadky 6..7)
+    { id: 'b_c0_r6_blue', color: 'blue', r: 6, c: 0, shape: '1x1' },
+    { id: 'b_c0_r7_white', color: 'white', r: 7, c: 0, shape: '1x1' },
+
+    // Stĺpec 1 (riadky 5..7)
+    { id: 'b_c1_r5_blue', color: 'blue', r: 5, c: 1, shape: '1x1' },
+    { id: 'b_c1_r6_white', color: 'white', r: 6, c: 1, shape: '1x1' },
+    { id: 'b_c1_r7_blue', color: 'blue', r: 7, c: 1, shape: '1x1' },
+
+    // Stĺpec 2 (riadky 4..7)
+    { id: 'b_c2_r4_black', color: 'black', r: 4, c: 2, shape: '1x1' },
+    { id: 'b_c2_r5_red', color: 'red', r: 5, c: 2, shape: '3x1' },
+
+    // Stĺpec 3 (riadky 3..7)
+    { id: 'b_c3_r3_black', color: 'black', r: 3, c: 3, shape: '1x1' },
+    { id: 'b_c3_r4_yellow', color: 'yellow', r: 4, c: 3, shape: '1x1' },
+    { id: 'b_c3_r5_black', color: 'black', r: 5, c: 3, shape: '1x1' },
+    { id: 'b_c3_r6_white', color: 'white', r: 6, c: 3, shape: '1x1' },
+    { id: 'b_c3_r7_black', color: 'black', r: 7, c: 3, shape: '1x1' },
+
+    // Stĺpec 4 (riadky 2..7)
+    { id: 'b_c4_r2_yellow_red', color: 'yellow', innerColor: 'red', r: 2, c: 4, shape: '3x1' },
+    { id: 'b_c4_r5_white', color: 'white', r: 5, c: 4, shape: '1x1' },
+    { id: 'b_c4_r6_black', color: 'black', r: 6, c: 4, shape: '1x1' },
+    { id: 'b_c4_r7_white', color: 'white', r: 7, c: 4, shape: '1x1' },
+
+    // Stĺpec 5 (riadky 0..7)
+    { id: 'b_c5_r0_red', color: 'red', r: 0, c: 5, shape: '4x1' },
+    { id: 'b_c5_r4_yellow', color: 'yellow', r: 4, c: 5, shape: '1x1' },
+    { id: 'b_c5_r5_black', color: 'black', r: 5, c: 5, shape: '1x1' },
+    { id: 'b_c5_r6_yellow', color: 'yellow', r: 6, c: 5, shape: '1x1' },
+    { id: 'b_c5_r7_black', color: 'black', r: 7, c: 5, shape: '1x1' }
+  ];
+}
+
+function createLevel7Blocks() {
+  return [
+    // Riadok 0: šachovnica 1x1 (žltá, modrá, žltá, modrá, žltá, modrá)
+    { id: 'b_r0_c0_yellow', color: 'yellow', r: 0, c: 0, shape: '1x1' },
+    { id: 'b_r0_c1_blue', color: 'blue', r: 0, c: 1, shape: '1x1' },
+    { id: 'b_r0_c2_yellow', color: 'yellow', r: 0, c: 2, shape: '1x1' },
+    { id: 'b_r0_c3_blue', color: 'blue', r: 0, c: 3, shape: '1x1' },
+    { id: 'b_r0_c4_yellow', color: 'yellow', r: 0, c: 4, shape: '1x1' },
+    { id: 'b_r0_c5_blue', color: 'blue', r: 0, c: 5, shape: '1x1' },
+
+    // Riadok 1: šachovnica 1x1 (modrá, žltá, modrá, žltá, modrá, žltá)
+    { id: 'b_r1_c0_blue', color: 'blue', r: 1, c: 0, shape: '1x1' },
+    { id: 'b_r1_c1_yellow', color: 'yellow', r: 1, c: 1, shape: '1x1' },
+    { id: 'b_r1_c2_blue', color: 'blue', r: 1, c: 2, shape: '1x1' },
+    { id: 'b_r1_c3_yellow', color: 'yellow', r: 1, c: 3, shape: '1x1' },
+    { id: 'b_r1_c4_blue', color: 'blue', r: 1, c: 4, shape: '1x1' },
+    { id: 'b_r1_c5_yellow', color: 'yellow', r: 1, c: 5, shape: '1x1' },
+
+    // Riadok 2: 3x zamrznuté 1x2 bloky s číslom 6 (žltá, červená, zelená)
+    { id: 'b_r2_c0_f6_yellow', color: 'yellow', r: 2, c: 0, shape: '1x2', frozen: 6 },
+    { id: 'b_r2_c2_f6_red', color: 'red', r: 2, c: 2, shape: '1x2', frozen: 6 },
+    { id: 'b_r2_c4_f6_green', color: 'green', r: 2, c: 4, shape: '1x2', frozen: 6 },
+
+    // Riadky 3..4:
+    // c0: červený 2x1
+    { id: 'b_r3_c0_red', color: 'red', r: 3, c: 0, shape: '2x1' },
+    // c1: dvojfarebný 2x1 (vonkajšia modrá, vnútorná ružová)
+    { id: 'b_r3_c1_blue_pink', color: 'blue', innerColor: 'pink', r: 3, c: 1, shape: '2x1' },
+    // c2..3: dvojfarebný 2x2 (vonkajšia žltá, vnútorná zelená)
+    { id: 'b_r3_c2_yellow_green', color: 'yellow', innerColor: 'green', r: 3, c: 2, shape: '2x2' },
+    // c4: dvojfarebný 2x1 (vonkajšia ružová, vnútorná žltá)
+    { id: 'b_r3_c4_pink_yellow', color: 'pink', innerColor: 'yellow', r: 3, c: 4, shape: '2x1' },
+    // c5: modrý 2x1
+    { id: 'b_r3_c5_blue', color: 'blue', r: 3, c: 5, shape: '2x1' },
+
+    // Riadok 5: 2x zamrznuté 1x3 bloky s číslom 18 (zelená, červená)
+    { id: 'b_r5_c0_f18_green', color: 'green', r: 5, c: 0, shape: '1x3', frozen: 18 },
+    { id: 'b_r5_c3_f18_red', color: 'red', r: 5, c: 3, shape: '1x3', frozen: 18 },
+
+    // Riadok 6: 2x zamrznuté dvojfarebné 1x3 bloky s číslom 19
+    // vľavo: zvonka ružová, zvnútra žltá
+    { id: 'b_r6_c0_f19_pink_yellow', color: 'pink', innerColor: 'yellow', r: 6, c: 0, shape: '1x3', frozen: 19 },
+    // vpravo: zvonka žltá, zvnútra modrá
+    { id: 'b_r6_c3_f19_yellow_blue', color: 'yellow', innerColor: 'blue', r: 6, c: 3, shape: '1x3', frozen: 19 },
+
+    // Riadok 7: 2x 1x3 bloky (modrá, zelená)
+    { id: 'b_r7_c0_blue', color: 'blue', r: 7, c: 0, shape: '1x3' },
+    { id: 'b_r7_c3_green', color: 'green', r: 7, c: 3, shape: '1x3' }
+  ];
+}
+
+function createLevel8Blocks() {
+  return [
+    // Riadok 0..1: 5x zvislých 2x1 blokov (ružová, svetlomodrá, ružová, svetlomodrá, ružová)
+    { id: 'b_r0_c0_pink', color: 'pink', r: 0, c: 0, shape: '2x1' },
+    { id: 'b_r0_c1_cyan', color: 'cyan', r: 0, c: 1, shape: '2x1' },
+    { id: 'b_r0_c2_pink', color: 'pink', r: 0, c: 2, shape: '2x1' },
+    { id: 'b_r0_c3_cyan', color: 'cyan', r: 0, c: 3, shape: '2x1' },
+    { id: 'b_r0_c4_pink', color: 'pink', r: 0, c: 4, shape: '2x1' },
+
+    // Riadok 2..3 (boky): 2x zamrznuté zvislé 2x1 bloky s číslom 7 (modrá)
+    { id: 'b_r2_c0_f7_blue', color: 'blue', r: 2, c: 0, shape: '2x1', frozen: 7 },
+    { id: 'b_r2_c4_f7_blue', color: 'blue', r: 2, c: 4, shape: '2x1', frozen: 7 },
+
+    // Riadok 2 (stred): zamrznutý vodorovný 1x3 blok s číslom 14 (biela)
+    { id: 'b_r2_c1_f14_white', color: 'white', r: 2, c: 1, shape: '1x3', frozen: 14 },
+
+    // Riadky 3..5 (stred): veľký zamrznutý 3x3 dvojfarebný blok s číslom 11 (zvonku červená, zvnútra zelená)
+    { id: 'b_r3_c1_f11_red_green', color: 'red', innerColor: 'green', r: 3, c: 1, shape: '3x3', frozen: 11 },
+
+    // Riadky 4..5 (boky): 2x zvislé 2x1 bloky (žltá)
+    { id: 'b_r4_c0_yellow', color: 'yellow', r: 4, c: 0, shape: '2x1' },
+    { id: 'b_r4_c4_yellow', color: 'yellow', r: 4, c: 4, shape: '2x1' },
+
+    // Riadky 6..7: 5x zvislých 2x1 blokov (modrá, žltá, modrá, žltá, modrá)
+    { id: 'b_r6_c0_blue', color: 'blue', r: 6, c: 0, shape: '2x1' },
+    { id: 'b_r6_c1_yellow', color: 'yellow', r: 6, c: 1, shape: '2x1' },
+    { id: 'b_r6_c2_blue', color: 'blue', r: 6, c: 2, shape: '2x1' },
+    { id: 'b_r6_c3_yellow', color: 'yellow', r: 6, c: 3, shape: '2x1' },
+    { id: 'b_r6_c4_blue', color: 'blue', r: 6, c: 4, shape: '2x1' }
+  ];
+}
+
+function createLevel9Blocks() {
+  return [
+    // Riadok 0: 3x vodorovné 1x2 bloky (modrá, žltá, modrá)
+    { id: 'b_r0_c0_blue', color: 'blue', r: 0, c: 0, shape: '1x2' },
+    { id: 'b_r0_c2_yellow', color: 'yellow', r: 0, c: 2, shape: '1x2' },
+    { id: 'b_r0_c4_blue', color: 'blue', r: 0, c: 4, shape: '1x2' },
+
+    // Riadok 1: 3x vodorovné 1x2 bloky (žltá, modrá, žltá)
+    { id: 'b_r1_c0_yellow', color: 'yellow', r: 1, c: 0, shape: '1x2' },
+    { id: 'b_r1_c2_blue', color: 'blue', r: 1, c: 2, shape: '1x2' },
+    { id: 'b_r1_c4_yellow', color: 'yellow', r: 1, c: 4, shape: '1x2' },
+
+    // Riadky 2..3: 3x zamrznuté 2x2 bloky
+    // Vľavo: 19 (zvonka zelená, zvnútra žltá)
+    { id: 'b_r2_c0_f19_green_yellow', color: 'green', innerColor: 'yellow', r: 2, c: 0, shape: '2x2', frozen: 19 },
+    // V strede: 9 (zelená)
+    { id: 'b_r2_c2_f9_green', color: 'green', r: 2, c: 2, shape: '2x2', frozen: 9 },
+    // Vpravo: 19 (zvonka modrá, zvnútra žltá)
+    { id: 'b_r2_c4_f19_blue_yellow', color: 'blue', innerColor: 'yellow', r: 2, c: 4, shape: '2x2', frozen: 19 },
+
+    // Riadky 4..5: 3x zamrznuté 2x2 bloky
+    // Vľavo: 19 (zvonka modrá, zvnútra žltá)
+    { id: 'b_r4_c0_f19_blue_yellow', color: 'blue', innerColor: 'yellow', r: 4, c: 0, shape: '2x2', frozen: 19 },
+    // V strede: 9 (červená)
+    { id: 'b_r4_c2_f9_red', color: 'red', r: 4, c: 2, shape: '2x2', frozen: 9 },
+    // Vpravo: 19 (zvonka červená, zvnútra červená)
+    { id: 'b_r4_c4_f19_red_red', color: 'red', innerColor: 'red', r: 4, c: 4, shape: '2x2', frozen: 19 },
+
+    // Riadok 6:
+    // c0 (riadky 6..7): červený 2x1
+    { id: 'b_r6_c0_red', color: 'red', r: 6, c: 0, shape: '2x1' },
+    // c1: biely 1x1
+    { id: 'b_r6_c1_white', color: 'white', r: 6, c: 1, shape: '1x1' },
+    // c2 (riadky 6..7): zelený 2x1
+    { id: 'b_r6_c2_green', color: 'green', r: 6, c: 2, shape: '2x1' },
+    // c3: biely 1x1
+    { id: 'b_r6_c3_white', color: 'white', r: 6, c: 3, shape: '1x1' },
+    // c4..5: červený 1x2
+    { id: 'b_r6_c4_red', color: 'red', r: 6, c: 4, shape: '1x2' },
+
+    // Riadok 7:
+    // c1: čierny 1x1
+    { id: 'b_r7_c1_black', color: 'black', r: 7, c: 1, shape: '1x1' },
+    // c3: čierny 1x1
+    { id: 'b_r7_c3_black', color: 'black', r: 7, c: 3, shape: '1x1' },
+    // c5: čierny 1x1
+    { id: 'b_r7_c5_black', color: 'black', r: 7, c: 5, shape: '1x1' },
+
+    // Riadok 8:
+    // c0: čierny 1x1
+    { id: 'b_r8_c0_black', color: 'black', r: 8, c: 0, shape: '1x1' },
+    // c1: biely 1x1
+    { id: 'b_r8_c1_white', color: 'white', r: 8, c: 1, shape: '1x1' },
+    // c2: čierny 1x1
+    { id: 'b_r8_c2_black', color: 'black', r: 8, c: 2, shape: '1x1' },
+    // c3: biely 1x1
+    { id: 'b_r8_c3_white', color: 'white', r: 8, c: 3, shape: '1x1' },
+    // c4: biely 1x1
+    { id: 'b_r8_c4_white', color: 'white', r: 8, c: 4, shape: '1x1' },
+    // c5: čierny 1x1
+    { id: 'b_r8_c5_black', color: 'black', r: 8, c: 5, shape: '1x1' }
+  ];
+}
+
+export function isBlockOutLevelImplemented(levelIndex) {
+  return typeof levelIndex === 'number' && levelIndex >= 0 && levelIndex < BLOCK_OUT_LEVELS.length;
+}
+
 export const BLOCK_OUT_LEVELS = [
   {
     id: 1,
@@ -579,176 +772,67 @@ export const BLOCK_OUT_LEVELS = [
   },
   {
     id: 6,
-    name: 'Level 6 - L-tvar a rohové steny',
-    width: 5,
-    height: 5,
-    walls: [
-      { r: 4, c: 4 },
-      { r: 4, c: 0 }
-    ],
+    name: 'Level 6 - Schody a zámky',
+    width: 6,
+    height: 8,
     doors: [
-      { side: 'bottom', index: 1, color: 'yellow', span: 2 },
-      { side: 'top', index: 3, color: 'blue' },
-      { side: 'left', index: 2, color: 'red' },
-      { side: 'right', index: 0, color: 'green' }
+      { side: 'left', index: 6, span: 1, color: 'blue' },
+      { side: 'bottom', index: 2, span: 1, color: 'white', locked: 3 },
+      { side: 'bottom', index: 3, span: 1, color: 'yellow', locked: 8 },
+      { side: 'bottom', index: 4, span: 2, color: 'black', locked: 15 },
+      { side: 'right', index: 4, span: 4, color: 'red', locked: 12 }
     ],
-    blocks: [
-      { id: 'b1', color: 'yellow', r: 1, c: 1, shape: 'L' },
-      { id: 'b2', color: 'blue', r: 0, c: 3, shape: '3x1', direction: 'vertical' },
-      { id: 'b3', color: 'red', r: 2, c: 0, shape: '1x1' },
-      { id: 'b4', color: 'green', r: 0, c: 0, shape: '1x2', direction: 'horizontal' }
-    ]
+    walls: [
+      { r: 0, c: 0 }, { r: 1, c: 0 }, { r: 2, c: 0 }, { r: 3, c: 0 }, { r: 4, c: 0 }, { r: 5, c: 0 },
+      { r: 0, c: 1 }, { r: 1, c: 1 }, { r: 2, c: 1 }, { r: 3, c: 1 }, { r: 4, c: 1 },
+      { r: 0, c: 2 }, { r: 1, c: 2 }, { r: 2, c: 2 }, { r: 3, c: 2 },
+      { r: 0, c: 3 }, { r: 1, c: 3 }, { r: 2, c: 3 },
+      { r: 0, c: 4 }, { r: 1, c: 4 }
+    ],
+    blocks: createLevel6Blocks()
   },
   {
     id: 7,
-    name: 'Level 7 - Dvojitý posuvník a stena',
-    width: 5,
-    height: 5,
-    walls: [
-      { r: 0, c: 0 },
-      { r: 4, c: 0 }
-    ],
+    name: 'Level 7 - Ľadové komory a dvojfarebné bloky',
+    width: 6,
+    height: 8,
     doors: [
-      { side: 'left', index: 1, color: 'orange', span: 2 },
-      { side: 'top', index: 3, color: 'purple' },
-      { side: 'bottom', index: 4, color: 'blue' },
-      { side: 'right', index: 3, color: 'red' }
+      { side: 'top', index: 3, span: 3, color: 'red', locked: 16 },
+      { side: 'left', index: 0, span: 2, color: 'blue', locked: 8 },
+      { side: 'left', index: 3, span: 2, color: 'pink', locked: 21 },
+      { side: 'bottom', index: 0, span: 3, color: 'green', locked: 26 },
+      { side: 'right', index: 0, span: 2, color: 'yellow' }
     ],
-    blocks: [
-      { id: 'b1', color: 'orange', r: 1, c: 1, shape: '2x2' },
-      { id: 'b2', color: 'purple', r: 2, c: 3, shape: '2x1', direction: 'vertical' },
-      { id: 'b3', color: 'blue', r: 0, c: 4, shape: '3x1', direction: 'vertical' },
-      { id: 'b4', color: 'red', r: 3, c: 1, shape: '1x2', direction: 'horizontal' }
-    ]
+    blocks: createLevel7Blocks()
   },
   {
     id: 8,
-    name: 'Level 8 - T-kus a pevnostné steny',
+    name: 'Level 8 - Veľké ľadové jadro',
     width: 5,
-    height: 5,
-    walls: [
-      { r: 0, c: 4 },
-      { r: 4, c: 4 }
-    ],
+    height: 8,
     doors: [
-      { side: 'top', index: 1, color: 'green', span: 3 },
-      { side: 'left', index: 3, color: 'purple' },
-      { side: 'bottom', index: 3, color: 'blue' },
-      { side: 'right', index: 2, color: 'yellow' },
-      { side: 'top', index: 0, color: 'red' }
+      { side: 'top', index: 1, span: 3, color: 'green' },
+      { side: 'bottom', index: 1, span: 3, color: 'red' },
+      { side: 'left', index: 4, span: 2, color: 'pink', locked: 12 },
+      { side: 'left', index: 6, span: 2, color: 'blue', locked: 7 },
+      { side: 'right', index: 4, span: 2, color: 'white', locked: 1 },
+      { side: 'right', index: 6, span: 2, color: 'blue' }
     ],
-    blocks: [
-      { id: 'b1', color: 'green', r: 1, c: 1, shape: 'T' },
-      { id: 'b2', color: 'purple', r: 3, c: 1, shape: '1x2', direction: 'horizontal' },
-      { id: 'b3', color: 'blue', r: 2, c: 3, shape: '2x1', direction: 'vertical' },
-      { id: 'b4', color: 'yellow', r: 2, c: 1, shape: '1x1' },
-      { id: 'b5', color: 'red', r: 0, c: 0, shape: '2x1', direction: 'vertical' }
-    ]
+    blocks: createLevel8Blocks()
   },
   {
     id: 9,
-    name: 'Level 9 - Majstrovská aréna so stenami',
+    name: 'Level 9 - Ľadová pevnosť (Level 19)',
     width: 6,
-    height: 6,
-    walls: [
-      { r: 0, c: 0 },
-      { r: 5, c: 0 },
-      { r: 5, c: 5 }
-    ],
+    height: 9,
     doors: [
-      { side: 'top', index: 1, color: 'red' },
-      { side: 'right', index: 1, color: 'purple' },
-      { side: 'bottom', index: 4, color: 'blue' },
-      { side: 'left', index: 4, color: 'yellow' },
-      { side: 'left', index: 2, color: 'green', span: 2 },
-      { side: 'right', index: 3, color: 'orange' }
+      { side: 'left', index: 0, span: 2, color: 'blue', locked: 7 },
+      { side: 'left', index: 7, span: 2, color: 'black', locked: 11 },
+      { side: 'right', index: 0, span: 2, color: 'green', locked: 11 },
+      { side: 'right', index: 8, span: 1, color: 'white' },
+      { side: 'bottom', index: 0, span: 3, color: 'yellow', locked: 23 },
+      { side: 'bottom', index: 4, span: 2, color: 'red' }
     ],
-    blocks: [
-      { id: 'b1', color: 'green', r: 2, c: 2, shape: '2x2' },
-      { id: 'b2', color: 'red', r: 2, c: 1, shape: '2x1', direction: 'vertical' },
-      { id: 'b3', color: 'blue', r: 1, c: 4, shape: '3x1', direction: 'vertical' },
-      { id: 'b4', color: 'purple', r: 1, c: 2, shape: '1x2', direction: 'horizontal' },
-      { id: 'b5', color: 'yellow', r: 4, c: 2, shape: '1x2', direction: 'horizontal' },
-      { id: 'b6', color: 'orange', r: 3, c: 4, shape: '1x2', direction: 'horizontal' }
-    ]
-  },
-  {
-    id: 10,
-    name: 'Level 10 - Dvojité L-tvary a stredová stena',
-    width: 6,
-    height: 6,
-    walls: [
-      { r: 0, c: 1 },
-      { r: 5, c: 4 }
-    ],
-    doors: [
-      { side: 'bottom', index: 1, color: 'yellow', span: 2 },
-      { side: 'top', index: 3, color: 'purple', span: 2 },
-      { side: 'top', index: 0, color: 'red' },
-      { side: 'bottom', index: 5, color: 'blue' },
-      { side: 'right', index: 0, color: 'green' }
-    ],
-    blocks: [
-      { id: 'b1', color: 'yellow', r: 2, c: 1, shape: 'L' },
-      { id: 'b2', color: 'purple', r: 2, c: 3, shape: 'L4' },
-      { id: 'b3', color: 'red', r: 1, c: 0, shape: '3x1', direction: 'vertical' },
-      { id: 'b4', color: 'blue', r: 2, c: 5, shape: '3x1', direction: 'vertical' },
-      { id: 'b5', color: 'green', r: 0, c: 2, shape: '1x2', direction: 'horizontal' }
-    ]
-  },
-  {
-    id: 11,
-    name: 'Level 11 - Pevnosť šampiónov',
-    width: 6,
-    height: 6,
-    walls: [
-      { r: 0, c: 0 },
-      { r: 5, c: 0 },
-      { r: 3, c: 0 }
-    ],
-    doors: [
-      { side: 'left', index: 1, color: 'green', span: 2 },
-      { side: 'top', index: 1, color: 'red' },
-      { side: 'bottom', index: 4, color: 'blue' },
-      { side: 'right', index: 0, color: 'yellow' },
-      { side: 'top', index: 3, color: 'purple' },
-      { side: 'right', index: 4, color: 'orange' }
-    ],
-    blocks: [
-      { id: 'b1', color: 'green', r: 1, c: 2, shape: '2x2' },
-      { id: 'b2', color: 'red', r: 2, c: 1, shape: '2x1', direction: 'vertical' },
-      { id: 'b3', color: 'blue', r: 1, c: 4, shape: '3x1', direction: 'vertical' },
-      { id: 'b4', color: 'yellow', r: 0, c: 1, shape: '1x2', direction: 'horizontal' },
-      { id: 'b5', color: 'purple', r: 0, c: 3, shape: '1x1' },
-      { id: 'b6', color: 'orange', r: 4, c: 2, shape: '1x2', direction: 'horizontal' }
-    ]
-  },
-  {
-    id: 12,
-    name: 'Level 12 - Veľké finále Block Out',
-    width: 6,
-    height: 6,
-    walls: [
-      { r: 0, c: 0 },
-      { r: 0, c: 5 },
-      { r: 5, c: 0 },
-      { r: 5, c: 5 }
-    ],
-    doors: [
-      { side: 'top', index: 2, color: 'green', span: 2 },
-      { side: 'right', index: 3, color: 'yellow' },
-      { side: 'top', index: 1, color: 'red' },
-      { side: 'left', index: 3, color: 'purple' },
-      { side: 'bottom', index: 4, color: 'blue' },
-      { side: 'left', index: 4, color: 'orange', span: 2 }
-    ],
-    blocks: [
-      { id: 'b1', color: 'green', r: 1, c: 2, shape: '2x2' },
-      { id: 'b2', color: 'yellow', r: 3, c: 2, shape: '1x2', direction: 'horizontal' },
-      { id: 'b3', color: 'red', r: 1, c: 1, shape: '2x1', direction: 'vertical' },
-      { id: 'b4', color: 'purple', r: 3, c: 1, shape: '1x1' },
-      { id: 'b5', color: 'blue', r: 1, c: 4, shape: '2x1', direction: 'vertical' },
-      { id: 'b6', color: 'orange', r: 4, c: 3, shape: '1x2', direction: 'horizontal' }
-    ]
+    blocks: createLevel9Blocks()
   }
 ];

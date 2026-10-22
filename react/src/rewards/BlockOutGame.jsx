@@ -4,7 +4,7 @@ import { BLOCK_OUT_LEVELS, COLOR_CONFIG, getBlockCells, getOccupiedCells, getBlo
 import { sounds } from './soundEffects';
 import { triggerFireworks } from '../utils/gameUtils';
 import { getLevelStars, updateLevelBestStars, getLevelPlays, incrementLevelPlays, getBlockOutSavedState, saveBlockOutSavedState, clearBlockOutSavedState, getBlockOutSavedStates } from '../utils/player';
-import { RestartIcon, NextLevelIcon, LevelsMenuIcon, BackIcon } from '../components/Icons';
+import { RestartIcon, NextLevelIcon, LevelsMenuIcon, BackIcon, UndoIcon, SoundOnIcon, SoundOffIcon } from '../components/Icons';
 import './blockOut.css';
 
 const DEFAULT_CELL_SIZE = 54;
@@ -282,9 +282,41 @@ export default function BlockOutGame({
   const [gameState, setGameState] = useState(() =>
     rewardLevel !== null ? 'playing' : 'levels'
   );
-  const [blocks, setBlocks] = useState([]);
-  const [doors, setDoors] = useState([]);
-  const [selectedBlockId, setSelectedBlockId] = useState(null);
+  const [blocks, setBlocks] = useState(() => {
+    if (rewardLevel !== null && BLOCK_OUT_LEVELS[rewardLevel]) {
+      const lvl = BLOCK_OUT_LEVELS[rewardLevel];
+      const saved = getBlockOutSavedState(rewardLevel);
+      if (saved && Array.isArray(saved.blocks) && saved.blocks.length > 0) {
+        return saved.blocks.map(b => ({
+          ...b,
+          frozen: b.frozen ?? b.freezeCount ?? b.count ?? 0,
+          exiting: false,
+          exitSide: null
+        }));
+      }
+      return lvl.blocks.map(b => ({
+        ...b,
+        frozen: b.frozen ?? b.freezeCount ?? b.count ?? 0,
+        exiting: false,
+        exitSide: null
+      }));
+    }
+    return [];
+  });
+  const [doors, setDoors] = useState(() => {
+    if (rewardLevel !== null && BLOCK_OUT_LEVELS[rewardLevel]) {
+      const lvl = BLOCK_OUT_LEVELS[rewardLevel];
+      const saved = getBlockOutSavedState(rewardLevel);
+      const doorList = (saved && Array.isArray(saved.doors)) ? saved.doors : (lvl.doors || []);
+      return doorList.map((d, idx) => ({
+        ...d,
+        id: d.id || `door_${idx}`,
+        locked: Number(d.locked ?? d.count ?? d.freezeCount ?? d.lockedCount ?? 0),
+        justUnlocked: false
+      }));
+    }
+    return [];
+  });
   const [dragInfo, setDragInfo] = useState(null); // { blockId, offsetX, offsetY, activeDir }
   const [moves, setMoves] = useState(0);
   const [history, setHistory] = useState([]);
@@ -439,11 +471,10 @@ export default function BlockOutGame({
     if (countPlay) {
       const currentCounts = getLevelPlays('blockOut', BLOCK_OUT_LEVELS.length);
       const curPlays = currentCounts[lvlIndex] || 0;
-      if (curPlays >= MAX_LEVEL_PLAYS) {
-        return;
+      if (curPlays < MAX_LEVEL_PLAYS) {
+        const updatedPlays = incrementLevelPlays('blockOut', lvlIndex, BLOCK_OUT_LEVELS.length);
+        setLevelPlays(updatedPlays);
       }
-      const updatedPlays = incrementLevelPlays('blockOut', lvlIndex, BLOCK_OUT_LEVELS.length);
-      setLevelPlays(updatedPlays);
     }
 
     setCurrentLevelIndex(lvlIndex);
@@ -461,7 +492,6 @@ export default function BlockOutGame({
         locked: Number(d.locked ?? d.count ?? d.freezeCount ?? d.lockedCount ?? 0),
         justUnlocked: false
       })));
-      setSelectedBlockId(saved.selectedBlockId || saved.blocks[0]?.id || null);
       setMoves(Number(saved.moves) || 0);
       setHistory(Array.isArray(saved.history) ? saved.history : []);
     } else {
@@ -477,7 +507,6 @@ export default function BlockOutGame({
         locked: Number(d.locked ?? d.count ?? d.freezeCount ?? d.lockedCount ?? 0),
         justUnlocked: false
       })));
-      setSelectedBlockId(lvl.blocks.length > 0 ? lvl.blocks[0].id : null);
       setMoves(0);
       setHistory([]);
     }
@@ -538,15 +567,13 @@ export default function BlockOutGame({
           doors: Array.isArray(h.doors)
             ? h.doors.map(d => ({ ...d, justUnlocked: false }))
             : [],
-          moves: h.moves,
-          selectedBlockId: h.selectedBlockId
+          moves: h.moves
         })),
-        selectedBlockId,
         timestamp: Date.now()
       });
       setSavedStates(getBlockOutSavedStates());
     }
-  }, [gameState, currentLevelIndex, blocks, doors, moves, history, selectedBlockId]);
+  }, [gameState, currentLevelIndex, blocks, doors, moves, history]);
 
   const resetCurrentLevel = () => {
     clearBlockOutSavedState(currentLevelIndex);
@@ -680,255 +707,6 @@ export default function BlockOutGame({
     return limits;
   }, [checkBlockStep]);
 
-  const moveBlock = useCallback((blockId, direction, requestedSteps = 1, forceExit = false) => {
-    if (gameState !== 'playing') return;
-
-    const dirMap = {
-      up: { dr: -1, dc: 0, exitSide: 'top' },
-      down: { dr: 1, dc: 0, exitSide: 'bottom' },
-      left: { dr: 0, dc: -1, exitSide: 'left' },
-      right: { dr: 0, dc: 1, exitSide: 'right' }
-    };
-    const { dr, dc, exitSide } = dirMap[direction] || {};
-    if (dr === undefined) return;
-
-    setBlocks((prevBlocks) => {
-      const target = prevBlocks.find(b => b.id === blockId && !b.exiting);
-      if (!target || isBlockFrozen(target)) return prevBlocks;
-      if (!isDirAllowedForBlock(target, direction)) return prevBlocks;
-
-      const blockCells = getBlockCells(target);
-      let curR = target.r;
-      let curC = target.c;
-      let boardR = target.r;
-      let boardC = target.c;
-      let exited = false;
-      let stepsRemaining = Math.max(1, requestedSteps);
-
-      while (stepsRemaining > 0 && !exited) {
-        const nextR = curR + dr;
-        const nextC = curC + dc;
-        const nextCells = blockCells.map(([rOff, cOff]) => ({
-          r: nextR + rOff,
-          c: nextC + cOff
-        }));
-
-        const exitingCells = nextCells.filter(
-          c => c.r < 0 || c.r >= level.height || c.c < 0 || c.c >= level.width
-        );
-
-        if (exitingCells.length > 0) {
-          let validExit = true;
-          for (const cell of exitingCells) {
-            let door = null;
-            if (dr === -1 && cell.r === -1 && cell.c >= 0 && cell.c < level.width) {
-              door = findDoorAt('top', cell.c);
-            } else if (dr === 1 && cell.r === level.height && cell.c >= 0 && cell.c < level.width) {
-              door = findDoorAt('bottom', cell.c);
-            } else if (dc === -1 && cell.c === -1 && cell.r >= 0 && cell.r < level.height) {
-              door = findDoorAt('left', cell.r);
-            } else if (dc === 1 && cell.c === level.width && cell.r >= 0 && cell.r < level.height) {
-              door = findDoorAt('right', cell.r);
-            }
-
-            if (!door || door.color !== target.color || isDoorLocked(door)) {
-              validExit = false;
-              break;
-            }
-          }
-
-          if (validExit) {
-            exited = true;
-            boardR = curR;
-            boardC = curC;
-            curR = nextR;
-            curC = nextC;
-          }
-          break;
-        }
-
-        const isOccupied = prevBlocks.some(other => {
-          if (other.exiting || other.id === target.id) return false;
-          const otherCells = getOccupiedCells(other);
-          return nextCells.some(nc => otherCells.some(oc => oc.r === nc.r && oc.c === nc.c));
-        }) || nextCells.some(nc => levelWalls.some(w => w.r === nc.r && w.c === nc.c));
-
-        if (isOccupied) {
-          break;
-        }
-
-        boardR = curR;
-        boardC = curC;
-        curR = nextR;
-        curC = nextC;
-        stepsRemaining -= 1;
-      }
-
-      if (forceExit && !exited) {
-        const nextR = curR + dr;
-        const nextC = curC + dc;
-        const nextCells = blockCells.map(([rOff, cOff]) => ({
-          r: nextR + rOff,
-          c: nextC + cOff
-        }));
-        const exitingCells = nextCells.filter(
-          c => c.r < 0 || c.r >= level.height || c.c < 0 || c.c >= level.width
-        );
-        if (exitingCells.length > 0) {
-          let validExit = true;
-          for (const cell of exitingCells) {
-            let door = null;
-            if (dr === -1 && cell.r === -1 && cell.c >= 0 && cell.c < level.width) {
-              door = findDoorAt('top', cell.c);
-            } else if (dr === 1 && cell.r === level.height && cell.c >= 0 && cell.c < level.width) {
-              door = findDoorAt('bottom', cell.c);
-            } else if (dc === -1 && cell.c === -1 && cell.r >= 0 && cell.r < level.height) {
-              door = findDoorAt('left', cell.r);
-            } else if (dc === 1 && cell.c === level.width && cell.r >= 0 && cell.r < level.height) {
-              door = findDoorAt('right', cell.r);
-            }
-
-            if (!door || door.color !== target.color || isDoorLocked(door)) {
-              validExit = false;
-              break;
-            }
-          }
-          if (validExit) {
-            exited = true;
-            boardR = curR;
-            boardC = curC;
-            curR = nextR;
-            curC = nextC;
-          }
-        }
-      }
-
-      if (curR === target.r && curC === target.c && !exited) {
-        return prevBlocks; // No movement possible
-      }
-
-      // Save history snapshot before moving
-      setHistory(prevHist => [
-        ...prevHist,
-        {
-          blocks: prevBlocks.map(b => ({ ...b })),
-          doors: doors.map(d => ({ ...d })),
-          moves,
-          selectedBlockId: target.id
-        }
-      ]);
-      setMoves(m => m + 1);
-
-      if (exited) {
-        sounds.playBlockOut();
-        setMessage('Pohltené! ✨');
-        setTimeout(() => setMessage(''), 1200);
-
-        let didUnfreeze = false;
-        let didCrack = false;
-        let didUnlockDoor = false;
-        let didDoorCrack = false;
-
-        setDoors(prevDoors => prevDoors.map(d => {
-          const curLocked = d.locked ?? d.count ?? 0;
-          if (curLocked > 0) {
-            const nextLocked = Math.max(0, curLocked - 1);
-            if (nextLocked === 0) didUnlockDoor = true;
-            else didDoorCrack = true;
-            return {
-              ...d,
-              locked: nextLocked,
-              justUnlocked: nextLocked === 0
-            };
-          }
-          return { ...d, justUnlocked: false };
-        }));
-
-        const updated = prevBlocks.map(b => {
-          if (b.id === target.id) {
-            return { ...b, r: curR, c: curC, exiting: true, exitSide };
-          }
-          const curFrozen = b.frozen ?? b.freezeCount ?? b.count ?? 0;
-          if (curFrozen > 0) {
-            const nextFrozen = Math.max(0, curFrozen - 1);
-            if (nextFrozen === 0) didUnfreeze = true;
-            else didCrack = true;
-            return {
-              ...b,
-              frozen: nextFrozen,
-              justUnfrozen: nextFrozen === 0
-            };
-          }
-          return b;
-        });
-
-        if (didUnlockDoor) {
-          sounds.playLockUnlock();
-        } else if (didUnfreeze) {
-          sounds.playIceShatter();
-        } else if (didCrack || didDoorCrack) {
-          sounds.playIceCrack();
-        }
-
-        // Allow smooth absorption animation to finish before removing or revealing inner layer
-        setTimeout(() => {
-          setBlocks(current => {
-            let remaining;
-            if (target.innerColor) {
-              remaining = current.map(b => {
-                if (b.id === target.id) {
-                  return {
-                    ...b,
-                    color: target.innerColor,
-                    innerColor: undefined,
-                    r: boardR,
-                    c: boardC,
-                    exiting: false,
-                    exitSide: undefined,
-                    justRevealed: true
-                  };
-                }
-                return b;
-              });
-              setTimeout(() => {
-                setBlocks(cur => cur.map(b => b.id === target.id ? { ...b, justRevealed: false } : b));
-              }, 400);
-            } else {
-              remaining = current.filter(b => b.id !== target.id);
-            }
-
-            if (remaining.length === 0) {
-              clearBlockOutSavedState(currentLevelIndex);
-              setSavedStates(getBlockOutSavedStates());
-              const updatedStars = updateLevelBestStars(
-                'blockOut',
-                currentLevelIndex,
-                5,
-                BLOCK_OUT_LEVELS.length
-              );
-              setLevelStars(updatedStars);
-              setGameState('win');
-              sounds.playVictory();
-              if (fireworksRef.current) {
-                triggerFireworks(fireworksRef.current);
-              }
-            } else {
-              setSelectedBlockId(prev => (prev === target.id ? (target.innerColor ? target.id : (remaining[0]?.id || null)) : prev));
-            }
-            return remaining;
-          });
-        }, 450);
-
-        return updated;
-      }
-
-      sounds.playSlide();
-      return prevBlocks.map(b =>
-        b.id === target.id ? { ...b, r: curR, c: curC } : b
-      );
-    });
-  }, [gameState, findDoorAt, level.height, level.width, levelWalls, moves, currentLevelIndex, doors]);
-
   const undoMove = () => {
     if (history.length === 0 || gameState !== 'playing') return;
     const last = history[history.length - 1];
@@ -938,29 +716,14 @@ export default function BlockOutGame({
       setDoors(last.doors.map(d => ({ ...d, justUnlocked: false })));
     }
     setMoves(last.moves);
-    setSelectedBlockId(last.selectedBlockId);
     sounds.playUndo();
   };
 
-  // Keyboard navigation
+  // Keyboard shortcut for Undo (Ctrl+Z / Cmd+Z)
   useEffect(() => {
     const handleKeyDown = (e) => {
-      if (gameState !== 'playing' || !selectedBlockId) return;
-
-      const key = e.key.toLowerCase();
-      if (key === 'arrowup' || key === 'w') {
-        e.preventDefault();
-        moveBlock(selectedBlockId, 'up');
-      } else if (key === 'arrowdown' || key === 's') {
-        e.preventDefault();
-        moveBlock(selectedBlockId, 'down');
-      } else if (key === 'arrowleft' || key === 'a') {
-        e.preventDefault();
-        moveBlock(selectedBlockId, 'left');
-      } else if (key === 'arrowright' || key === 'd') {
-        e.preventDefault();
-        moveBlock(selectedBlockId, 'right');
-      } else if (key === 'z' && (e.ctrlKey || e.metaKey)) {
+      if (gameState !== 'playing') return;
+      if (e.key.toLowerCase() === 'z' && (e.ctrlKey || e.metaKey)) {
         e.preventDefault();
         undoMove();
       }
@@ -968,7 +731,7 @@ export default function BlockOutGame({
 
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [gameState, selectedBlockId, moveBlock, undoMove]);
+  }, [gameState, undoMove]);
 
   // Touch and mouse drag handlers using Pointer Events
   const handlePointerDown = (block, e) => {
@@ -976,25 +739,13 @@ export default function BlockOutGame({
     if (e.button !== undefined && e.button !== 0) return; // Only primary button
     e.preventDefault();
 
-    setSelectedBlockId(block.id);
-
     if (isBlockFrozen(block)) {
       sounds.playIceCrack();
       return;
     }
 
-    const targetEl = e.currentTarget;
-    if (targetEl && targetEl.setPointerCapture) {
-      try {
-        targetEl.setPointerCapture(e.pointerId);
-      } catch {
-        // Fallback if setPointerCapture is unsupported
-      }
-    }
-
     dragRef.current = {
       pointerId: e.pointerId,
-      targetEl,
       block,
       blockId: block.id,
       startR: block.r,
@@ -1031,7 +782,7 @@ export default function BlockOutGame({
 
     drag.isDragging = true;
     const step = cellSize + gap;
-    const threshold = step * 0.45;
+    const threshold = step * 0.5;
 
     let maxLoops = 10;
     while (maxLoops-- > 0) {
@@ -1043,10 +794,10 @@ export default function BlockOutGame({
         const localDy = e.clientY - expectedY;
 
         let pullBack = false;
-        if (drag.exitSide === 'right' && localDx <= -threshold) pullBack = true;
-        else if (drag.exitSide === 'left' && localDx >= threshold) pullBack = true;
-        else if (drag.exitSide === 'bottom' && localDy <= -threshold) pullBack = true;
-        else if (drag.exitSide === 'top' && localDy >= threshold) pullBack = true;
+        if (drag.exitSide === 'right' && localDx <= -step * 0.2) pullBack = true;
+        else if (drag.exitSide === 'left' && localDx >= step * 0.2) pullBack = true;
+        else if (drag.exitSide === 'bottom' && localDy <= -step * 0.2) pullBack = true;
+        else if (drag.exitSide === 'top' && localDy >= step * 0.2) pullBack = true;
 
         if (pullBack) {
           drag.isExiting = false;
@@ -1063,74 +814,61 @@ export default function BlockOutGame({
       const absDx = Math.abs(localDx);
       const absDy = Math.abs(localDy);
 
-      let pDr = 0, pDc = 0;
-      let sDr = 0, sDc = 0;
-
-      if (absDx >= absDy) {
-        if (absDx >= threshold) {
-          pDc = localDx > 0 ? 1 : -1;
-        }
-        if (absDy >= threshold) {
-          sDr = localDy > 0 ? 1 : -1;
-        }
-      } else {
-        if (absDy >= threshold) {
-          pDr = localDy > 0 ? 1 : -1;
-        }
-        if (absDx >= threshold) {
-          sDc = localDx > 0 ? 1 : -1;
-        }
-      }
-
-      if (pDr === 0 && pDc === 0 && sDr === 0 && sDc === 0) break;
+      if (absDx < threshold && absDy < threshold) break;
 
       let moved = false;
-      // Try primary direction first
-      if (pDc !== 0 && absDx >= absDy) {
-        const res = checkBlockStep(drag.block, drag.currentR, drag.currentC, drag.currentR, drag.currentC + pDc, blocks);
-        if (res.valid) {
-          if (res.exit) {
-            drag.isExiting = true;
-            drag.exitSide = res.exitSide;
-          } else {
-            drag.currentC += pDc;
-          }
-          moved = true;
-        }
-      } else if (pDr !== 0) {
-        const res = checkBlockStep(drag.block, drag.currentR, drag.currentC, drag.currentR + pDr, drag.currentC, blocks);
-        if (res.valid) {
-          if (res.exit) {
-            drag.isExiting = true;
-            drag.exitSide = res.exitSide;
-          } else {
-            drag.currentR += pDr;
-          }
-          moved = true;
-        }
-      }
+      const tryXFirst = absDx >= absDy;
 
-      // If primary direction was blocked, try secondary direction
-      if (!moved) {
-        if (sDr !== 0 && absDx >= absDy) {
-          const res = checkBlockStep(drag.block, drag.currentR, drag.currentC, drag.currentR + sDr, drag.currentC, blocks);
+      if (tryXFirst) {
+        if (absDx >= threshold) {
+          const dirX = localDx > 0 ? 1 : -1;
+          const res = checkBlockStep(drag.block, drag.currentR, drag.currentC, drag.currentR, drag.currentC + dirX, blocks);
           if (res.valid) {
             if (res.exit) {
               drag.isExiting = true;
               drag.exitSide = res.exitSide;
             } else {
-              drag.currentR += sDr;
+              drag.currentC += dirX;
             }
             moved = true;
           }
-        } else if (sDc !== 0 && absDy > absDx) {
-          const res = checkBlockStep(drag.block, drag.currentR, drag.currentC, drag.currentR, drag.currentC + sDc, blocks);
+        }
+        if (!moved && absDy >= threshold) {
+          const dirY = localDy > 0 ? 1 : -1;
+          const res = checkBlockStep(drag.block, drag.currentR, drag.currentC, drag.currentR + dirY, drag.currentC, blocks);
           if (res.valid) {
             if (res.exit) {
               drag.isExiting = true;
               drag.exitSide = res.exitSide;
             } else {
-              drag.currentC += sDc;
+              drag.currentR += dirY;
+            }
+            moved = true;
+          }
+        }
+      } else {
+        if (absDy >= threshold) {
+          const dirY = localDy > 0 ? 1 : -1;
+          const res = checkBlockStep(drag.block, drag.currentR, drag.currentC, drag.currentR + dirY, drag.currentC, blocks);
+          if (res.valid) {
+            if (res.exit) {
+              drag.isExiting = true;
+              drag.exitSide = res.exitSide;
+            } else {
+              drag.currentR += dirY;
+            }
+            moved = true;
+          }
+        }
+        if (!moved && absDx >= threshold) {
+          const dirX = localDx > 0 ? 1 : -1;
+          const res = checkBlockStep(drag.block, drag.currentR, drag.currentC, drag.currentR, drag.currentC + dirX, blocks);
+          if (res.valid) {
+            if (res.exit) {
+              drag.isExiting = true;
+              drag.exitSide = res.exitSide;
+            } else {
+              drag.currentC += dirX;
             }
             moved = true;
           }
@@ -1141,27 +879,27 @@ export default function BlockOutGame({
     }
 
     // Sub-pixel drag visual offset calculation
-    const expectedX = drag.startX + (drag.currentC - drag.startC) * step;
-    const expectedY = drag.startY + (drag.currentR - drag.startR) * step;
-    const localDx = e.clientX - expectedX;
-    const localDy = e.clientY - expectedY;
+    const curExpectedX = drag.startX + (drag.currentC - drag.startC) * step;
+    const curExpectedY = drag.startY + (drag.currentR - drag.startR) * step;
+    const subDx = e.clientX - curExpectedX;
+    const subDy = e.clientY - curExpectedY;
 
     let subOffsetX = 0;
     let subOffsetY = 0;
 
     if (drag.isExiting) {
       if (drag.exitSide === 'right') {
-        subOffsetX = Math.max(0, Math.min(localDx, doorDepth + cellSize * 0.25));
-        subOffsetY = Math.max(-6, Math.min(6, localDy * 0.1));
+        subOffsetX = Math.max(0, Math.min(subDx, doorDepth + cellSize * 0.25));
+        subOffsetY = Math.max(-6, Math.min(6, subDy * 0.1));
       } else if (drag.exitSide === 'left') {
-        subOffsetX = Math.min(0, Math.max(localDx, -(doorDepth + cellSize * 0.25)));
-        subOffsetY = Math.max(-6, Math.min(6, localDy * 0.1));
+        subOffsetX = Math.min(0, Math.max(subDx, -(doorDepth + cellSize * 0.25)));
+        subOffsetY = Math.max(-6, Math.min(6, subDy * 0.1));
       } else if (drag.exitSide === 'bottom') {
-        subOffsetY = Math.max(0, Math.min(localDy, doorDepth + cellSize * 0.25));
-        subOffsetX = Math.max(-6, Math.min(6, localDx * 0.1));
+        subOffsetY = Math.max(0, Math.min(subDy, doorDepth + cellSize * 0.25));
+        subOffsetX = Math.max(-6, Math.min(6, subDx * 0.1));
       } else if (drag.exitSide === 'top') {
-        subOffsetY = Math.min(0, Math.max(localDy, -(doorDepth + cellSize * 0.25)));
-        subOffsetX = Math.max(-6, Math.min(6, localDx * 0.1));
+        subOffsetY = Math.min(0, Math.max(subDy, -(doorDepth + cellSize * 0.25)));
+        subOffsetX = Math.max(-6, Math.min(6, subDx * 0.1));
       }
     } else {
       const canRight = checkBlockStep(drag.block, drag.currentR, drag.currentC, drag.currentR, drag.currentC + 1, blocks).valid;
@@ -1169,16 +907,16 @@ export default function BlockOutGame({
       const canDown = checkBlockStep(drag.block, drag.currentR, drag.currentC, drag.currentR + 1, drag.currentC, blocks).valid;
       const canUp = checkBlockStep(drag.block, drag.currentR, drag.currentC, drag.currentR - 1, drag.currentC, blocks).valid;
 
-      if (localDx > 0) {
-        subOffsetX = canRight ? Math.min(localDx, step * 0.5) : Math.min(localDx * 0.15, 8);
-      } else if (localDx < 0) {
-        subOffsetX = canLeft ? Math.max(localDx, -step * 0.5) : Math.max(localDx * 0.15, -8);
+      if (subDx > 0) {
+        subOffsetX = canRight ? Math.min(subDx, step * 0.5) : Math.min(subDx * 0.15, 8);
+      } else if (subDx < 0) {
+        subOffsetX = canLeft ? Math.max(subDx, -step * 0.5) : Math.max(subDx * 0.15, -8);
       }
 
-      if (localDy > 0) {
-        subOffsetY = canDown ? Math.min(localDy, step * 0.5) : Math.min(localDy * 0.15, 8);
-      } else if (localDy < 0) {
-        subOffsetY = canUp ? Math.max(localDy, -step * 0.5) : Math.max(localDy * 0.15, -8);
+      if (subDy > 0) {
+        subOffsetY = canDown ? Math.min(subDy, step * 0.5) : Math.min(subDy * 0.15, 8);
+      } else if (subDy < 0) {
+        subOffsetY = canUp ? Math.max(subDy, -step * 0.5) : Math.max(subDy * 0.15, -8);
       }
     }
 
@@ -1200,7 +938,6 @@ export default function BlockOutGame({
     if (!dragRef.current || dragRef.current.pointerId !== e.pointerId) return;
 
     const {
-      targetEl,
       blockId,
       startR,
       startC,
@@ -1211,19 +948,10 @@ export default function BlockOutGame({
       exitSide
     } = dragRef.current;
 
-    if (targetEl && targetEl.releasePointerCapture) {
-      try {
-        targetEl.releasePointerCapture(e.pointerId);
-      } catch {
-        // Fallback
-      }
-    }
-
     dragRef.current = null;
     setDragInfo(null);
 
     if (!isDragging) {
-      setSelectedBlockId(blockId);
       return;
     }
 
@@ -1234,8 +962,7 @@ export default function BlockOutGame({
         {
           blocks: blocks.map(b => ({ ...b })),
           doors: doors.map(d => ({ ...d })),
-          moves,
-          selectedBlockId: blockId
+          moves
         }
       ]);
       setMoves(m => m + 1);
@@ -1264,6 +991,69 @@ export default function BlockOutGame({
         return { ...d, justUnlocked: false };
       }));
 
+      const target = blocks.find(b => b.id === blockId);
+      if (target && target.innerColor) {
+        const oldColor = target.color;
+        const nextColor = target.innerColor;
+
+        // Dvojfarebný blok: vonkajšia farba (border) sa zničí, blok ostáva na hracej ploche na currentR, currentC
+        const updated = blocks.map(b => {
+          if (b.id === blockId) {
+            return {
+              ...b,
+              r: currentR,
+              c: currentC,
+              borderDestroying: true,
+              destroyingColor: oldColor
+            };
+          }
+          const curFrozen = b.frozen ?? b.freezeCount ?? b.count ?? 0;
+          if (curFrozen > 0) {
+            const nextFrozen = Math.max(0, curFrozen - 1);
+            if (nextFrozen === 0) didUnfreeze = true;
+            else didCrack = true;
+            return {
+              ...b,
+              frozen: nextFrozen,
+              justUnfrozen: nextFrozen === 0
+            };
+          }
+          return b;
+        });
+
+        if (didUnlockDoor) {
+          sounds.playLockUnlock();
+        } else if (didUnfreeze) {
+          sounds.playIceShatter();
+        } else if (didCrack || didDoorCrack) {
+          sounds.playIceCrack();
+        }
+
+        setBlocks(updated);
+
+        setTimeout(() => {
+          setBlocks(current => current.map(b => {
+            if (b.id === blockId) {
+              return {
+                ...b,
+                color: nextColor,
+                innerColor: undefined,
+                borderDestroying: false,
+                destroyingColor: undefined,
+                justRevealed: true
+              };
+            }
+            return b;
+          }));
+          setTimeout(() => {
+            setBlocks(cur => cur.map(b => b.id === blockId ? { ...b, justRevealed: false } : b));
+          }, 400);
+        }, 350);
+
+        return;
+      }
+
+      // Jednofarebný blok: pohltenie a vyradenie z hracej plochy
       const updated = blocks.map(b => {
         if (b.id === blockId) {
           return { ...b, r: currentR, c: currentC, exiting: true, exitSide };
@@ -1294,30 +1084,7 @@ export default function BlockOutGame({
 
       setTimeout(() => {
         setBlocks(current => {
-          const target = current.find(b => b.id === blockId);
-          let remaining;
-          if (target && target.innerColor) {
-            remaining = current.map(b => {
-              if (b.id === blockId) {
-                return {
-                  ...b,
-                  color: target.innerColor,
-                  innerColor: undefined,
-                  r: currentR,
-                  c: currentC,
-                  exiting: false,
-                  exitSide: undefined,
-                  justRevealed: true
-                };
-              }
-              return b;
-            });
-            setTimeout(() => {
-              setBlocks(cur => cur.map(b => b.id === blockId ? { ...b, justRevealed: false } : b));
-            }, 400);
-          } else {
-            remaining = current.filter(b => b.id !== blockId);
-          }
+          const remaining = current.filter(b => b.id !== blockId);
 
           if (remaining.length === 0) {
             clearBlockOutSavedState(currentLevelIndex);
@@ -1334,8 +1101,6 @@ export default function BlockOutGame({
             if (fireworksRef.current) {
               triggerFireworks(fireworksRef.current);
             }
-          } else {
-            setSelectedBlockId(prev => (prev === blockId ? (target && target.innerColor ? blockId : (remaining[0]?.id || null)) : prev));
           }
           return remaining;
         });
@@ -1349,8 +1114,7 @@ export default function BlockOutGame({
         {
           blocks: blocks.map(b => ({ ...b })),
           doors: doors.map(d => ({ ...d })),
-          moves,
-          selectedBlockId: blockId
+          moves
         }
       ]);
       setMoves(m => m + 1);
@@ -1419,8 +1183,6 @@ export default function BlockOutGame({
     }
   };
 
-  const selectedBlock = blocks.find(b => b.id === selectedBlockId && !b.exiting) || null;
-
   return (
     <div
       className="blockout-container"
@@ -1434,20 +1196,20 @@ export default function BlockOutGame({
         <>
           <div className="blockout-header">
             <button
-              className="blockout-btn-icon"
+              className="blockout-btn-icon blockout-btn-back"
               onClick={handleExit}
               title="Späť do menu"
             >
-              <BackIcon size={20} stroke="#334155" />
+              <BackIcon size={20} stroke="currentColor" />
             </button>
             <h2 className="blockout-title">🧩 Block Out! - Výber levelu</h2>
             <div className="blockout-header-actions">
               <button
-                className="blockout-btn-icon"
+                className="blockout-btn-icon blockout-btn-sound"
                 onClick={toggleMute}
                 title={muted ? 'Zapnúť zvuk' : 'Vypnúť zvuk'}
               >
-                {muted ? '🔇' : '🔊'}
+                {muted ? <SoundOffIcon size={20} stroke="currentColor" /> : <SoundOnIcon size={20} stroke="currentColor" />}
               </button>
             </div>
           </div>
@@ -1504,7 +1266,7 @@ export default function BlockOutGame({
         <>
           <div className="blockout-header">
             <button
-              className="blockout-btn-icon"
+              className="blockout-btn-icon blockout-btn-back"
               onClick={() => {
                 if (rewardLevel !== null) {
                   handleExit();
@@ -1515,31 +1277,31 @@ export default function BlockOutGame({
               }}
               title={rewardLevel !== null ? 'Späť' : 'Výber levelov'}
             >
-              {rewardLevel !== null ? <BackIcon size={20} stroke="#334155" /> : '📋'}
+              {rewardLevel !== null ? <BackIcon size={20} stroke="currentColor" /> : <LevelsMenuIcon size={20} stroke="currentColor" />}
             </button>
             <h2 className="blockout-title">{level.name}</h2>
             <div className="blockout-header-actions">
               <button
-                className="blockout-btn-icon"
+                className="blockout-btn-icon blockout-btn-undo"
                 onClick={undoMove}
                 disabled={history.length === 0}
                 title="Krok späť"
               >
-                ↩
+                <UndoIcon size={20} stroke="currentColor" />
               </button>
               <button
-                className="blockout-btn-icon"
+                className="blockout-btn-icon blockout-btn-restart"
                 onClick={resetCurrentLevel}
                 title="Reštartovať level"
               >
-                🔄
+                <RestartIcon size={20} stroke="currentColor" />
               </button>
               <button
-                className="blockout-btn-icon"
+                className="blockout-btn-icon blockout-btn-sound"
                 onClick={toggleMute}
                 title={muted ? 'Zapnúť zvuk' : 'Vypnúť zvuk'}
               >
-                {muted ? '🔇' : '🔊'}
+                {muted ? <SoundOffIcon size={20} stroke="currentColor" /> : <SoundOnIcon size={20} stroke="currentColor" />}
               </button>
             </div>
           </div>
@@ -1571,10 +1333,10 @@ export default function BlockOutGame({
                   : doorDepth;
 
                 let doorStyle = {
-                  backgroundColor: isLocked ? '#334155' : conf.bg,
-                  borderColor: isLocked ? '#475569' : conf.border,
+                  backgroundColor: isLocked ? '#94a3b8' : conf.bg,
+                  borderColor: isLocked ? '#64748b' : conf.border,
                   boxShadow: isLocked
-                    ? 'inset 0 2px 5px rgba(0, 0, 0, 0.5), 0 2px 6px rgba(0, 0, 0, 0.25)'
+                    ? 'inset 0 2px 4px rgba(255, 255, 255, 0.25), inset 0 -2px 4px rgba(0, 0, 0, 0.2), 0 2px 5px rgba(0, 0, 0, 0.15)'
                     : `0 0 10px ${conf.glow}`
                 };
 
@@ -1767,7 +1529,6 @@ export default function BlockOutGame({
               {blocks.map((block) => {
                   const conf = COLOR_CONFIG[block.color] || COLOR_CONFIG.red;
                   const innerConf = block.innerColor ? (COLOR_CONFIG[block.innerColor] || COLOR_CONFIG.red) : null;
-                  const isSelected = selectedBlockId === block.id;
                   const isDragging = dragInfo && dragInfo.blockId === block.id;
                   const isFrozen = isBlockFrozen(block);
                   const cells = getBlockCells(block);
@@ -1794,20 +1555,29 @@ export default function BlockOutGame({
                   const frozenClass = isFrozen ? 'is-frozen' : (block.justUnfrozen ? 'just-unfrozen' : '');
                   const revealedClass = block.justRevealed ? 'just-revealed' : '';
                   const cellRadius = Math.max(8, Math.round(cellSize * 0.24));
-                  const innerInset = Math.max(6, Math.min(Math.round(cellSize * 0.24), Math.round(Math.min(containerW, containerH) * 0.22)));
                   const isRectangular = cells.length === dims.rows * dims.cols;
+
+                  // Pozadie dlaždice: pri dvojfarebných blokoch je pozadie druhá farba (innerConf), inak conf
+                  const bgConf = innerConf ? innerConf : conf;
+                  const hasTwoColorBorder = !isFrozen && (Boolean(innerConf) || Boolean(block.borderDestroying));
+                  const outerBorderColor = block.destroyingColor
+                    ? (COLOR_CONFIG[block.destroyingColor]?.bg || conf.bg)
+                    : conf.bg;
+                  const innerBorderThickness = Math.min(
+                    Math.round(cellSize / 2),
+                    Math.max(6, Math.round(Math.min(containerW, containerH) / 3.2))
+                  );
 
                   return (
                     <div
                       key={block.id}
-                      className={`blockout-piece-container ${isSelected ? 'selected' : ''} ${exitClass} ${frozenClass} ${revealedClass} ${
+                      className={`blockout-piece-container ${
+                        hasTwoColorBorder ? 'has-two-color' : ''
+                      } ${exitClass} ${frozenClass} ${revealedClass} ${
                         isDragging ? 'dragging' : ''
                       }`}
                       style={pieceStyle}
                       onPointerDown={(e) => handlePointerDown(block, e)}
-                      onPointerMove={handlePointerMove}
-                      onPointerUp={handlePointerUp}
-                      onPointerCancel={handlePointerCancel}
                     >
                       {/* Unified seamless ice crystal surface for frozen blocks */}
                       {isFrozen && isRectangular && (
@@ -1840,18 +1610,14 @@ export default function BlockOutGame({
                         gap={gap}
                       />
 
-                      {/* Inner block layer for two-color blocks */}
-                      {!isFrozen && innerConf && (
+                      {/* Inner border layer for two-color blocks (hrúbka = polovica dlaždice) */}
+                      {hasTwoColorBorder && (
                         <div
-                          className="blockout-inner-block"
+                          className={`blockout-two-color-border ${block.borderDestroying ? 'destroying' : ''}`}
                           style={{
-                            top: `${innerInset}px`,
-                            left: `${innerInset}px`,
-                            width: `${containerW - 2 * innerInset}px`,
-                            height: `${containerH - 2 * innerInset}px`,
-                            backgroundColor: innerConf.bg,
-                            borderColor: innerConf.border,
-                            borderRadius: `${Math.max(6, Math.round(cellRadius * 0.75))}px`,
+                            borderWidth: `${innerBorderThickness}px`,
+                            borderColor: outerBorderColor,
+                            borderRadius: `${cellRadius}px`
                           }}
                         />
                       )}
@@ -1867,8 +1633,8 @@ export default function BlockOutGame({
                           left: dc * (cellSize + gap),
                           width: cellSize,
                           height: cellSize,
-                          backgroundColor: isFrozen ? '#cbd5e1' : conf.bg,
-                          borderColor: isFrozen ? '#94a3b8' : conf.border,
+                          backgroundColor: isFrozen ? '#cbd5e1' : bgConf.bg,
+                          borderColor: isFrozen ? '#94a3b8' : bgConf.border,
                           borderTopLeftRadius: !hasTop && !hasLeft ? `${cellRadius}px` : '0px',
                           borderTopRightRadius: !hasTop && !hasRight ? `${cellRadius}px` : '0px',
                           borderBottomLeftRadius: !hasBottom && !hasLeft ? `${cellRadius}px` : '0px',
@@ -1890,9 +1656,9 @@ export default function BlockOutGame({
                                   left: dc * (cellSize + gap) + cellSize - 1,
                                   width: gap + 2,
                                   height: cellSize,
-                                  backgroundColor: isFrozen ? '#cbd5e1' : conf.bg,
-                                  borderTop: `2px solid ${isFrozen ? '#94a3b8' : conf.border}`,
-                                  borderBottom: `2px solid ${isFrozen ? '#94a3b8' : conf.border}`
+                                  backgroundColor: isFrozen ? '#cbd5e1' : bgConf.bg,
+                                  borderTop: `2px solid ${isFrozen ? '#94a3b8' : bgConf.border}`,
+                                  borderBottom: `2px solid ${isFrozen ? '#94a3b8' : bgConf.border}`
                                 }}
                               />
                             )}
@@ -1906,9 +1672,9 @@ export default function BlockOutGame({
                                   left: dc * (cellSize + gap),
                                   width: cellSize,
                                   height: gap + 2,
-                                  backgroundColor: isFrozen ? '#cbd5e1' : conf.bg,
-                                  borderLeft: `2px solid ${isFrozen ? '#94a3b8' : conf.border}`,
-                                  borderRight: `2px solid ${isFrozen ? '#94a3b8' : conf.border}`
+                                  backgroundColor: isFrozen ? '#cbd5e1' : bgConf.bg,
+                                  borderLeft: `2px solid ${isFrozen ? '#94a3b8' : bgConf.border}`,
+                                  borderRight: `2px solid ${isFrozen ? '#94a3b8' : bgConf.border}`
                                 }}
                               />
                             )}
@@ -1922,7 +1688,7 @@ export default function BlockOutGame({
                                   left: dc * (cellSize + gap) + cellSize - 1,
                                   width: gap + 2,
                                   height: gap + 2,
-                                  backgroundColor: isFrozen ? '#cbd5e1' : conf.bg
+                                  backgroundColor: isFrozen ? '#cbd5e1' : bgConf.bg
                                 }}
                               />
                             )}
@@ -1953,57 +1719,62 @@ export default function BlockOutGame({
                 <p style={{ margin: 0, color: '#475569', fontSize: 16 }}>
                   Všetky kocky úspešne vyradené na {moves} {moves === 1 ? 'ťah' : (moves < 5 ? 'ťahy' : 'ťahov')}!
                 </p>
-                <div className="blockout-modal-buttons">
-                  {onNextVybraneLevel ? (
-                    hasNextVybraneLevel && (
+                <div className="result-actions" style={{ width: '100%', marginTop: 8 }}>
+                  <div className="result-actions-icons">
+                    {isLevelUnlocked(currentLevelIndex) && (
                       <button
-                        className="btn-blockout-primary"
-                        onClick={onNextVybraneLevel}
+                        type="button"
+                        className="btn-icon-action btn-icon-restart"
+                        onClick={() => startLevel(currentLevelIndex, true)}
+                        title="Hrať znova"
                       >
-                        <NextLevelIcon size={20} />
-                        <span>Ďalší level</span>
+                        <RestartIcon size={26} />
                       </button>
-                    )
-                  ) : (
-                    currentLevelIndex + 1 < BLOCK_OUT_LEVELS.length && isLevelUnlocked(currentLevelIndex + 1) && (
+                    )}
+                  </div>
+                  <div className="result-actions-nav">
+                    {onBack || onCloseReward ? (
                       <button
-                        className="btn-blockout-primary"
-                        onClick={() => startLevel(currentLevelIndex + 1, true)}
+                        className="btn-secondary btn-levels-menu"
+                        onClick={handleExit}
                       >
-                        <NextLevelIcon size={20} />
-                        <span>Ďalší level</span>
+                        <BackIcon size={20} />
+                        <span>Späť</span>
                       </button>
-                    )
-                  )}
-                  {isLevelUnlocked(currentLevelIndex) && (
-                    <button
-                      className="btn-blockout-secondary"
-                      onClick={() => startLevel(currentLevelIndex, true)}
-                    >
-                      <RestartIcon size={20} stroke="#334155" />
-                      <span>Hrať znova</span>
-                    </button>
-                  )}
-                  {onBack || onCloseReward ? (
-                    <button
-                      className="btn-blockout-secondary"
-                      onClick={handleExit}
-                    >
-                      <LevelsMenuIcon size={20} stroke="#334155" />
-                      <span>Späť</span>
-                    </button>
-                  ) : (
-                    <button
-                      className="btn-blockout-secondary"
-                      onClick={() => {
-                        setSavedStates(getBlockOutSavedStates());
-                        setGameState('levels');
-                      }}
-                    >
-                      <LevelsMenuIcon size={20} stroke="#334155" />
-                      <span>Výber levelov</span>
-                    </button>
-                  )}
+                    ) : (
+                      <button
+                        className="btn-secondary btn-levels-menu"
+                        onClick={() => {
+                          setSavedStates(getBlockOutSavedStates());
+                          setGameState('levels');
+                        }}
+                      >
+                        <LevelsMenuIcon size={20} />
+                        <span>Výber levelov</span>
+                      </button>
+                    )}
+                    {onNextVybraneLevel ? (
+                      hasNextVybraneLevel && (
+                        <button
+                          className="btn-next-level"
+                          onClick={onNextVybraneLevel}
+                        >
+                          <NextLevelIcon size={20} />
+                          <span>Ďalší level</span>
+                        </button>
+                      )
+                    ) : (
+                      currentLevelIndex + 1 < BLOCK_OUT_LEVELS.length && isLevelUnlocked(currentLevelIndex + 1) && (
+                        <button
+                          className="btn-next-level"
+                          onClick={() => startLevel(currentLevelIndex + 1, true)}
+                        >
+                          <NextLevelIcon size={20} />
+                          <span>Ďalší level</span>
+                        </button>
+                      )
+                    )}
+                  </div>
                 </div>
               </div>
             </div>

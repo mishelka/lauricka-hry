@@ -1,9 +1,12 @@
-import { useMemo, useRef, useState } from 'react';
+import { useContext, useEffect, useMemo, useRef, useState } from 'react';
 import { VYBRANE_V_GROUPS, VYBRANE_V_RULES, VYBRANE_V_CHYTAKY } from '../data/vybraneVSlova';
-import { getStarCount, getVybraneOptionId, shuffleArray, triggerFireworks } from '../utils/gameUtils';
+import { getStarCount, getVybraneOptionId, getVybraneOptions, shuffleArray, triggerFireworks } from '../utils/gameUtils';
 import { getLevelStars, updateLevelBestStars } from '../utils/player';
+import useDevUnlock from '../utils/useDevUnlock';
 import BlockOutGame from '../rewards/BlockOutGame';
-import { RestartIcon, NextLevelIcon, LevelsMenuIcon, GameIcon } from './Icons';
+import { isBlockOutLevelImplemented } from '../rewards/blockOutLevels';
+import { RestartIcon, NextLevelIcon, LevelsMenuIcon, GameIcon, HelpIcon } from './Icons';
+import { TopActionsContext } from '../App';
 
 const QUESTIONS_PER_LEVEL = 15;
 const MAX_STARS = 5;
@@ -13,11 +16,32 @@ function renderStars(stars) {
 }
 
 export default function VybraneVGame() {
+  const { setRightAction } = useContext(TopActionsContext);
   const groups = useMemo(() => VYBRANE_V_GROUPS, []);
   const [levelStars, setLevelStars] = useState(() => getLevelStars('vybraneV', groups.length));
+  useDevUnlock({ gameId: 'vybraneV', levelCount: groups.length, onUnlock: setLevelStars });
   const [selectedLevel, setSelectedLevel] = useState(null);
   const [playingRewardLevel, setPlayingRewardLevel] = useState(null);
   const [showRules, setShowRules] = useState(false);
+
+  useEffect(() => {
+    if (selectedLevel !== null || playingRewardLevel !== null) {
+      setRightAction(null);
+      return;
+    }
+    setRightAction(
+      <button
+        type="button"
+        className={`btn-top-action btn-help${showRules ? ' active' : ''}`}
+        onClick={() => setShowRules(prev => !prev)}
+        title={showRules ? 'Skryť prehľad' : 'Prehľad vybraných slov po V'}
+        aria-label="Prehľad vybraných slov po V"
+      >
+        <HelpIcon size={24} />
+      </button>
+    );
+    return () => setRightAction(null);
+  }, [showRules, selectedLevel, playingRewardLevel, setRightAction]);
   const [order, setOrder] = useState([]);
   const [index, setIndex] = useState(0);
   const [hit, setHit] = useState(0);
@@ -49,6 +73,7 @@ export default function VybraneVGame() {
     const pool = groups[level] || [];
     const shuffled = shuffleArray(pool).slice(0, Math.min(pool.length, QUESTIONS_PER_LEVEL));
     setSelectedLevel(level);
+    setShowRules(false);
     setOrder(shuffled);
     setIndex(0);
     setHit(0);
@@ -126,6 +151,43 @@ export default function VybraneVGame() {
     }
   }
 
+  const renderRulesPanel = () => (
+    <div className="rules-panel">
+      <h3>
+        <span>Prehľad vybraných slov po V</span>
+        <button
+          type="button"
+          className="btn-rules-close"
+          onClick={() => setShowRules(false)}
+          title="Zavrieť prehľad"
+        >
+          ✕ Zavrieť
+        </button>
+      </h3>
+      <p className="rules-words-list">
+        vysoký, výška, Vysočina, Vysoké Tatry, zvyk, zvyknúť si, jazyk, jazykový, vy, vykať, výr, výskať, vyť, vydra, vyhňa, vyžla, predpona vy-/vý- (výlet, výhra, výťah, výrobok, výborný)
+      </p>
+
+      <h4 className="rules-section-rules">Pravidlá a význam:</h4>
+      <ul className="rules-section-rules">
+        {VYBRANE_V_RULES.map((rule, idx) => (
+          <li key={idx}>
+            <strong>{rule.word}:</strong> {rule.description}
+          </li>
+        ))}
+      </ul>
+
+      <h4 className="rules-section-chytaky">Pozor na chytáky (i / y):</h4>
+      <ul className="rules-section-chytaky">
+        {VYBRANE_V_CHYTAKY.map((chytak, idx) => (
+          <li key={idx}>
+            <strong>{chytak.pair}:</strong> {chytak.desc}
+          </li>
+        ))}
+      </ul>
+    </div>
+  );
+
   const levelDone = selectedLevel !== null ? (levelStars[selectedLevel] || 0) === MAX_STARS : false;
   const hasNextLevel = selectedLevel !== null && selectedLevel < groups.length - 1;
 
@@ -157,55 +219,13 @@ export default function VybraneVGame() {
         <h1>Vybrané slová po V</h1>
         <p className="level-menu-help">Vyber si úroveň a precvič si vybrané slová po V. Získaj 5★ na odomknutie ďalšej úrovne a odmeny.</p>
 
-        <div style={{ marginBottom: '18px' }}>
-          <button
-            type="button"
-            className="btn-secondary"
-            style={{ fontSize: '18px', padding: '12px 18px', width: 'auto', borderRadius: '12px' }}
-            onClick={() => setShowRules(prev => !prev)}
-          >
-            {showRules ? '🔼 Skryť prehľad a pravidlá' : '📖 Prehľad vybraných slov po V'}
-          </button>
-        </div>
-
-        {showRules && (
-          <div className="rules-container" style={{
-            background: '#ffffff',
-            border: '2px solid #b8d4e8',
-            borderRadius: '16px',
-            padding: '16px',
-            marginBottom: '20px',
-            textAlign: 'left'
-          }}>
-            <h2 style={{ marginTop: 0, color: '#1f4e79', fontSize: '22px' }}>Vybrané slová po V:</h2>
-            <p style={{ fontWeight: 'bold', fontSize: '16px', color: '#2b6cb0', lineHeight: 1.5 }}>
-              vysoký, výška, Vysočina, Vysoké Tatry, zvyk, zvyknúť si, jazyk, jazykový, vy, vykať, výr, výskať, vyť, vydra, vyhňa, vyžla, predpona vy-/vý- (výlet, výhra, výťah, výrobok, výborný)
-            </p>
-
-            <h3 style={{ color: '#1f4e79', fontSize: '18px', marginTop: '16px', marginBottom: '8px' }}>Pravidlá a význam:</h3>
-            <ul style={{ paddingLeft: '20px', margin: 0, fontSize: '14px', lineHeight: 1.5 }}>
-              {VYBRANE_V_RULES.map((rule, idx) => (
-                <li key={idx} style={{ marginBottom: '6px' }}>
-                  <strong style={{ color: '#1a365d' }}>{rule.word}:</strong> {rule.description}
-                </li>
-              ))}
-            </ul>
-
-            <h3 style={{ color: '#c53030', fontSize: '18px', marginTop: '16px', marginBottom: '8px' }}>Pozor na chytáky (i / y):</h3>
-            <ul style={{ paddingLeft: '20px', margin: 0, fontSize: '14px', lineHeight: 1.5 }}>
-              {VYBRANE_V_CHYTAKY.map((chytak, idx) => (
-                <li key={idx} style={{ marginBottom: '6px' }}>
-                  <strong style={{ color: '#9b2c2c' }}>{chytak.pair}:</strong> {chytak.desc}
-                </li>
-              ))}
-            </ul>
-          </div>
-        )}
+        {showRules && renderRulesPanel()}
 
         <div className="levels-grid">
           {groups.map((_, level) => {
             const best = levelStars[level] || 0;
             const unlocked = isLevelUnlocked(level);
+            const isRewardImplemented = isBlockOutLevelImplemented(level);
             const classes = ['level-btn'];
             if (best === MAX_STARS) classes.push('completed');
             if (!unlocked && best < MAX_STARS) classes.push('locked');
@@ -224,10 +244,15 @@ export default function VybraneVGame() {
                 {best === MAX_STARS && (
                   <button
                     type="button"
-                    className="level-play-btn"
-                    onClick={() => setPlayingRewardLevel(level)}
-                    title={`Hrať odmenu: Block Out - Level ${level + 1}`}
-                    style={{ background: '#2563eb' }}
+                    className={`level-play-btn${!isRewardImplemented ? ' disabled' : ''}`}
+                    onClick={() => isRewardImplemented && setPlayingRewardLevel(level)}
+                    disabled={!isRewardImplemented}
+                    title={
+                      isRewardImplemented
+                        ? `Hrať odmenu: Block Out - Level ${level + 1}`
+                        : `Odmena (Block Out - Level ${level + 1}) zatiaľ nie je implementovaná`
+                    }
+                    style={{ background: isRewardImplemented ? '#2563eb' : '#94a3b8' }}
                   >
                     <GameIcon size={22} />
                   </button>
@@ -242,6 +267,7 @@ export default function VybraneVGame() {
 
   if (resultVisible) {
     const stars = getStarCount(miss);
+    const isRewardImplemented = selectedLevel !== null && isBlockOutLevelImplemented(selectedLevel);
     return (
       <div className="result-box">
         <h2>Koniec hry!</h2>
@@ -252,37 +278,50 @@ export default function VybraneVGame() {
         </div>
         <div className="level-progress-message">
           {levelDone
-            ? (hasNextLevel ? 'Level splnený na 5★! Odomkla sa ti odmena Block Out a ďalší level.' : 'Fantastické! Zvládla si všetky úrovne vybraných slov po V!')
+            ? (hasNextLevel ? 'Level splnený na 5★! Odomkla sa ti odmena Block Out a ďalší level.' : 'Fantastické! Zvládla si všetky úrovne vybraných slov po V a odomkla si Vybrané slová po Z! 🎉')
             : `Získala si ${stars}/5 ★. Na postup do ďalšieho levelu a odmenu potrebuješ 5/5 ★.`}
         </div>
         <div className="wrong-list">
           {wrongItems.size > 0 ? `Precvič si: ${Array.from(wrongItems).join(', ')}` : 'Výborne, žiadne chyby! Všetko správne! 🎉'}
         </div>
         <div className="result-actions">
-          <button className="btn-restart" onClick={() => startLevel(selectedLevel)}>
-            <RestartIcon />
-            <span>Opakovať level</span>
-          </button>
-          {stars === 5 && (
+          <div className="result-actions-icons">
             <button
               type="button"
-              className="btn-reward-game"
-              onClick={() => setPlayingRewardLevel(selectedLevel)}
+              className="btn-icon-action btn-icon-restart"
+              onClick={() => startLevel(selectedLevel)}
+              title="Opakovať level"
             >
-              <GameIcon />
-              <span>{`Hrať odmenu: Block Out (${selectedLevel + 1}. level)`}</span>
+              <RestartIcon size={26} />
             </button>
-          )}
-          {hasNextLevel && levelDone && (
-            <button className="btn-next-level" onClick={() => startLevel(selectedLevel + 1)}>
-              <NextLevelIcon />
-              <span>Ďalší level</span>
+            {stars === 5 && (
+              <button
+                type="button"
+                className={`btn-icon-action btn-icon-reward${!isRewardImplemented ? ' disabled' : ''}`}
+                onClick={() => isRewardImplemented && setPlayingRewardLevel(selectedLevel)}
+                disabled={!isRewardImplemented}
+                title={
+                  isRewardImplemented
+                    ? `Hrať odmenu: Block Out (${selectedLevel + 1}. level)`
+                    : `Odmena (Block Out - Level ${selectedLevel + 1}) zatiaľ nie je implementovaná`
+                }
+              >
+                <GameIcon size={26} />
+              </button>
+            )}
+          </div>
+          <div className="result-actions-nav">
+            <button className="btn-secondary btn-levels-menu" onClick={() => setSelectedLevel(null)}>
+              <LevelsMenuIcon />
+              <span>Menu levelov</span>
             </button>
-          )}
-          <button className="btn-secondary" onClick={() => setSelectedLevel(null)}>
-            <LevelsMenuIcon />
-            <span>Menu levelov</span>
-          </button>
+            {hasNextLevel && levelDone && (
+              <button className="btn-next-level" onClick={() => startLevel(selectedLevel + 1)}>
+                <NextLevelIcon />
+                <span>Ďalší level</span>
+              </button>
+            )}
+          </div>
         </div>
       </div>
     );
@@ -334,12 +373,7 @@ export default function VybraneVGame() {
         )}
 
         <div className="button-grid-2x2">
-          {[
-            { id: 'makke', label: 'I', className: 'btn-sl-makke' },
-            { id: 'makke-dlhe', label: 'Í', className: 'btn-sl-makke' },
-            { id: 'tvrde', label: 'Y', className: 'btn-sl-tvrde' },
-            { id: 'tvrde-dlhe', label: 'Ý', className: 'btn-sl-tvrde' }
-          ].map(option => {
+          {getVybraneOptions(currentTask).map(option => {
             const marker = feedbackMap[option.id];
             const icon = marker === 'correct' ? '✅' : '❌';
 

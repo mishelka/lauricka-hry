@@ -1,9 +1,10 @@
 import { useRef, useState } from 'react';
 import { getStarCount, triggerFireworks } from '../utils/gameUtils';
 import { getBestStars, getLevelStars, updateLevelBestStars } from '../utils/player';
+import useDevUnlock from '../utils/useDevUnlock';
 import AudioTalePlayer from './AudioTalePlayer';
 import { AUDIO_TALES } from '../data/audioTales';
-import { RestartIcon, NextLevelIcon, LevelsMenuIcon, PlayIcon, PauseIcon } from './Icons';
+import { RestartIcon, NextLevelIcon, LevelsMenuIcon, PlayIcon, PauseIcon, HeadphonesIcon } from './Icons';
 
 const TOTAL = 5;
 const MAX_STARS = 5;
@@ -78,6 +79,7 @@ export default function RatanieGame() {
 
     return initial;
   });
+  useDevUnlock({ gameId: 'ratanie', levelCount: LEVELS.length, onUnlock: setLevelStars });
   const [selectedLevel, setSelectedLevel] = useState(null);
   const [examples, setExamples] = useState([]);
   const [index, setIndex] = useState(0);
@@ -259,21 +261,37 @@ export default function RatanieGame() {
           {wrongItems.size > 0 ? `Precvič si: ${Array.from(wrongItems).join(', ')}` : 'Výborne, žiadne chyby!'}
         </div>
         <div className="result-actions">
-          <button className="btn-restart" onClick={() => startLevel(selectedLevel)}>
-            <RestartIcon />
-            <span>Opakovať level</span>
-          </button>
-          {stars === 5 && <AudioTalePlayer taleUrl={levelTaleUrl} />}
-          {hasNextLevel && levelDone && (
-            <button className="btn-next-level" onClick={() => startLevel(selectedLevel + 1)}>
-              <NextLevelIcon />
-              <span>Ďalší level</span>
+          <div className="result-actions-icons">
+            <button
+              type="button"
+              className="btn-icon-action btn-icon-restart"
+              onClick={() => startLevel(selectedLevel)}
+              title="Opakovať level"
+            >
+              <RestartIcon size={26} />
             </button>
-          )}
-          <button className="btn-secondary" onClick={() => setSelectedLevel(null)}>
-            <LevelsMenuIcon />
-            <span>Menu levelov</span>
-          </button>
+            {stars === 5 && (
+              <AudioTalePlayer
+                taleUrl={levelTaleUrl}
+                className="btn-icon-action btn-icon-reward"
+                playLabel={<HeadphonesIcon size={26} />}
+                pauseLabel={<PauseIcon size={26} />}
+                title="Prehrať rozprávku"
+              />
+            )}
+          </div>
+          <div className="result-actions-nav">
+            <button className="btn-secondary btn-levels-menu" onClick={() => setSelectedLevel(null)}>
+              <LevelsMenuIcon />
+              <span>Menu levelov</span>
+            </button>
+            {hasNextLevel && levelDone && (
+              <button className="btn-next-level" onClick={() => startLevel(selectedLevel + 1)}>
+                <NextLevelIcon />
+                <span>Ďalší level</span>
+              </button>
+            )}
+          </div>
         </div>
       </div>
     );

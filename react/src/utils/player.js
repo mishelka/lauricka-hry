@@ -167,6 +167,17 @@ export function updateLevelBestStars(gameId, levelIndex, stars, levelCount) {
   return levels;
 }
 
+export function unlockAllLevels(gameId, levelCount) {
+  const state = loadState();
+  migrateLegacyIfNeeded(state);
+  const rec = getRecord(state, gameId);
+  const levels = new Array(levelCount).fill(MAX_STARS);
+  rec.levelStars = levels;
+  rec.bestStars = MAX_STARS;
+  saveState(state);
+  return levels;
+}
+
 export function getLevelPlays(gameId, levelCount) {
   const state = loadState();
   migrateLegacyIfNeeded(state);

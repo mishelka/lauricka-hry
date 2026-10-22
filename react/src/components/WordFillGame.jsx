@@ -1,9 +1,10 @@
 import { useMemo, useRef, useState } from 'react';
 import { getStarCount, shuffleArray, triggerFireworks } from '../utils/gameUtils';
 import { getLevelStars, updateLevelBestStars } from '../utils/player';
+import useDevUnlock from '../utils/useDevUnlock';
 import AudioTalePlayer from './AudioTalePlayer';
 import { AUDIO_TALES } from '../data/audioTales';
-import { RestartIcon, NextLevelIcon, LevelsMenuIcon } from './Icons';
+import { RestartIcon, NextLevelIcon, LevelsMenuIcon, HeadphonesIcon, PauseIcon } from './Icons';
 
 const MAX_STARS = 5;
 
@@ -61,6 +62,7 @@ export default function WordFillGame({ title, gameId, levelGroups, sourceWords }
   }, [levelGroups, sourceWords]);
 
   const [levelStars, setLevelStars] = useState(() => getLevelStars(gameId, groups.length));
+  useDevUnlock({ gameId, levelCount: groups.length, onUnlock: setLevelStars });
   const [selectedLevel, setSelectedLevel] = useState(null);
   const [words, setWords] = useState([]);
   const [answers, setAnswers] = useState({});
@@ -197,6 +199,11 @@ export default function WordFillGame({ title, gameId, levelGroups, sourceWords }
       const choice = selected[optionIndex] || '';
 
       if (!submitted) {
+        const isUpper = part.correct === part.correct.toUpperCase() && part.correct !== part.correct.toLowerCase();
+        const optionsList = isUpper
+          ? entry.options.map(opt => opt.toLocaleUpperCase('sk'))
+          : entry.options.map(opt => opt.toLocaleLowerCase('sk'));
+
         return (
           <select
             key={`${wordIndex}-blank-${idx}`}
@@ -206,7 +213,7 @@ export default function WordFillGame({ title, gameId, levelGroups, sourceWords }
             aria-label="Vyber písmeno"
           >
             <option value="">_</option>
-            {entry.options.map(option => (
+            {optionsList.map(option => (
               <option key={option} value={option}>{option}</option>
             ))}
           </select>
@@ -321,21 +328,37 @@ export default function WordFillGame({ title, gameId, levelGroups, sourceWords }
               : 'Výborne, žiadne chyby! Všetko správne! 🎉'}
           </div>
           <div className="result-actions">
-            <button className="btn-restart" onClick={restartCurrentLevel}>
-              <RestartIcon />
-              <span>Opakovať level</span>
-            </button>
-            {currentStars === MAX_STARS && <AudioTalePlayer taleUrl={taleUrl} />}
-            {hasNextLevel && (levelDone || currentStars === MAX_STARS) && (
-              <button className="btn-next-level" onClick={() => startLevel(selectedLevel + 1)}>
-                <NextLevelIcon />
-                <span>Ďalší level</span>
+            <div className="result-actions-icons">
+              <button
+                type="button"
+                className="btn-icon-action btn-icon-restart"
+                onClick={restartCurrentLevel}
+                title="Opakovať level"
+              >
+                <RestartIcon size={26} />
               </button>
-            )}
-            <button className="btn-levels-menu" onClick={() => setSelectedLevel(null)}>
-              <LevelsMenuIcon />
-              <span>Menu levelov</span>
-            </button>
+              {currentStars === MAX_STARS && (
+                <AudioTalePlayer
+                  taleUrl={taleUrl}
+                  className="btn-icon-action btn-icon-reward"
+                  playLabel={<HeadphonesIcon size={26} />}
+                  pauseLabel={<PauseIcon size={26} />}
+                  title="Prehrať rozprávku"
+                />
+              )}
+            </div>
+            <div className="result-actions-nav">
+              <button className="btn-secondary btn-levels-menu" onClick={() => setSelectedLevel(null)}>
+                <LevelsMenuIcon />
+                <span>Menu levelov</span>
+              </button>
+              {hasNextLevel && (levelDone || currentStars === MAX_STARS) && (
+                <button className="btn-next-level" onClick={() => startLevel(selectedLevel + 1)}>
+                  <NextLevelIcon />
+                  <span>Ďalší level</span>
+                </button>
+              )}
+            </div>
           </div>
         </div>
       )}

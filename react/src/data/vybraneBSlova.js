@@ -1,5 +1,5 @@
 export const VYBRANE_B_GROUPS = [
-  // Level 1: Základné vybrané a bežné slová 1 (Mix Y a I)
+  // Level 1: Základné vybrané a bežné slová (Mix Y a I)
   [
     { vypis: 'b_lina', odpoved: 'tvrde', cele: 'bylina', hint: 'bylina = liečivá rastlina (vybrané slovo)' },
     { vypis: 'b_cykel', odpoved: 'makke', cele: 'bicykel', hint: 'bicykel = dopravný prostriedok (cudzie slovo)' },
@@ -8,38 +8,34 @@ export const VYBRANE_B_GROUPS = [
     { vypis: 'b_k', odpoved: 'tvrde-dlhe', cele: 'býk', hint: 'býk = samec kravy (vybrané slovo)' },
     { vypis: 'b_č', odpoved: 'makke', cele: 'bič', hint: 'bič = nástroj na plieskanie / poháňanie (nie je vybrané slovo)' },
     { vypis: 'b_t', odpoved: 'tvrde', cele: 'byt', hint: 'byt = príbytok na bývanie (vybrané slovo)' },
-    { vypis: 'b_eliť', odpoved: 'makke', cele: 'bieliť', hint: 'bieliť = natierať na bielo (nie je vybrané slovo)' }
-  ],
-
-  // Level 2: Základné vybrané a bežné slová 2 (Mix Y a I)
-  [
+    { vypis: 'b_eliť', odpoved: 'makke', cele: 'bieliť', hint: 'bieliť = natierať na bielo (nie je vybrané slovo)' },
     { vypis: 'b_vať', odpoved: 'tvrde-dlhe', cele: 'bývať', hint: 'bývať = mať domov, sídliť (vybrané slovo)' },
-    { vypis: 'b_tka', odpoved: 'makke', cele: 'bitka', hint: 'bitka = zápas, udieranie (odvodené od biť)' },
     { vypis: 'dob_tok', odpoved: 'tvrde', cele: 'dobytok', hint: 'dobytok = hospodárske zvieratá (vybrané slovo)' },
-    { vypis: 'b_elizeň', odpoved: 'makke', cele: 'bielizeň', hint: 'bielizeň = odev, prádlo (nie je vybrané slovo)' },
-    { vypis: 'kob_la', odpoved: 'tvrde', cele: 'kobyla', hint: 'kobyla = samica koňa (vybrané slovo)' },
-    { vypis: 'ab_', odpoved: 'tvrde', cele: 'aby', hint: 'aby = spojka (vybrané slovo)' },
-    { vypis: 'keb_', odpoved: 'tvrde', cele: 'keby', hint: 'keby = spojka vyjadrujúca podmienku (vybrané slovo)' },
-    { vypis: 'b_stro', odpoved: 'makke', cele: 'bistro', hint: 'bistro = malé občerstvenie (cudzie slovo)' }
+    { vypis: 'kob_la', odpoved: 'tvrde', cele: 'kobyla', hint: 'kobyla = samica koňa (vybrané slovo)' }
   ],
 
-  // Level 3: Odvodené a bežné slová 1 (Mix Y a I)
+  // Level 2: Odvodené a bežné slová 1 (Mix Y a I)
   [
+    { vypis: 'ab_', odpoved: 'tvrde', cele: 'aby', hint: 'aby = spojka (vybrané slovo)' },
+    { vypis: 'b_tka', odpoved: 'makke', cele: 'bitka', hint: 'bitka = zápas, udieranie (odvodené od biť)' },
+    { vypis: 'keb_', odpoved: 'tvrde', cele: 'keby', hint: 'keby = spojka vyjadrujúca podmienku (vybrané slovo)' },
+    { vypis: 'b_elizeň', odpoved: 'makke', cele: 'bielizeň', hint: 'bielizeň = odev, prádlo (nie je vybrané slovo)' },
     { vypis: 'b_vol', odpoved: 'tvrde', cele: 'byvol', hint: 'byvol = veľké rohaté zviera (vybrané slovo)' },
-    { vypis: 'b_žutéria', odpoved: 'makke', cele: 'bižutéria', hint: 'bižutéria = ozdobné šperky (cudzie slovo)' },
+    { vypis: 'b_stro', odpoved: 'makke', cele: 'bistro', hint: 'bistro = malé občerstvenie (cudzie slovo)' },
     { vypis: 'b_tosť', odpoved: 'tvrde', cele: 'bytosť', hint: 'bytosť = živý tvor, človek (vybrané slovo)' },
-    { vypis: 'b_fľovať sa', odpoved: 'makke', cele: 'bifľovať sa', hint: 'bifľovať sa = učiť sa naspamäť (cudzie slovo)' },
+    { vypis: 'b_žutéria', odpoved: 'makke', cele: 'bižutéria', hint: 'bižutéria = ozdobné šperky (cudzie slovo)' },
     { vypis: 'b_valý', odpoved: 'tvrde-dlhe', cele: 'bývalý', hint: 'bývalý = niekdajší (vybrané slovo)' },
     { vypis: 'b_linka', odpoved: 'tvrde', cele: 'bylinka', hint: 'odvodené od bylina' },
-    { vypis: 'b_zón', odpoved: 'makke', cele: 'bizón', hint: 'bizón = americké zviera (cudzie slovo)' },
     { vypis: 'b_linkový', odpoved: 'tvrde', cele: 'bylinkový', hint: 'odvodené od bylina' }
   ],
 
-  // Level 4: Odvodené a bežné slová 2 (Mix Y a I)
+  // Level 3: Odvodené a bežné slová 2 (Mix Y a I)
   [
-    { vypis: 'b_kiny', odpoved: 'makke', cele: 'bikiny', hint: 'bikiny = dámske plavky (cudzie slovo)' },
+    { vypis: 'b_fľovať sa', odpoved: 'makke', cele: 'bifľovať sa', hint: 'bifľovať sa = učiť sa naspamäť (cudzie slovo)' },
     { vypis: 'b_strosť', odpoved: 'tvrde', cele: 'bystrosť', hint: 'odvodené od bystrý' },
+    { vypis: 'b_zón', odpoved: 'makke', cele: 'bizón', hint: 'bizón = americké zviera (cudzie slovo)' },
     { vypis: 'Banská B_strica', odpoved: 'tvrde', cele: 'Banská Bystrica', hint: 'mesto s bystrou vodou' },
+    { vypis: 'b_kiny', odpoved: 'makke', cele: 'bikiny', hint: 'bikiny = dámske plavky (cudzie slovo)' },
     { vypis: 'b_strina', odpoved: 'tvrde', cele: 'bystrina', hint: 'horský potok s bystrou vodou' },
     { vypis: 'b_túnok', odpoved: 'makke', cele: 'bitúnok', hint: 'bitúnok = miesto spracovania mäsa' },
     { vypis: 'ob_vačka', odpoved: 'tvrde-dlhe', cele: 'obývačka', hint: 'odvodené od bývať' },
@@ -47,7 +43,7 @@ export const VYBRANE_B_GROUPS = [
     { vypis: 'náb_tok', odpoved: 'tvrde', cele: 'nábytok', hint: 'odvodené od byt / bývať' }
   ],
 
-  // Level 5: Rozšírené a cudzie slová 1 (Mix Y a I)
+  // Level 4: Rozšírené a cudzie slová 1 (Mix Y a I)
   [
     { vypis: 'zb_tok', odpoved: 'tvrde', cele: 'zbytok', hint: 'zbytok / zvyšok (vybrané slovo)' },
     { vypis: 'b_ológia', odpoved: 'makke', cele: 'biológia', hint: 'biológia = veda o živote (cudzie slovo)' },
@@ -62,7 +58,7 @@ export const VYBRANE_B_GROUPS = [
     { vypis: 'zab_vať sa', odpoved: 'tvrde-dlhe', cele: 'zabývať sa', hint: 'odvodené od bývať' }
   ],
 
-  // Level 6: Rozšírené a odvodené slová 2 (Mix Y a I)
+  // Level 5: Rozšírené a odvodené slová 2 (Mix Y a I)
   [
     { vypis: 'b_skup', odpoved: 'makke', cele: 'biskup', hint: 'biskup = cirkevný hodnostár (nie je vybrané slovo)' },
     { vypis: 'dob_tkárstvo', odpoved: 'tvrde', cele: 'dobytkárstvo', hint: 'odvodené od dobytok' },
@@ -76,7 +72,7 @@ export const VYBRANE_B_GROUPS = [
     { vypis: 'starob_lý', odpoved: 'tvrde', cele: 'starobylý', hint: 'odvodené od byť (dávno jestvujúci)' }
   ],
 
-  // Level 7: Dvojice a chytáky 1 (Rozlišujeme význam)
+  // Level 6: Dvojice a chytáky 1 (Rozlišujeme význam)
   [
     { vypis: 'b_ť (existovať)', odpoved: 'tvrde', cele: 'byť (existovať)', hint: 'byť = existovať, nachádzať sa (vybrané slovo)' },
     { vypis: 'b_ť (udierať)', odpoved: 'makke', cele: 'biť (udierať)', hint: 'biť = udierať, tĺcť, zvoniť (nie je vybrané slovo)' },
@@ -88,7 +84,7 @@ export const VYBRANE_B_GROUPS = [
     { vypis: 'dob_ť (mobil)', odpoved: 'makke', cele: 'dobiť (mobil)', hint: 'dobiť = doplniť energiu, nabiť batériu' }
   ],
 
-  // Level 8: Dvojice a chytáky 2 (Rozlišujeme význam)
+  // Level 7: Dvojice a chytáky 2 (Rozlišujeme význam)
   [
     { vypis: 'odb_ť (loptu)', odpoved: 'makke', cele: 'odbiť (loptu)', hint: 'odbiť = odraziť úderom (biť)' },
     { vypis: 'odb_t (predaj tovaru)', odpoved: 'tvrde', cele: 'odbyt (predaj tovaru)', hint: 'odbyt = predaj tovaru (vybrané slovo)' },
@@ -100,7 +96,7 @@ export const VYBRANE_B_GROUPS = [
     { vypis: 'b_elina (biela tkanina)', odpoved: 'makke', cele: 'bielina (biela tkanina)', hint: 'bielina = biela látka (od biela)' }
   ],
 
-  // Level 9: Vety a slovné spojenia
+  // Level 8: Vety a slovné spojenia
   [
     { vypis: 'Včielka zbiera peľ z lesných b_lín.', odpoved: 'tvrde', cele: 'Včielka zbiera peľ z lesných bylín.', hint: 'byliny = rastliny' },
     { vypis: 'Chcem b_ť najlepšou žiačkou v triede.', odpoved: 'tvrde', cele: 'Chcem byť najlepšou žiačkou v triede.', hint: 'byť = existovať' },
@@ -119,7 +115,7 @@ export const VYBRANE_B_GROUPS = [
     { vypis: 'Otecko zavesil obraz a prib_l klinec.', odpoved: 'makke', cele: 'Otecko zavesil obraz a pribil klinec.', hint: 'pribiť klinec = úder kladivom' }
   ],
 
-  // Level 10: Majstrovský mix (Všetky pravidlá spolu)
+  // Level 9: Majstrovský mix (Všetky pravidlá spolu)
   [
     { vypis: 'neob_vaný ostrov', odpoved: 'tvrde-dlhe', cele: 'neobývaný ostrov', hint: 'odvodené od bývať' },
     { vypis: 'b_linkový čaj s medom', odpoved: 'tvrde', cele: 'bylinkový čaj s medom', hint: 'odvodené od bylina' },

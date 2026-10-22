@@ -28,6 +28,34 @@ export function getVybraneOptionId(task) {
   return task.odpoved || null;
 }
 
+export function isTaskBlankUppercase(task) {
+  if (!task) return false;
+  if (task.vypis && task.cele) {
+    const blankIdx = task.vypis.indexOf('_');
+    if (blankIdx !== -1 && blankIdx < task.cele.length) {
+      const ch = task.cele[blankIdx];
+      return ch === ch.toUpperCase() && ch !== ch.toLowerCase();
+    }
+  }
+  if (task.vypis) {
+    const trimmed = task.vypis.trim();
+    if (trimmed.startsWith('_')) {
+      return true;
+    }
+  }
+  return false;
+}
+
+export function getVybraneOptions(task) {
+  const isUpper = isTaskBlankUppercase(task);
+  return [
+    { id: 'makke', label: isUpper ? 'I' : 'i', className: 'btn-sl-makke' },
+    { id: 'makke-dlhe', label: isUpper ? 'Í' : 'í', className: 'btn-sl-makke' },
+    { id: 'tvrde', label: isUpper ? 'Y' : 'y', className: 'btn-sl-tvrde' },
+    { id: 'tvrde-dlhe', label: isUpper ? 'Ý' : 'ý', className: 'btn-sl-tvrde' }
+  ];
+}
+
 export function triggerFireworks(overlay) {
   if (!overlay) return;
 

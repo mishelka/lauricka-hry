@@ -1,7 +1,8 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { DOPLNOVACKY_DTNL_GROUPS, DOPLNOVACKY_B_GROUPS } from '../data/tasks';
-import { getLevelStars } from '../utils/player';
+import { getLevelStars, unlockAllLevels } from '../utils/player';
+import useDevUnlock from '../utils/useDevUnlock';
 import WordFillGame from './WordFillGame';
 
 export function DoplnovackyMenu() {
@@ -10,6 +11,15 @@ export function DoplnovackyMenu() {
     dtnl: getLevelStars('doplnovacky_dtnl', DOPLNOVACKY_DTNL_GROUPS.length),
     b: getLevelStars('doplnovacky_b', DOPLNOVACKY_B_GROUPS.length)
   }));
+
+  useDevUnlock({
+    gameId: 'doplnovacky_dtnl',
+    levelCount: DOPLNOVACKY_DTNL_GROUPS.length,
+    onUnlock: (dtnlLevels) => {
+      const bLevels = unlockAllLevels('doplnovacky_b', DOPLNOVACKY_B_GROUPS.length);
+      setStars({ dtnl: dtnlLevels, b: bLevels });
+    }
+  });
 
   useEffect(() => {
     setStars({

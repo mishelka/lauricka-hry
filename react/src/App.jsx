@@ -9,7 +9,8 @@ import { VYBRANE_R_GROUPS } from './data/vybraneRSlova';
 import { VYBRANE_S_GROUPS } from './data/vybraneSSlova';
 import { VYBRANE_V_GROUPS } from './data/vybraneVSlova';
 import { VYBRANE_Z_GROUPS } from './data/vybraneZSlova';
-import { getBestStars, getLevelStars } from './utils/player';
+import { getBestStars, getLevelStars, unlockAllLevels } from './utils/player';
+import useDevUnlock from './utils/useDevUnlock';
 import YiGame from './components/YiGame';
 import ObojakeGame from './components/ObojakeGame';
 import SlovaYiGame from './components/SlovaYiGame';
@@ -29,8 +30,12 @@ import CudzieGame from './components/CudzieGame';
 import BlockOutGame from './rewards/BlockOutGame';
 import { BLOCK_OUT_LEVELS } from './rewards/blockOutLevels';
 import { AUDIO_TALES } from './data/audioTales';
-import { BackIcon, PlayIcon, PauseIcon } from './components/Icons';
-import {useEffect, useMemo, useState} from "react";
+import { HomeIcon, PlayIcon, PauseIcon } from './components/Icons';
+import { createContext, useContext, useEffect, useMemo, useState } from "react";
+
+export const TopActionsContext = createContext({
+  setRightAction: () => {},
+});
 
 function renderStars(starsCount) {
   return Array.from({ length: 5 }).map((_, i) => (
@@ -104,6 +109,21 @@ function MenuPage() {
     };
   }, []);
 
+  useDevUnlock({
+    gameId: 'vybraneB',
+    levelCount: VYBRANE_B_GROUPS.length,
+    onUnlock: () => {
+      unlockAllLevels('vybraneB', VYBRANE_B_GROUPS.length);
+      unlockAllLevels('vybraneM', VYBRANE_M_GROUPS.length);
+      unlockAllLevels('vybraneP', VYBRANE_P_GROUPS.length);
+      unlockAllLevels('vybraneR', VYBRANE_R_GROUPS.length);
+      unlockAllLevels('vybraneS', VYBRANE_S_GROUPS.length);
+      unlockAllLevels('vybraneV', VYBRANE_V_GROUPS.length);
+      unlockAllLevels('vybraneZ', VYBRANE_Z_GROUPS.length);
+      refreshMenuStars();
+    }
+  });
+
   const yiStars = menuStars.yi;
   const obojakeStars = menuStars.obojake;
   const cudzieStars = menuStars.cudzie;
@@ -118,6 +138,15 @@ function MenuPage() {
   const vybraneSFinished = useMemo(() => menuStars.vybraneSLevels.filter(stars => stars === 5).length, [menuStars.vybraneSLevels]);
   const vybraneVFinished = useMemo(() => menuStars.vybraneVLevels.filter(stars => stars === 5).length, [menuStars.vybraneVLevels]);
   const vybraneZFinished = useMemo(() => menuStars.vybraneZLevels.filter(stars => stars === 5).length, [menuStars.vybraneZLevels]);
+
+  const isBUnlocked = true;
+  const isMUnlocked = vybraneBFinished === VYBRANE_B_GROUPS.length;
+  const isPUnlocked = isMUnlocked && vybraneMFinished === VYBRANE_M_GROUPS.length;
+  const isRUnlocked = isPUnlocked && vybranePFinished === VYBRANE_P_GROUPS.length;
+  const isSUnlocked = isRUnlocked && vybraneRFinished === VYBRANE_R_GROUPS.length;
+  const isVUnlocked = isSUnlocked && vybraneSFinished === VYBRANE_S_GROUPS.length;
+  const isZUnlocked = isVUnlocked && vybraneVFinished === VYBRANE_V_GROUPS.length;
+
   const blockOutFinished = useMemo(() => menuStars.blockOutLevels.filter(stars => stars === 5).length, [menuStars.blockOutLevels]);
   const doplnovackyFinished = useMemo(
     () => menuStars.doplnovackyDtnlLevels.filter(stars => stars === 5).length + menuStars.doplnovackyBLevels.filter(stars => stars === 5).length,
@@ -225,50 +254,92 @@ function MenuPage() {
           <div className="menu-cards">
             <div className="menu-card">
               <button className="btn-menu-vybrane-b menu-card-btn" onClick={() => navigate('/vybrane-b')}>
-                <span className="menu-title">Vybrané po B</span>
+                <span className="menu-title">B</span>
                 <span className="menu-stars">{`${vybraneBFinished} z ${VYBRANE_B_GROUPS.length}`}</span>
               </button>
             </div>
 
             <div className="menu-card">
-              <button className="btn-menu-vybrane-m menu-card-btn" onClick={() => navigate('/vybrane-m')}>
-                <span className="menu-title">Vybrané po M</span>
-                <span className="menu-stars">{`${vybraneMFinished} z ${VYBRANE_M_GROUPS.length}`}</span>
+              <button
+                className={`btn-menu-vybrane-m menu-card-btn${!isMUnlocked ? ' menu-card-locked' : ''}`}
+                onClick={() => isMUnlocked && navigate('/vybrane-m')}
+                disabled={!isMUnlocked}
+                title={!isMUnlocked ? 'Najprv dokonči B' : undefined}
+              >
+                <span className="menu-title">M</span>
+                <span className="menu-stars">
+                  {isMUnlocked ? `${vybraneMFinished} z ${VYBRANE_M_GROUPS.length}` : 'Najprv dokonči B'}
+                </span>
               </button>
             </div>
 
             <div className="menu-card">
-              <button className="btn-menu-vybrane-p menu-card-btn" onClick={() => navigate('/vybrane-p')}>
-                <span className="menu-title">Vybrané po P</span>
-                <span className="menu-stars">{`${vybranePFinished} z ${VYBRANE_P_GROUPS.length}`}</span>
+              <button
+                className={`btn-menu-vybrane-p menu-card-btn${!isPUnlocked ? ' menu-card-locked' : ''}`}
+                onClick={() => isPUnlocked && navigate('/vybrane-p')}
+                disabled={!isPUnlocked}
+                title={!isPUnlocked ? 'Najprv dokonči M' : undefined}
+              >
+                <span className="menu-title">P</span>
+                <span className="menu-stars">
+                  {isPUnlocked ? `${vybranePFinished} z ${VYBRANE_P_GROUPS.length}` : 'Najprv dokonči M'}
+                </span>
               </button>
             </div>
 
             <div className="menu-card">
-              <button className="btn-menu-vybrane-r menu-card-btn" onClick={() => navigate('/vybrane-r')}>
-                <span className="menu-title">Vybrané po R</span>
-                <span className="menu-stars">{`${vybraneRFinished} z ${VYBRANE_R_GROUPS.length}`}</span>
+              <button
+                className={`btn-menu-vybrane-r menu-card-btn${!isRUnlocked ? ' menu-card-locked' : ''}`}
+                onClick={() => isRUnlocked && navigate('/vybrane-r')}
+                disabled={!isRUnlocked}
+                title={!isRUnlocked ? 'Najprv dokonči P' : undefined}
+              >
+                <span className="menu-title">R</span>
+                <span className="menu-stars">
+                  {isRUnlocked ? `${vybraneRFinished} z ${VYBRANE_R_GROUPS.length}` : 'Najprv dokonči P'}
+                </span>
               </button>
             </div>
 
             <div className="menu-card">
-              <button className="btn-menu-vybrane-s menu-card-btn" onClick={() => navigate('/vybrane-s')}>
-                <span className="menu-title">Vybrané po S</span>
-                <span className="menu-stars">{`${vybraneSFinished} z ${VYBRANE_S_GROUPS.length}`}</span>
+              <button
+                className={`btn-menu-vybrane-s menu-card-btn${!isSUnlocked ? ' menu-card-locked' : ''}`}
+                onClick={() => isSUnlocked && navigate('/vybrane-s')}
+                disabled={!isSUnlocked}
+                title={!isSUnlocked ? 'Najprv dokonči R' : undefined}
+              >
+                <span className="menu-title">S</span>
+                <span className="menu-stars">
+                  {isSUnlocked ? `${vybraneSFinished} z ${VYBRANE_S_GROUPS.length}` : 'Najprv dokonči R'}
+                </span>
               </button>
             </div>
 
             <div className="menu-card">
-              <button className="btn-menu-vybrane-v menu-card-btn" onClick={() => navigate('/vybrane-v')}>
-                <span className="menu-title">Vybrané po V</span>
-                <span className="menu-stars">{`${vybraneVFinished} z ${VYBRANE_V_GROUPS.length}`}</span>
+              <button
+                className={`btn-menu-vybrane-v menu-card-btn${!isVUnlocked ? ' menu-card-locked' : ''}`}
+                onClick={() => isVUnlocked && navigate('/vybrane-v')}
+                disabled={!isVUnlocked}
+                title={!isVUnlocked ? 'Najprv dokonči S' : undefined}
+              >
+                <span className="menu-title">V</span>
+                <span className="menu-stars">
+                  {isVUnlocked ? `${vybraneVFinished} z ${VYBRANE_V_GROUPS.length}` : 'Najprv dokonči S'}
+                </span>
               </button>
             </div>
 
             <div className="menu-card">
-              <button className="btn-menu-vybrane-z menu-card-btn" onClick={() => navigate('/vybrane-z')}>
-                <span className="menu-title">Vybrané po Z</span>
-                <span className="menu-stars">{`${vybraneZFinished} z ${VYBRANE_Z_GROUPS.length}`}</span>
+              <button
+                className={`btn-menu-vybrane-z menu-card-btn${!isZUnlocked ? ' menu-card-locked' : ''}`}
+                onClick={() => isZUnlocked && navigate('/vybrane-z')}
+                disabled={!isZUnlocked}
+                title={!isZUnlocked ? 'Najprv dokonči V' : undefined}
+              >
+                <span className="menu-title">Z</span>
+                <span className="menu-stars">
+                  {isZUnlocked ? `${vybraneZFinished} z ${VYBRANE_Z_GROUPS.length}` : 'Najprv dokonči V'}
+                </span>
               </button>
             </div>
           </div>
@@ -293,20 +364,45 @@ function MenuPage() {
   );
 }
 
-function GamePage({ children, backTo = '/' }) {
+function GamePage({ children, backTo = '/', rightAction: propRightAction }) {
   const navigate = useNavigate();
+  const [contextRightAction, setContextRightAction] = useState(null);
+
+  const rightAction = propRightAction || contextRightAction;
 
   return (
-    <>
+    <TopActionsContext.Provider value={{ setRightAction: setContextRightAction }}>
       <div className="top-actions">
-        <button className="btn-back" onClick={() => navigate(backTo)}>
-          <BackIcon />
-          <span>Späť do menu</span>
+        <button
+          className="btn-back"
+          onClick={() => navigate(backTo)}
+          title="Hlavné menu"
+          aria-label="Hlavné menu"
+        >
+          <HomeIcon size={24} />
         </button>
+        {rightAction}
       </div>
       {children}
-    </>
+    </TopActionsContext.Provider>
   );
+}
+
+function isVybraneLetterUnlocked(letter) {
+  if (letter === 'b') return true;
+  const bDone = getLevelStars('vybraneB', VYBRANE_B_GROUPS.length).filter(s => s === 5).length === VYBRANE_B_GROUPS.length;
+  if (letter === 'm') return bDone;
+  const mDone = bDone && getLevelStars('vybraneM', VYBRANE_M_GROUPS.length).filter(s => s === 5).length === VYBRANE_M_GROUPS.length;
+  if (letter === 'p') return mDone;
+  const pDone = mDone && getLevelStars('vybraneP', VYBRANE_P_GROUPS.length).filter(s => s === 5).length === VYBRANE_P_GROUPS.length;
+  if (letter === 'r') return pDone;
+  const rDone = pDone && getLevelStars('vybraneR', VYBRANE_R_GROUPS.length).filter(s => s === 5).length === VYBRANE_R_GROUPS.length;
+  if (letter === 's') return rDone;
+  const sDone = rDone && getLevelStars('vybraneS', VYBRANE_S_GROUPS.length).filter(s => s === 5).length === VYBRANE_S_GROUPS.length;
+  if (letter === 'v') return sDone;
+  const vDone = sDone && getLevelStars('vybraneV', VYBRANE_V_GROUPS.length).filter(s => s === 5).length === VYBRANE_V_GROUPS.length;
+  if (letter === 'z') return vDone;
+  return false;
 }
 
 export default function App() {
@@ -324,12 +420,12 @@ export default function App() {
           <Route path="/doplnovacky/b" element={<GamePage backTo="/doplnovacky"><DoplnovackyBGame /></GamePage>} />
           <Route path="/cudzie" element={<GamePage><CudzieGame /></GamePage>} />
           <Route path="/vybrane-b" element={<GamePage><VybraneBGame /></GamePage>} />
-          <Route path="/vybrane-m" element={<GamePage><VybraneMGame /></GamePage>} />
-          <Route path="/vybrane-p" element={<GamePage><VybranePGame /></GamePage>} />
-          <Route path="/vybrane-r" element={<GamePage><VybraneRGame /></GamePage>} />
-          <Route path="/vybrane-s" element={<GamePage><VybraneSGame /></GamePage>} />
-          <Route path="/vybrane-v" element={<GamePage><VybraneVGame /></GamePage>} />
-          <Route path="/vybrane-z" element={<GamePage><VybraneZGame /></GamePage>} />
+          <Route path="/vybrane-m" element={isVybraneLetterUnlocked('m') ? <GamePage><VybraneMGame /></GamePage> : <Navigate to="/vybrane-b" replace />} />
+          <Route path="/vybrane-p" element={isVybraneLetterUnlocked('p') ? <GamePage><VybranePGame /></GamePage> : <Navigate to="/vybrane-b" replace />} />
+          <Route path="/vybrane-r" element={isVybraneLetterUnlocked('r') ? <GamePage><VybraneRGame /></GamePage> : <Navigate to="/vybrane-b" replace />} />
+          <Route path="/vybrane-s" element={isVybraneLetterUnlocked('s') ? <GamePage><VybraneSGame /></GamePage> : <Navigate to="/vybrane-b" replace />} />
+          <Route path="/vybrane-v" element={isVybraneLetterUnlocked('v') ? <GamePage><VybraneVGame /></GamePage> : <Navigate to="/vybrane-b" replace />} />
+          <Route path="/vybrane-z" element={isVybraneLetterUnlocked('z') ? <GamePage><VybraneZGame /></GamePage> : <Navigate to="/vybrane-b" replace />} />
           <Route path="/ratanie" element={<GamePage><RatanieGame /></GamePage>} />
           <Route path="/nasobenie-3" element={<GamePage><Nasobenie3Game /></GamePage>} />
           <Route path="/delenie-3" element={<GamePage><Delenie3Game /></GamePage>} />

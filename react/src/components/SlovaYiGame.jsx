@@ -1,10 +1,11 @@
 import { useMemo, useRef, useState } from 'react';
 import { SLOVA_YI_GROUPS, SLOVA_YI_TASKS } from '../data/tasks';
-import { getStarCount, getVybraneOptionId, shuffleArray, triggerFireworks } from '../utils/gameUtils';
+import { getStarCount, getVybraneOptionId, getVybraneOptions, shuffleArray, triggerFireworks } from '../utils/gameUtils';
 import { getLevelStars, updateLevelBestStars } from '../utils/player';
+import useDevUnlock from '../utils/useDevUnlock';
 import AudioTalePlayer from './AudioTalePlayer';
 import { AUDIO_TALES } from '../data/audioTales';
-import { RestartIcon, NextLevelIcon, LevelsMenuIcon, PlayIcon, PauseIcon } from './Icons';
+import { RestartIcon, NextLevelIcon, LevelsMenuIcon, PlayIcon, PauseIcon, HeadphonesIcon } from './Icons';
 
 const MAX_STARS = 5;
 
@@ -15,6 +16,7 @@ function renderStars(stars) {
 export default function SlovaYiGame() {
   const groups = useMemo(() => (SLOVA_YI_GROUPS.length > 0 ? SLOVA_YI_GROUPS : [SLOVA_YI_TASKS]), []);
   const [levelStars, setLevelStars] = useState(() => getLevelStars('slovaYi', groups.length));
+  useDevUnlock({ gameId: 'slovaYi', levelCount: groups.length, onUnlock: setLevelStars });
   const [selectedLevel, setSelectedLevel] = useState(null);
   const [order, setOrder] = useState([]);
   const [index, setIndex] = useState(0);
@@ -178,25 +180,43 @@ export default function SlovaYiGame() {
           {wrongItems.size > 0 ? `Precvič si: ${Array.from(wrongItems).join(', ')}` : 'Výborne, žiadne chyby!'}
         </div>
         <div className="result-actions">
-          <button className="btn-restart" onClick={() => startLevel(selectedLevel)}>
-            <RestartIcon />
-            <span>Opakovať level</span>
-          </button>
-          {stars === 5 && <AudioTalePlayer taleUrl={levelTaleUrl} />}
-          {hasNextLevel && levelDone && (
-            <button className="btn-next-level" onClick={() => startLevel(selectedLevel + 1)}>
-              <NextLevelIcon />
-              <span>Ďalší level</span>
+          <div className="result-actions-icons">
+            <button
+              type="button"
+              className="btn-icon-action btn-icon-restart"
+              onClick={() => startLevel(selectedLevel)}
+              title="Opakovať level"
+            >
+              <RestartIcon size={26} />
             </button>
-          )}
-          <button className="btn-secondary" onClick={() => setSelectedLevel(null)}>
-            <LevelsMenuIcon />
-            <span>Menu levelov</span>
-          </button>
+            {stars === 5 && (
+              <AudioTalePlayer
+                taleUrl={levelTaleUrl}
+                className="btn-icon-action btn-icon-reward"
+                playLabel={<HeadphonesIcon size={26} />}
+                pauseLabel={<PauseIcon size={26} />}
+                title="Prehrať rozprávku"
+              />
+            )}
+          </div>
+          <div className="result-actions-nav">
+            <button className="btn-secondary btn-levels-menu" onClick={() => setSelectedLevel(null)}>
+              <LevelsMenuIcon />
+              <span>Menu levelov</span>
+            </button>
+            {hasNextLevel && levelDone && (
+              <button className="btn-next-level" onClick={() => startLevel(selectedLevel + 1)}>
+                <NextLevelIcon />
+                <span>Ďalší level</span>
+              </button>
+            )}
+          </div>
         </div>
       </div>
     );
   }
+
+  const currentTask = order[index];
 
   return (
     <>
@@ -208,12 +228,7 @@ export default function SlovaYiGame() {
         </div>
         <div className="prompt prompt-words">{displayWord}</div>
         <div className="button-grid-2x2">
-          {[
-            { id: 'makke', label: 'I', className: 'btn-sl-makke' },
-            { id: 'makke-dlhe', label: 'Í', className: 'btn-sl-makke' },
-            { id: 'tvrde', label: 'Y', className: 'btn-sl-tvrde' },
-            { id: 'tvrde-dlhe', label: 'Ý', className: 'btn-sl-tvrde' }
-          ].map(option => (
+          {getVybraneOptions(currentTask).map(option => (
             <button
               key={option.id}
               className={option.className}

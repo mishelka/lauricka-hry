@@ -66,25 +66,70 @@
   padding: 0;
   font-size: 20px;
   border-radius: 12px;
-  border: 1px solid #e2e8f0;
+  border: none;
   background: #f8fafc;
-  color: #334155;
+  color: #ffffff;
   display: flex;
   align-items: center;
   justify-content: center;
   cursor: pointer;
   transition: all 0.15s ease;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.08);
 }
 
-.blockout-btn-icon:hover:not(:disabled) {
-  background: #f1f5f9;
-  border-color: #cbd5e1;
+.blockout-btn-icon svg {
+  stroke: currentColor;
+}
+
+.blockout-btn-icon.blockout-btn-back {
+  background: #000000;
+  color: #ffffff;
+}
+
+.blockout-btn-icon.blockout-btn-back:hover:not(:disabled) {
+  background: #1e293b;
   transform: translateY(-1px);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.18);
+}
+
+.blockout-btn-icon.blockout-btn-undo {
+  background: #a5d3ff;
+  color: #ffffff;
+}
+
+.blockout-btn-icon.blockout-btn-undo:hover:not(:disabled) {
+  background: #8fc2f5;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 8px rgba(165, 211, 255, 0.45);
+}
+
+.blockout-btn-icon.blockout-btn-restart {
+  background: #5f9ea0;
+  color: #ffffff;
+}
+
+.blockout-btn-icon.blockout-btn-restart:hover:not(:disabled) {
+  background: #518c8e;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 8px rgba(95, 158, 160, 0.45);
+}
+
+.blockout-btn-icon.blockout-btn-sound {
+  background: #8a2be2;
+  color: #ffffff;
+}
+
+.blockout-btn-icon.blockout-btn-sound:hover:not(:disabled) {
+  background: #7821cb;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 8px rgba(138, 43, 226, 0.45);
 }
 
 .blockout-btn-icon:disabled {
   opacity: 0.4;
   cursor: not-allowed;
+  transform: none !important;
+  box-shadow: none !important;
 }
 
 .blockout-status-bar {
@@ -290,9 +335,9 @@
 
 /* Locked door styles */
 .blockout-door.blockout-door-locked {
-  background: #1e293b !important;
-  border: 2px solid #475569 !important;
-  box-shadow: inset 0 2px 5px rgba(0, 0, 0, 0.6), 0 2px 6px rgba(0, 0, 0, 0.25) !important;
+  background: #94a3b8 !important;
+  border: 2px solid #64748b !important;
+  box-shadow: inset 0 2px 4px rgba(255, 255, 255, 0.3), inset 0 -2px 4px rgba(0, 0, 0, 0.25), 0 2px 5px rgba(0, 0, 0, 0.15) !important;
   cursor: not-allowed;
   filter: none;
 }
@@ -303,8 +348,8 @@
   inset: 0;
   background: repeating-linear-gradient(
     45deg,
-    rgba(0, 0, 0, 0.12),
-    rgba(0, 0, 0, 0.12) 3px,
+    rgba(255, 255, 255, 0.15),
+    rgba(255, 255, 255, 0.15) 3px,
     transparent 3px,
     transparent 6px
   );
@@ -317,11 +362,11 @@
   z-index: 2;
   font-weight: 900;
   font-family: inherit;
-  color: #fef08a;
+  color: #1e293b;
   line-height: 1;
   text-shadow: 
-    0 1px 3px rgba(0, 0, 0, 0.95),
-    0 0 2px #000000;
+    0 1px 0 rgba(255, 255, 255, 0.8),
+    0 0 2px rgba(255, 255, 255, 0.5);
   pointer-events: none;
   user-select: none;
   display: flex;
@@ -374,15 +419,9 @@
 }
 
 .blockout-piece-container:hover .blockout-subcell,
-.blockout-piece-container:hover .blockout-cell-bridge {
+.blockout-piece-container:hover .blockout-cell-bridge,
+.blockout-piece-container:hover .blockout-two-color-border {
   filter: brightness(1.08);
-}
-
-.blockout-piece-container.selected .blockout-subcell {
-  outline: 3px solid #38bdf8;
-  outline-offset: 1px;
-  box-shadow: 0 8px 20px rgba(56, 189, 248, 0.45);
-  z-index: 15;
 }
 
 .blockout-piece-container.dragging {
@@ -391,10 +430,15 @@
   z-index: 30 !important;
 }
 
+.blockout-piece-container.dragging.has-two-color .blockout-subcell {
+  outline: none;
+}
+
 .blockout-piece-container.dragging .blockout-subcell,
-.blockout-piece-container.dragging .blockout-cell-bridge {
+.blockout-piece-container.dragging .blockout-cell-bridge,
+.blockout-piece-container.dragging .blockout-two-color-border {
   filter: brightness(1.12);
-  box-shadow: 0 14px 28px rgba(0, 0, 0, 0.3), inset 0 2px 4px rgba(255, 255, 255, 0.5) !important;
+  box-shadow: 0 14px 28px rgba(0, 0, 0, 0.35), inset 0 2px 4px rgba(255, 255, 255, 0.5) !important;
 }
 
 .blockout-subcell-wrapper {
@@ -595,14 +639,43 @@
   }
 }
 
-/* Two-color inner block styling */
-.blockout-inner-block {
+/* Two-color inner border styling (prvá/vonkajšia farba ako hrubý inner border) */
+.blockout-two-color-border {
   position: absolute;
-  border: 3px solid;
-  box-shadow: inset 0 2px 4px rgba(255, 255, 255, 0.45), 0 2px 6px rgba(0, 0, 0, 0.28);
-  z-index: 5;
-  pointer-events: none;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
   box-sizing: border-box;
+  border-style: solid;
+  pointer-events: none;
+  z-index: 18;
+  box-shadow: inset 0 2px 4px rgba(255, 255, 255, 0.4), 0 2px 8px rgba(0, 0, 0, 0.2);
+  transition: opacity 0.3s ease, transform 0.3s ease, filter 0.18s ease;
+}
+
+.blockout-two-color-border.destroying {
+  animation: borderShatterOut 0.35s cubic-bezier(0.2, 0.8, 0.35, 1) forwards;
+}
+
+@keyframes borderShatterOut {
+  0% {
+    opacity: 1;
+    transform: scale(1);
+    filter: brightness(1.6) drop-shadow(0 0 12px rgba(255, 255, 255, 0.9));
+  }
+  40% {
+    opacity: 0.9;
+    transform: scale(1.05);
+    border-width: 2px;
+    filter: brightness(2) drop-shadow(0 0 20px rgba(255, 255, 255, 1));
+  }
+  100% {
+    opacity: 0;
+    transform: scale(1.12);
+    border-width: 0px;
+    filter: brightness(2.5);
+  }
 }
 
 /* Backward-compatibility for single square pieces */
@@ -632,13 +705,6 @@
 
 .blockout-piece:hover {
   filter: brightness(1.06);
-}
-
-.blockout-piece.selected {
-  outline: 4px solid #38bdf8;
-  outline-offset: 2px;
-  box-shadow: 0 8px 20px rgba(56, 189, 248, 0.45);
-  z-index: 15;
 }
 
 .blockout-piece.dragging {
@@ -976,6 +1042,11 @@
   border: none;
   cursor: pointer;
   transition: background 0.15s ease, transform 0.15s ease;
+}
+
+.btn-blockout-primary svg,
+.btn-blockout-secondary svg {
+  stroke: currentColor;
 }
 
 .btn-blockout-primary:hover {

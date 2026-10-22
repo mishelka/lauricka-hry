@@ -1,7 +1,7 @@
 import { getStarCount } from '../utils/gameUtils';
 import { useEffect } from 'react';
 import AudioTalePlayer from './AudioTalePlayer';
-import { RestartIcon } from './Icons';
+import { RestartIcon, HeadphonesIcon, PauseIcon } from './Icons';
 
 export default function ResultScreen({ miss, wrongItems, onRestart, onResult, taleUrl }) {
   const stars = getStarCount(miss);
@@ -24,11 +24,25 @@ export default function ResultScreen({ miss, wrongItems, onRestart, onResult, ta
         {wrongItems.length > 0 ? `Precvič si: ${wrongItems.join(', ')}` : 'Výborne, žiadne chyby!'}
       </div>
       <div className="result-actions">
-        <button className="btn-restart" onClick={onRestart}>
-          <RestartIcon />
-          <span>Nová hra</span>
-        </button>
-        {stars === 5 && <AudioTalePlayer taleUrl={taleUrl} />}
+        <div className="result-actions-icons">
+          <button
+            type="button"
+            className="btn-icon-action btn-icon-restart"
+            onClick={onRestart}
+            title="Nová hra"
+          >
+            <RestartIcon size={26} />
+          </button>
+          {stars === 5 && (
+            <AudioTalePlayer
+              taleUrl={taleUrl}
+              className="btn-icon-action btn-icon-reward"
+              playLabel={<HeadphonesIcon size={26} />}
+              pauseLabel={<PauseIcon size={26} />}
+              title="Prehrať rozprávku"
+            />
+          )}
+        </div>
       </div>
     </div>
   );
