@@ -1,13 +1,13 @@
 import { useContext, useEffect, useMemo, useRef, useState } from 'react';
-import { VYBRANE_R_GROUPS, VYBRANE_R_RULES, VYBRANE_R_CHYTAKY } from '../data/vybraneRSlova';
-import { getStarCount, getVybraneOptionId, shuffleArray, triggerFireworks } from '../utils/gameUtils';
-import { getLevelStars, updateLevelBestStars } from '../utils/player';
-import useDevUnlock from '../utils/useDevUnlock';
-import BlockOutGame from '../rewards/BlockOutGame';
-import { isBlockOutLevelImplemented } from '../rewards/blockOutLevels';
-import { RestartIcon, NextLevelIcon, LevelsMenuIcon, GameIcon, HelpIcon } from './Icons';
-import { TopActionsContext } from '../App';
-import IyChoiceButtons from './IyChoiceButtons';
+import { VYBRANE_V_GROUPS, VYBRANE_V_RULES, VYBRANE_V_CHYTAKY } from '../../data/vybraneVSlova';
+import { getStarCount, getVybraneOptionId, shuffleArray, triggerFireworks } from '../../utils/gameUtils';
+import { getLevelStars, updateLevelBestStars } from '../../utils/player';
+import useDevUnlock from '../../utils/useDevUnlock';
+import BlockOutGame from '../odmeny/BlockOutGame';
+import { isBlockOutLevelImplemented } from '../odmeny/blockOutLevels';
+import { RestartIcon, NextLevelIcon, LevelsMenuIcon, GameIcon, HelpIcon } from '../../atomic/Icons';
+import { TopActionsContext } from '../../App';
+import IyChoiceButtons from '../../atomic/IyChoiceButtons';
 
 const QUESTIONS_PER_LEVEL = 15;
 const MAX_STARS = 5;
@@ -16,11 +16,11 @@ function renderStars(stars) {
   return `${'★'.repeat(stars)}${'☆'.repeat(MAX_STARS - stars)}`;
 }
 
-export default function VybraneRGame() {
+export default function VybraneVGame() {
   const { setRightAction } = useContext(TopActionsContext);
-  const groups = useMemo(() => VYBRANE_R_GROUPS, []);
-  const [levelStars, setLevelStars] = useState(() => getLevelStars('vybraneR', groups.length));
-  useDevUnlock({ gameId: 'vybraneR', levelCount: groups.length, onUnlock: setLevelStars });
+  const groups = useMemo(() => VYBRANE_V_GROUPS, []);
+  const [levelStars, setLevelStars] = useState(() => getLevelStars('vybraneV', groups.length));
+  useDevUnlock({ gameId: 'vybraneV', levelCount: groups.length, onUnlock: setLevelStars });
   const [selectedLevel, setSelectedLevel] = useState(null);
   const [playingRewardLevel, setPlayingRewardLevel] = useState(null);
   const [showRules, setShowRules] = useState(false);
@@ -35,8 +35,8 @@ export default function VybraneRGame() {
         type="button"
         className={`btn-top-action btn-help${showRules ? ' active' : ''}`}
         onClick={() => setShowRules(prev => !prev)}
-        title={showRules ? 'Skryť prehľad' : 'Prehľad vybraných slov po R'}
-        aria-label="Prehľad vybraných slov po R"
+        title={showRules ? 'Skryť prehľad' : 'Prehľad vybraných slov po V'}
+        aria-label="Prehľad vybraných slov po V"
       >
         <HelpIcon size={24} />
       </button>
@@ -101,7 +101,7 @@ export default function VybraneRGame() {
     const stars = getStarCount(finalMiss);
     const previous = levelStars[selectedLevel] || 0;
     const best = Math.max(previous, stars);
-    const updated = updateLevelBestStars('vybraneR', selectedLevel, best, groups.length);
+    const updated = updateLevelBestStars('vybraneV', selectedLevel, best, groups.length);
     setLevelStars(updated);
     setWrongItems(new Set(wrongSet));
     setResultVisible(true);
@@ -155,7 +155,7 @@ export default function VybraneRGame() {
   const renderRulesPanel = () => (
     <div className="rules-panel">
       <h3>
-        <span>Prehľad vybraných slov po R</span>
+        <span>Prehľad vybraných slov po V</span>
         <button
           type="button"
           className="btn-rules-close"
@@ -166,12 +166,12 @@ export default function VybraneRGame() {
         </button>
       </h3>
       <p className="rules-words-list">
-        ryba, rybník, rybár, rýchly, rýchlosť, rýpať, rypák, ryť, rozryť, úkryt, koryto, korytnačka, rýdzi, ryha, bryndza, Torysa, rys, rysovať, ryšavý, rytier, rýľ, rým, kryť, pokrývka, strýko, stryná, prýštiť, trýzniť
+        vysoký, výška, Vysočina, Vysoké Tatry, zvyk, zvyknúť si, jazyk, jazykový, vy, vykať, výr, výskať, vyť, vydra, vyhňa, vyžla, predpona vy-/vý- (výlet, výhra, výťah, výrobok, výborný)
       </p>
 
       <h4 className="rules-section-rules">Pravidlá a význam:</h4>
       <ul className="rules-section-rules">
-        {VYBRANE_R_RULES.map((rule, idx) => (
+        {VYBRANE_V_RULES.map((rule, idx) => (
           <li key={idx}>
             <strong>{rule.word}:</strong> {rule.description}
           </li>
@@ -180,7 +180,7 @@ export default function VybraneRGame() {
 
       <h4 className="rules-section-chytaky">Pozor na chytáky (i / y):</h4>
       <ul className="rules-section-chytaky">
-        {VYBRANE_R_CHYTAKY.map((chytak, idx) => (
+        {VYBRANE_V_CHYTAKY.map((chytak, idx) => (
           <li key={idx}>
             <strong>{chytak.pair}:</strong> {chytak.desc}
           </li>
@@ -217,8 +217,8 @@ export default function VybraneRGame() {
   if (selectedLevel === null) {
     return (
       <div>
-        <h1>Vybrané slová po R</h1>
-        <p className="level-menu-help">Vyber si úroveň a precvič si vybrané slová po R. Získaj 5★ na odomknutie ďalšej úrovne a odmeny.</p>
+        <h1>Vybrané slová po V</h1>
+        <p className="level-menu-help">Vyber si úroveň a precvič si vybrané slová po V. Získaj 5★ na odomknutie ďalšej úrovne a odmeny.</p>
 
         {showRules && renderRulesPanel()}
 
@@ -279,7 +279,7 @@ export default function VybraneRGame() {
         </div>
         <div className="level-progress-message">
           {levelDone
-            ? (hasNextLevel ? 'Level splnený na 5★! Odomkla sa ti odmena Block Out a ďalší level.' : 'Fantastické! Zvládla si všetky úrovne vybraných slov po R a odomkla si Vybrané slová po S! 🎉')
+            ? (hasNextLevel ? 'Level splnený na 5★! Odomkla sa ti odmena Block Out a ďalší level.' : 'Fantastické! Zvládla si všetky úrovne vybraných slov po V a odomkla si Vybrané slová po Z! 🎉')
             : `Získala si ${stars}/5 ★. Na postup do ďalšieho levelu a odmenu potrebuješ 5/5 ★.`}
         </div>
         <div className="wrong-list">
@@ -334,7 +334,7 @@ export default function VybraneRGame() {
   return (
     <>
       <div className="game-ui">
-        <h1>Vybrané slová po R</h1>
+        <h1>Vybrané slová po V</h1>
         <div className="current-level">
           {`Level ${selectedLevel + 1} • Úloha ${index + 1}/${order.length}`}
         </div>

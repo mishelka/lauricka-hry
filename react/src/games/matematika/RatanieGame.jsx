@@ -1,10 +1,10 @@
 import { useRef, useState } from 'react';
-import { getStarCount, triggerFireworks } from '../utils/gameUtils';
-import { getBestStars, getLevelStars, updateLevelBestStars } from '../utils/player';
-import useDevUnlock from '../utils/useDevUnlock';
-import AudioTalePlayer from './AudioTalePlayer';
-import { AUDIO_TALES } from '../data/audioTales';
-import { RestartIcon, NextLevelIcon, LevelsMenuIcon, PlayIcon, PauseIcon, HeadphonesIcon } from './Icons';
+import { getStarCount, triggerFireworks } from '../../utils/gameUtils';
+import { getBestStars, getLevelStars, updateLevelBestStars } from '../../utils/player';
+import useDevUnlock from '../../utils/useDevUnlock';
+import AudioTalePlayer from '../../atomic/AudioTalePlayer';
+import { AUDIO_TALES } from '../../data/audioTales';
+import { RestartIcon, NextLevelIcon, LevelsMenuIcon, PlayIcon, PauseIcon, HeadphonesIcon } from '../../atomic/Icons';
 
 const TOTAL = 5;
 const MAX_STARS = 5;

@@ -9,30 +9,14 @@ import { VYBRANE_R_GROUPS } from './data/vybraneRSlova';
 import { VYBRANE_S_GROUPS } from './data/vybraneSSlova';
 import { VYBRANE_V_GROUPS } from './data/vybraneVSlova';
 import { VYBRANE_Z_GROUPS } from './data/vybraneZSlova';
-import { getBestStars, getCollectedSmileyIds, getLevelStars, getTotalStars, unlockAllLevels } from './utils/player';
+import { getBestStars, getCollectedSmileyIds, getLevelStars, getPlayerName, getTotalStars, unlockAllLevels } from './utils/player';
 import useDevUnlock from './utils/useDevUnlock';
-import YiGame from './components/YiGame';
-import ObojakeGame from './components/ObojakeGame';
-import SlovaYiGame from './components/SlovaYiGame';
-import VybraneOpakovanieGame from './components/VybraneOpakovanieGame';
-import VybraneBGame from './components/VybraneBGame';
-import VybraneMGame from './components/VybraneMGame';
-import VybranePGame from './components/VybranePGame';
-import VybraneRGame from './components/VybraneRGame';
-import VybraneSGame from './components/VybraneSGame';
-import VybraneVGame from './components/VybraneVGame';
-import VybraneZGame from './components/VybraneZGame';
-import RatanieGame from './components/RatanieGame';
-import Nasobenie5Game from './components/Nasobenie5Game';
-import Delenie5Game from './components/Delenie5Game';
-import AudioTalePlayer from './components/AudioTalePlayer';
-import DoplnovackyMenu, { DoplnovackyDtnlGame, DoplnovackyBGame } from './components/DoplnovackyGame';
-import CudzieGame from './components/CudzieGame';
-import BlockOutGame from './rewards/BlockOutGame';
-import { BLOCK_OUT_LEVELS } from './rewards/blockOutLevels';
+import { YiGame, ObojakeGame, SlovaYiGame, CudzieGame, DoplnovackyMenu, DoplnovackyDtnlGame, DoplnovackyBGame } from './games/slovencina';
+import { VybraneBGame, VybraneMGame, VybranePGame, VybraneRGame, VybraneSGame, VybraneVGame, VybraneZGame, VybraneOpakovanieGame } from './games/vybraneSlova';
+import { RatanieGame, Nasobenie5Game, Delenie5Game } from './games/matematika';
+import { BlockOutGame, BLOCK_OUT_LEVELS } from './games/odmeny';
+import { AudioTalePlayer, HomeIcon, PlayIcon, PauseIcon, UserIcon, SmileyIcon, PlayerProfileModal } from './atomic';
 import { AUDIO_TALES } from './data/audioTales';
-import { HomeIcon, PlayIcon, PauseIcon, UserIcon, SmileyIcon } from './components/Icons';
-import PlayerProfileModal from './components/PlayerProfileModal';
 import { createContext, useContext, useEffect, useMemo, useState } from "react";
 
 export const TopActionsContext = createContext({
@@ -49,6 +33,7 @@ function MenuPage() {
   const navigate = useNavigate();
   const location = useLocation();
   const [showProfileModal, setShowProfileModal] = useState(false);
+  const [playerName, setPlayerName] = useState(() => getPlayerName());
   const [collectedSmileysCount, setCollectedSmileysCount] = useState(() => getCollectedSmileyIds().length);
   const [totalStarsCount, setTotalStarsCount] = useState(() => getTotalStars());
   const [menuStars, setMenuStars] = useState(() => ({
@@ -73,6 +58,7 @@ function MenuPage() {
   }));
 
   function refreshMenuStars() {
+    setPlayerName(getPlayerName());
     setCollectedSmileysCount(getCollectedSmileyIds().length);
     setTotalStarsCount(getTotalStars());
     setMenuStars({
@@ -172,11 +158,11 @@ function MenuPage() {
           type="button"
           className="btn-header-profile"
           onClick={() => setShowProfileModal(true)}
-          title="Profil hráča"
-          aria-label="Profil hráča"
+          title={playerName || "Profil hráča"}
+          aria-label={playerName || "Profil hráča"}
         >
           <span className="header-profile-icon"><UserIcon size={18} /></span>
-          <span className="header-profile-label">Tvoj profil</span>
+          <span className="header-profile-label">{playerName || "Tvoj profil"}</span>
           <span className="header-profile-badge header-profile-stars-badge">⭐ {totalStarsCount}</span>
           <span className="header-profile-badge header-profile-smileys-badge">😊 {collectedSmileysCount}</span>
         </button>
@@ -187,6 +173,9 @@ function MenuPage() {
         onClose={() => {
           setShowProfileModal(false);
           refreshMenuStars();
+        }}
+        onNameChange={(newName) => {
+          setPlayerName(newName);
         }}
       />
 

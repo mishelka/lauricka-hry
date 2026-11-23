@@ -377,3 +377,16 @@ export function getPlayerStats() {
 export function getTotalStars() {
   return getPlayerStats().totalStars;
 }
+
+export function getPlayerName() {
+  const state = loadState();
+  return typeof state.playerName === 'string' ? state.playerName.trim() : '';
+}
+
+export function setPlayerName(name) {
+  const state = loadState();
+  const trimmed = typeof name === 'string' ? name.trim() : '';
+  state.playerName = trimmed;
+  saveState(state);
+  return trimmed;
+}

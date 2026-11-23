@@ -1,8 +1,8 @@
-import QuizGame from './QuizGame';
-import { YI_TASKS } from '../data/tasks';
-import { getBestStars, updateBestStars } from '../utils/player';
+import QuizGame from '../../atomic/QuizGame';
+import { YI_TASKS } from '../../data/tasks';
+import { getBestStars, updateBestStars } from '../../utils/player';
 import { useState } from 'react';
-import { AUDIO_TALES } from '../data/audioTales';
+import { AUDIO_TALES } from '../../data/audioTales';
 
 const options = [
   { id: 'tvrde', label: 'Tvrdá Y', className: 'btn-yi-tvrde' },

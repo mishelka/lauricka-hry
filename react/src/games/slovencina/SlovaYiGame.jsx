@@ -1,12 +1,12 @@
 import { useMemo, useRef, useState } from 'react';
-import { SLOVA_YI_GROUPS, SLOVA_YI_TASKS } from '../data/tasks';
-import { getStarCount, getVybraneOptionId, shuffleArray, triggerFireworks } from '../utils/gameUtils';
-import { getLevelStars, updateLevelBestStars } from '../utils/player';
-import useDevUnlock from '../utils/useDevUnlock';
-import AudioTalePlayer from './AudioTalePlayer';
-import { AUDIO_TALES } from '../data/audioTales';
-import { RestartIcon, NextLevelIcon, LevelsMenuIcon, PlayIcon, PauseIcon, HeadphonesIcon } from './Icons';
-import IyChoiceButtons from './IyChoiceButtons';
+import { SLOVA_YI_GROUPS, SLOVA_YI_TASKS } from '../../data/tasks';
+import { getStarCount, getVybraneOptionId, shuffleArray, triggerFireworks } from '../../utils/gameUtils';
+import { getLevelStars, updateLevelBestStars } from '../../utils/player';
+import useDevUnlock from '../../utils/useDevUnlock';
+import AudioTalePlayer from '../../atomic/AudioTalePlayer';
+import { AUDIO_TALES } from '../../data/audioTales';
+import { RestartIcon, NextLevelIcon, LevelsMenuIcon, PlayIcon, PauseIcon, HeadphonesIcon } from '../../atomic/Icons';
+import IyChoiceButtons from '../../atomic/IyChoiceButtons';
 
 const MAX_STARS = 5;
 

@@ -1,22 +1,22 @@
 import { useContext, useEffect, useMemo, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { getAchievedChytakyTasks } from '../data/vybraneOpakovanieData';
-import { VYBRANE_B_GROUPS } from '../data/vybraneBSlova';
-import { VYBRANE_M_GROUPS } from '../data/vybraneMSlova';
-import { VYBRANE_P_GROUPS } from '../data/vybranePSlova';
-import { VYBRANE_R_GROUPS } from '../data/vybraneRSlova';
-import { VYBRANE_S_GROUPS } from '../data/vybraneSSlova';
-import { VYBRANE_V_GROUPS } from '../data/vybraneVSlova';
-import { VYBRANE_Z_GROUPS } from '../data/vybraneZSlova';
-import { getStarCount, getVybraneOptionId, shuffleArray, triggerFireworks } from '../utils/gameUtils';
-import { awardRandomSmiley, getBestStars, getLevelStars, incrementLevelPlays, updateBestStars } from '../utils/player';
-import useDevUnlock from '../utils/useDevUnlock';
-import { RestartIcon, LevelsMenuIcon, SmileyIcon, HelpIcon } from './Icons';
-import { TopActionsContext } from '../App';
-import PlayerProfileModal from './PlayerProfileModal';
-import IyChoiceButtons from './IyChoiceButtons';
+import { getAlternatingOpakovanieTasks } from '../../data/vybraneOpakovanieData';
+import { VYBRANE_B_GROUPS } from '../../data/vybraneBSlova';
+import { VYBRANE_M_GROUPS } from '../../data/vybraneMSlova';
+import { VYBRANE_P_GROUPS } from '../../data/vybranePSlova';
+import { VYBRANE_R_GROUPS } from '../../data/vybraneRSlova';
+import { VYBRANE_S_GROUPS } from '../../data/vybraneSSlova';
+import { VYBRANE_V_GROUPS } from '../../data/vybraneVSlova';
+import { VYBRANE_Z_GROUPS } from '../../data/vybraneZSlova';
+import { getStarCount, getVybraneOptionId, triggerFireworks } from '../../utils/gameUtils';
+import { awardRandomSmiley, getBestStars, getLevelStars, incrementLevelPlays, updateBestStars } from '../../utils/player';
+import useDevUnlock from '../../utils/useDevUnlock';
+import { RestartIcon, LevelsMenuIcon, SmileyIcon, HelpIcon } from '../../atomic/Icons';
+import { TopActionsContext } from '../../App';
+import PlayerProfileModal from '../../atomic/PlayerProfileModal';
+import IyChoiceButtons from '../../atomic/IyChoiceButtons';
 
-const QUESTIONS_PER_ROUND = 12;
+const QUESTIONS_PER_ROUND = 10;
 const MAX_STARS = 5;
 
 function renderStars(stars) {
@@ -24,30 +24,31 @@ function renderStars(stars) {
 }
 
 function getUnlockedLettersList() {
-  const letters = ['b'];
+  const letters = [];
   const bDone = getLevelStars('vybraneB', VYBRANE_B_GROUPS.length).filter(s => s === 5).length === VYBRANE_B_GROUPS.length;
-  if (!bDone) return letters;
-  letters.push('m');
+  if (bDone) letters.push('b');
 
   const mDone = getLevelStars('vybraneM', VYBRANE_M_GROUPS.length).filter(s => s === 5).length === VYBRANE_M_GROUPS.length;
-  if (!mDone) return letters;
-  letters.push('p');
+  if (mDone) letters.push('m');
 
   const pDone = getLevelStars('vybraneP', VYBRANE_P_GROUPS.length).filter(s => s === 5).length === VYBRANE_P_GROUPS.length;
-  if (!pDone) return letters;
-  letters.push('r');
+  if (pDone) letters.push('p');
 
   const rDone = getLevelStars('vybraneR', VYBRANE_R_GROUPS.length).filter(s => s === 5).length === VYBRANE_R_GROUPS.length;
-  if (!rDone) return letters;
-  letters.push('s');
+  if (rDone) letters.push('r');
 
   const sDone = getLevelStars('vybraneS', VYBRANE_S_GROUPS.length).filter(s => s === 5).length === VYBRANE_S_GROUPS.length;
-  if (!sDone) return letters;
-  letters.push('v');
+  if (sDone) letters.push('s');
 
   const vDone = getLevelStars('vybraneV', VYBRANE_V_GROUPS.length).filter(s => s === 5).length === VYBRANE_V_GROUPS.length;
-  if (!vDone) return letters;
-  letters.push('z');
+  if (vDone) letters.push('v');
+
+  const zDone = getLevelStars('vybraneZ', VYBRANE_Z_GROUPS.length).filter(s => s === 5).length === VYBRANE_Z_GROUPS.length;
+  if (zDone) letters.push('z');
+
+  if (letters.length === 0) {
+    return ['b'];
+  }
 
   return letters;
 }
@@ -65,8 +66,10 @@ export default function VybraneOpakovanieGame() {
     gameId: 'vybraneOpakovanie',
     levelCount: 1,
     onUnlock: () => {
-      setUnlockedLetters(['b', 'm', 'p', 'r', 's', 'v', 'z']);
+      const allLetters = ['b', 'm', 'p', 'r', 's', 'v', 'z'];
+      setUnlockedLetters(allLetters);
       setBestStars(MAX_STARS);
+      startRound(allLetters);
     }
   });
 
@@ -99,11 +102,12 @@ export default function VybraneOpakovanieGame() {
     return () => setRightAction(null);
   }, [setRightAction]);
 
-  function startRound() {
-    const letters = getUnlockedLettersList();
+  function startRound(customLetters) {
+    const letters = customLetters && Array.isArray(customLetters) && customLetters.length > 0
+      ? customLetters
+      : getUnlockedLettersList();
     setUnlockedLetters(letters);
-    const pool = getAchievedChytakyTasks(letters);
-    const shuffled = shuffleArray(pool).slice(0, Math.min(pool.length, QUESTIONS_PER_ROUND));
+    const shuffled = getAlternatingOpakovanieTasks(letters, QUESTIONS_PER_ROUND);
 
     setOrder(shuffled);
     setIndex(0);
@@ -138,8 +142,12 @@ export default function VybraneOpakovanieGame() {
     setBestStars(updatedBest);
     incrementLevelPlays('vybraneOpakovanie', 0, 1);
 
-    const award = awardRandomSmiley();
-    setAwardedSmileyData(award);
+    if (finalMiss === 0) {
+      const award = awardRandomSmiley();
+      setAwardedSmileyData(award);
+    } else {
+      setAwardedSmileyData(null);
+    }
     setWrongItems(new Set(wrongSet));
     setResultVisible(true);
     triggerFireworks(fireworksRef.current);

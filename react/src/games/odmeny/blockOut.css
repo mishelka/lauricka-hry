@@ -93,14 +93,14 @@
 }
 
 .blockout-btn-icon.blockout-btn-undo {
-  background: #a5d3ff;
+  background: #3b82f6;
   color: #ffffff;
 }
 
 .blockout-btn-icon.blockout-btn-undo:hover:not(:disabled) {
-  background: #8fc2f5;
+  background: #2563eb;
   transform: translateY(-1px);
-  box-shadow: 0 4px 8px rgba(165, 211, 255, 0.45);
+  box-shadow: 0 4px 8px rgba(37, 99, 235, 0.45);
 }
 
 .blockout-btn-icon.blockout-btn-restart {

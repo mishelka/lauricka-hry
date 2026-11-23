@@ -1,12 +1,12 @@
 import { useContext, useEffect, useMemo, useRef, useState } from 'react';
-import { DELENIE_5_GROUPS, DELENIE_5_RULES } from '../data/delenie5Data';
-import { getStarCount, shuffleArray, triggerFireworks } from '../utils/gameUtils';
-import { getLevelStars, updateLevelBestStars } from '../utils/player';
-import useDevUnlock from '../utils/useDevUnlock';
-import BlockOutGame from '../rewards/BlockOutGame';
-import { isBlockOutLevelImplemented } from '../rewards/blockOutLevels';
-import { RestartIcon, NextLevelIcon, LevelsMenuIcon, GameIcon, HelpIcon } from './Icons';
-import { TopActionsContext } from '../App';
+import { DELENIE_5_GROUPS, DELENIE_5_RULES } from '../../data/delenie5Data';
+import { getStarCount, shuffleArray, triggerFireworks } from '../../utils/gameUtils';
+import { getLevelStars, updateLevelBestStars } from '../../utils/player';
+import useDevUnlock from '../../utils/useDevUnlock';
+import BlockOutGame from '../odmeny/BlockOutGame';
+import { isBlockOutLevelImplemented } from '../odmeny/blockOutLevels';
+import { RestartIcon, NextLevelIcon, LevelsMenuIcon, GameIcon, HelpIcon } from '../../atomic/Icons';
+import { TopActionsContext } from '../../App';
 
 const QUESTIONS_PER_LEVEL = 10;
 const MAX_STARS = 5;

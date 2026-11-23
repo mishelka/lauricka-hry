@@ -1,8 +1,8 @@
-import QuizGame from './QuizGame';
-import { OBOJAKE_TASKS } from '../data/tasks';
+import QuizGame from '../../atomic/QuizGame';
+import { OBOJAKE_TASKS } from '../../data/tasks';
 import { useState } from 'react';
-import { getBestStars, updateBestStars } from '../utils/player';
-import { AUDIO_TALES } from '../data/audioTales';
+import { getBestStars, updateBestStars } from '../../utils/player';
+import { AUDIO_TALES } from '../../data/audioTales';
 
 const options = [
   { id: 'tvrde', label: 'Tvrdá Y', className: 'btn-ob-tvrde' },

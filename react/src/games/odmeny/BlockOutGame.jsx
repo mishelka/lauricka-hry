@@ -2,9 +2,9 @@ import { useState, useEffect, useRef, useCallback, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { BLOCK_OUT_LEVELS, COLOR_CONFIG, getBlockCells, getOccupiedCells, getBlockDimensions, isDirAllowedForBlock, isBlockFrozen, isDoorLocked, getLevelWalls } from './blockOutLevels';
 import { sounds } from './soundEffects';
-import { triggerFireworks } from '../utils/gameUtils';
-import { getLevelStars, updateLevelBestStars, getLevelPlays, incrementLevelPlays, getBlockOutSavedState, saveBlockOutSavedState, clearBlockOutSavedState, getBlockOutSavedStates } from '../utils/player';
-import { RestartIcon, NextLevelIcon, LevelsMenuIcon, BackIcon, UndoIcon, SoundOnIcon, SoundOffIcon } from '../components/Icons';
+import { triggerFireworks } from '../../utils/gameUtils';
+import { getLevelStars, updateLevelBestStars, getLevelPlays, incrementLevelPlays, getBlockOutSavedState, saveBlockOutSavedState, clearBlockOutSavedState, getBlockOutSavedStates } from '../../utils/player';
+import { RestartIcon, NextLevelIcon, LevelsMenuIcon, BackIcon, UndoIcon, SoundOnIcon, SoundOffIcon } from '../../atomic/Icons';
 import './blockOut.css';
 
 const DEFAULT_CELL_SIZE = 54;

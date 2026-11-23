@@ -369,8 +369,8 @@ button:disabled {
 .btn-icon {
   display: inline-block;
   vertical-align: middle;
-  stroke: #ffffff;
-  color: #ffffff;
+  stroke: currentColor;
+  color: inherit;
   flex-shrink: 0;
 }
 
@@ -1135,6 +1135,11 @@ button:disabled {
   color: #4f46e5;
 }
 
+.header-profile-icon .btn-icon {
+  stroke: #4f46e5;
+  color: #4f46e5;
+}
+
 .header-profile-label {
   font-weight: 600;
   color: #334155;
@@ -1270,6 +1275,7 @@ button:disabled {
   flex-direction: column;
   box-shadow: 0 20px 40px rgba(0, 0, 0, 0.25);
   overflow: hidden;
+  position: relative;
   animation: slideUp 0.25s ease-out;
 }
 
@@ -1304,9 +1310,111 @@ button:disabled {
   font-size: 32px;
 }
 
+.profile-title-text-wrap {
+  display: flex;
+  flex-direction: column;
+}
+
+.profile-modal-name-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
 .profile-modal-title h2 {
   margin: 0;
   font-size: 22px;
+  color: #1e293b;
+}
+
+.profile-name-edit-btn {
+  background: #f1f5f9;
+  border: 1px solid #cbd5e1;
+  border-radius: 8px;
+  width: 28px;
+  height: 28px;
+  font-size: 13px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  padding: 0;
+  color: #475569;
+  transition: all 0.15s ease;
+}
+
+.profile-name-edit-btn:hover {
+  background: #e2e8f0;
+  border-color: #94a3b8;
+  transform: scale(1.05);
+}
+
+.profile-name-edit-form {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin: 0;
+}
+
+.profile-name-input {
+  font-size: 18px;
+  font-weight: 700;
+  color: #1e293b;
+  padding: 3px 8px;
+  border: 2px solid #3b82f6;
+  border-radius: 8px;
+  outline: none;
+  background: #ffffff;
+  width: 170px;
+  max-width: 100%;
+}
+
+.profile-name-input:focus {
+  border-color: #2563eb;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2);
+}
+
+.profile-name-save-btn {
+  background: #10b981;
+  color: #ffffff;
+  border: none;
+  border-radius: 8px;
+  width: 30px;
+  height: 30px;
+  font-size: 15px;
+  font-weight: bold;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  padding: 0;
+  transition: all 0.15s ease;
+}
+
+.profile-name-save-btn:hover {
+  background: #059669;
+  transform: scale(1.05);
+}
+
+.profile-name-cancel-btn {
+  background: #f1f5f9;
+  color: #64748b;
+  border: 1px solid #cbd5e1;
+  border-radius: 8px;
+  width: 30px;
+  height: 30px;
+  font-size: 13px;
+  font-weight: bold;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  padding: 0;
+  transition: all 0.15s ease;
+}
+
+.profile-name-cancel-btn:hover {
+  background: #e2e8f0;
   color: #1e293b;
 }
 
@@ -1369,6 +1477,12 @@ button:disabled {
   box-shadow: 0 2px 6px rgba(0, 0, 0, 0.06);
 }
 
+.profile-tab-btn .btn-icon,
+.profile-tab-btn svg {
+  stroke: #000000;
+  color: #000000;
+}
+
 .profile-modal-content {
   padding: 20px 24px;
   overflow-y: auto;
@@ -1426,63 +1540,139 @@ button:disabled {
   line-height: 1.4;
 }
 
+.smiley-detail-backdrop {
+  position: absolute;
+  inset: 0;
+  background: rgba(15, 23, 42, 0.45);
+  backdrop-filter: blur(2px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  z-index: 50;
+  border-radius: inherit;
+  animation: fadeIn 0.15s ease-out;
+}
+
 .smiley-detail-card {
   display: flex;
   align-items: center;
-  gap: 14px;
-  background: linear-gradient(135deg, #fef3c7 0%, #fffbeb 100%);
-  border: 1.5px solid #fde68a;
-  border-radius: 16px;
-  padding: 12px 16px;
-  margin-bottom: 16px;
+  gap: 16px;
+  background: linear-gradient(135deg, #fffbeb 0%, #fef3c7 100%);
+  border: 2px solid #fde68a;
+  border-radius: 20px;
+  padding: 18px 22px;
+  margin: 0;
+  max-width: 480px;
+  width: 100%;
   position: relative;
-  animation: fadeIn 0.2s ease;
+  text-align: left;
+  box-shadow: 0 16px 36px rgba(0, 0, 0, 0.25);
+  animation: popIn 0.25s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+.smiley-detail-avatar {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
 }
 
 .smiley-detail-emoji {
-  font-size: 38px;
+  font-size: 48px;
+  line-height: 1;
+  filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.12));
 }
 
 .smiley-detail-info {
   flex: 1;
+  min-width: 0;
 }
 
-.smiley-detail-info h4 {
-  margin: 0 0 2px;
-  font-size: 17px;
-  color: #78350f;
-}
-
-.smiley-category-tag {
+.smiley-detail-tag {
   display: inline-block;
   background: #f59e0b;
   color: #ffffff;
   font-size: 11px;
   font-weight: 700;
-  padding: 1px 6px;
-  border-radius: 6px;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  padding: 2px 8px;
+  border-radius: 9999px;
   margin-bottom: 4px;
 }
 
+.smiley-detail-info h4 {
+  margin: 2px 0 4px;
+  font-size: 20px;
+  color: #78350f;
+  font-weight: 800;
+}
+
 .smiley-detail-info p {
-  margin: 0;
-  font-size: 13px;
+  margin: 0 0 6px;
+  font-size: 14px;
   color: #92400e;
+  line-height: 1.35;
+}
+
+.smiley-detail-count {
+  display: block;
+  font-size: 13px;
+  color: #b45309;
+  font-weight: 500;
 }
 
 .smiley-detail-close {
-  width: 26px;
-  height: 26px;
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  width: 28px;
+  height: 28px;
   border-radius: 50%;
   background: rgba(120, 53, 15, 0.1);
   color: #78350f;
   font-size: 14px;
+  font-weight: bold;
   border: none;
   cursor: pointer;
   padding: 0;
   display: flex;
   align-items: center;
   justify-content: center;
+  transition: all 0.15s ease;
+}
+
+.smiley-detail-close:hover {
+  background: rgba(120, 53, 15, 0.2);
+  transform: scale(1.1);
+}
+
+.smiley-detail-card.locked-detail {
+  background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+  border-color: #cbd5e1;
+  box-shadow: 0 4px 12px rgba(100, 116, 139, 0.1);
+}
+
+.smiley-detail-card.locked-detail .smiley-detail-tag {
+  background: #64748b;
+}
+
+.smiley-detail-card.locked-detail h4 {
+  color: #334155;
+}
+
+.smiley-detail-card.locked-detail p {
+  color: #475569;
+}
+
+.smiley-detail-card.locked-detail .smiley-detail-count {
+  color: #64748b;
+}
+
+.smiley-detail-card.locked-detail .smiley-detail-close {
+  background: rgba(100, 116, 139, 0.12);
+  color: #475569;
 }
 
 .smileys-grid {
@@ -1675,5 +1865,26 @@ button:disabled {
   .stats-cards-grid {
     grid-template-columns: repeat(2, 1fr);
     gap: 8px;
+  }
+
+  .smiley-detail-backdrop {
+    padding: 12px;
+  }
+
+  .smiley-detail-card {
+    padding: 14px 16px;
+    gap: 12px;
+  }
+
+  .smiley-detail-emoji {
+    font-size: 38px;
+  }
+
+  .smiley-detail-info h4 {
+    font-size: 17px;
+  }
+
+  .smiley-detail-info p {
+    font-size: 13px;
   }
 }

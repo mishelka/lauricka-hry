@@ -1,9 +1,9 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { DOPLNOVACKY_DTNL_GROUPS, DOPLNOVACKY_B_GROUPS } from '../data/tasks';
-import { getLevelStars, unlockAllLevels } from '../utils/player';
-import useDevUnlock from '../utils/useDevUnlock';
-import WordFillGame from './WordFillGame';
+import { DOPLNOVACKY_DTNL_GROUPS, DOPLNOVACKY_B_GROUPS } from '../../data/tasks';
+import { getLevelStars, unlockAllLevels } from '../../utils/player';
+import useDevUnlock from '../../utils/useDevUnlock';
+import WordFillGame from '../../atomic/WordFillGame';
 
 export function DoplnovackyMenu() {
   const navigate = useNavigate();

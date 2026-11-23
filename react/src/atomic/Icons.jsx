@@ -1,12 +1,12 @@
 import React from 'react';
 
-export function HomeIcon({ size = 24, stroke = '#ffffff', className = 'btn-icon', ...props }) {
+export function HomeIcon({ size = 24, stroke = 'currentColor', fill = 'none', className = 'btn-icon', ...props }) {
   return (
     <svg
       width={size}
       height={size}
       viewBox="0 0 24 24"
-      fill="none"
+      fill={fill}
       stroke={stroke}
       strokeWidth="2.2"
       strokeLinecap="round"
@@ -21,13 +21,13 @@ export function HomeIcon({ size = 24, stroke = '#ffffff', className = 'btn-icon'
   );
 }
 
-export function HelpIcon({ size = 24, stroke = '#ffffff', className = 'btn-icon', ...props }) {
+export function HelpIcon({ size = 24, stroke = 'currentColor', fill = 'none', className = 'btn-icon', ...props }) {
   return (
     <svg
       width={size}
       height={size}
       viewBox="0 0 24 24"
-      fill="none"
+      fill={fill}
       stroke={stroke}
       strokeWidth="2.2"
       strokeLinecap="round"
@@ -43,13 +43,13 @@ export function HelpIcon({ size = 24, stroke = '#ffffff', className = 'btn-icon'
   );
 }
 
-export function BackIcon({ size = 20, stroke = '#ffffff', className = 'btn-icon', ...props }) {
+export function BackIcon({ size = 20, stroke = 'currentColor', fill = 'none', className = 'btn-icon', ...props }) {
   return (
     <svg
       width={size}
       height={size}
       viewBox="0 0 24 24"
-      fill="none"
+      fill={fill}
       stroke={stroke}
       strokeWidth="2.5"
       strokeLinecap="round"
@@ -64,13 +64,13 @@ export function BackIcon({ size = 20, stroke = '#ffffff', className = 'btn-icon'
   );
 }
 
-export function RestartIcon({ size = 22, stroke = '#ffffff', className = 'btn-icon', ...props }) {
+export function RestartIcon({ size = 22, stroke = 'currentColor', fill = 'none', className = 'btn-icon', ...props }) {
   return (
     <svg
       width={size}
       height={size}
       viewBox="0 0 24 24"
-      fill="none"
+      fill={fill}
       stroke={stroke}
       strokeWidth="2.5"
       strokeLinecap="round"
@@ -85,13 +85,13 @@ export function RestartIcon({ size = 22, stroke = '#ffffff', className = 'btn-ic
   );
 }
 
-export function NextLevelIcon({ size = 22, stroke = '#ffffff', className = 'btn-icon', ...props }) {
+export function NextLevelIcon({ size = 22, stroke = 'currentColor', fill = 'none', className = 'btn-icon', ...props }) {
   return (
     <svg
       width={size}
       height={size}
       viewBox="0 0 24 24"
-      fill="none"
+      fill={fill}
       stroke={stroke}
       strokeWidth="2.5"
       strokeLinecap="round"
@@ -106,13 +106,13 @@ export function NextLevelIcon({ size = 22, stroke = '#ffffff', className = 'btn-
   );
 }
 
-export function LevelsMenuIcon({ size = 22, stroke = '#ffffff', className = 'btn-icon', ...props }) {
+export function LevelsMenuIcon({ size = 22, stroke = 'currentColor', fill = 'none', className = 'btn-icon', ...props }) {
   return (
     <svg
       width={size}
       height={size}
       viewBox="0 0 24 24"
-      fill="none"
+      fill={fill}
       stroke={stroke}
       strokeWidth="2.2"
       strokeLinecap="round"
@@ -129,13 +129,13 @@ export function LevelsMenuIcon({ size = 22, stroke = '#ffffff', className = 'btn
   );
 }
 
-export function HeadphonesIcon({ size = 22, stroke = '#ffffff', className = 'btn-icon', ...props }) {
+export function HeadphonesIcon({ size = 22, stroke = 'currentColor', fill = 'none', className = 'btn-icon', ...props }) {
   return (
     <svg
       width={size}
       height={size}
       viewBox="0 0 24 24"
-      fill="none"
+      fill={fill}
       stroke={stroke}
       strokeWidth="2.2"
       strokeLinecap="round"
@@ -150,13 +150,13 @@ export function HeadphonesIcon({ size = 22, stroke = '#ffffff', className = 'btn
   );
 }
 
-export function PauseIcon({ size = 22, stroke = '#ffffff', className = 'btn-icon', ...props }) {
+export function PauseIcon({ size = 22, stroke = 'currentColor', fill = 'none', className = 'btn-icon', ...props }) {
   return (
     <svg
       width={size}
       height={size}
       viewBox="0 0 24 24"
-      fill="none"
+      fill={fill}
       stroke={stroke}
       strokeWidth="2.5"
       strokeLinecap="round"
@@ -171,13 +171,13 @@ export function PauseIcon({ size = 22, stroke = '#ffffff', className = 'btn-icon
   );
 }
 
-export function PlayIcon({ size = 22, stroke = '#ffffff', className = 'btn-icon', ...props }) {
+export function PlayIcon({ size = 22, stroke = 'currentColor', fill = 'none', className = 'btn-icon', ...props }) {
   return (
     <svg
       width={size}
       height={size}
       viewBox="0 0 24 24"
-      fill="none"
+      fill={fill}
       stroke={stroke}
       strokeWidth="2.2"
       strokeLinecap="round"
@@ -191,13 +191,13 @@ export function PlayIcon({ size = 22, stroke = '#ffffff', className = 'btn-icon'
   );
 }
 
-export function GameIcon({ size = 22, stroke = '#ffffff', className = 'btn-icon', ...props }) {
+export function GameIcon({ size = 22, stroke = 'currentColor', fill = 'none', className = 'btn-icon', ...props }) {
   return (
     <svg
       width={size}
       height={size}
       viewBox="0 0 24 24"
-      fill="none"
+      fill={fill}
       stroke={stroke}
       strokeWidth="2.2"
       strokeLinecap="round"
@@ -214,13 +214,13 @@ export function GameIcon({ size = 22, stroke = '#ffffff', className = 'btn-icon'
   );
 }
 
-export function UndoIcon({ size = 22, stroke = '#ffffff', className = 'btn-icon', ...props }) {
+export function UndoIcon({ size = 22, stroke = 'currentColor', fill = 'none', className = 'btn-icon', ...props }) {
   return (
     <svg
       width={size}
       height={size}
       viewBox="0 0 24 24"
-      fill="none"
+      fill={fill}
       stroke={stroke}
       strokeWidth="2.5"
       strokeLinecap="round"
@@ -235,13 +235,13 @@ export function UndoIcon({ size = 22, stroke = '#ffffff', className = 'btn-icon'
   );
 }
 
-export function SoundOnIcon({ size = 22, stroke = '#ffffff', className = 'btn-icon', ...props }) {
+export function SoundOnIcon({ size = 22, stroke = 'currentColor', fill = 'none', className = 'btn-icon', ...props }) {
   return (
     <svg
       width={size}
       height={size}
       viewBox="0 0 24 24"
-      fill="none"
+      fill={fill}
       stroke={stroke}
       strokeWidth="2.2"
       strokeLinecap="round"
@@ -256,13 +256,13 @@ export function SoundOnIcon({ size = 22, stroke = '#ffffff', className = 'btn-ic
   );
 }
 
-export function SoundOffIcon({ size = 22, stroke = '#ffffff', className = 'btn-icon', ...props }) {
+export function SoundOffIcon({ size = 22, stroke = 'currentColor', fill = 'none', className = 'btn-icon', ...props }) {
   return (
     <svg
       width={size}
       height={size}
       viewBox="0 0 24 24"
-      fill="none"
+      fill={fill}
       stroke={stroke}
       strokeWidth="2.2"
       strokeLinecap="round"
@@ -278,13 +278,13 @@ export function SoundOffIcon({ size = 22, stroke = '#ffffff', className = 'btn-i
   );
 }
 
-export function UserIcon({ size = 22, stroke = 'currentColor', className = 'btn-icon', ...props }) {
+export function UserIcon({ size = 22, stroke = 'currentColor', fill = 'none', className = 'btn-icon', ...props }) {
   return (
     <svg
       width={size}
       height={size}
       viewBox="0 0 24 24"
-      fill="000000"
+      fill={fill}
       stroke={stroke}
       strokeWidth="2.2"
       strokeLinecap="round"
@@ -299,13 +299,13 @@ export function UserIcon({ size = 22, stroke = 'currentColor', className = 'btn-
   );
 }
 
-export function SmileyIcon({ size = 22, stroke = 'currentColor', className = 'btn-icon', ...props }) {
+export function SmileyIcon({ size = 22, stroke = 'currentColor', fill = 'none', className = 'btn-icon', ...props }) {
   return (
     <svg
       width={size}
       height={size}
       viewBox="0 0 24 24"
-      fill="none"
+      fill={fill}
       stroke={stroke}
       strokeWidth="2.2"
       strokeLinecap="round"
@@ -322,13 +322,13 @@ export function SmileyIcon({ size = 22, stroke = 'currentColor', className = 'bt
   );
 }
 
-export function TrophyIcon({ size = 22, stroke = 'currentColor', className = 'btn-icon', ...props }) {
+export function TrophyIcon({ size = 22, stroke = 'currentColor', fill = 'none', className = 'btn-icon', ...props }) {
   return (
     <svg
       width={size}
       height={size}
       viewBox="0 0 24 24"
-      fill="none"
+      fill={fill}
       stroke={stroke}
       strokeWidth="2.2"
       strokeLinecap="round"
@@ -337,22 +337,22 @@ export function TrophyIcon({ size = 22, stroke = 'currentColor', className = 'bt
       aria-hidden="true"
       {...props}
     >
-      <path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6" />
-      <path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18" />
-      <path d="M4 22h16" />
-      <path d="M10 14.66V17c0 .55-.45 1-1 1H8v4h8v-4h-1c-.55 0-1-.45-1-1v-2.34" />
-      <path d="M18 2H6v7a6 6 0 0 0 12 0V2z" />
+      <path d="M6 9H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h2" />
+      <path d="M18 9h2a2 2 0 0 0 2-2V5a2 2 0 0 0-2-2h-2" />
+      <path d="M4 3h16v7a8 8 0 0 1-16 0V3z" />
+      <path d="M12 17v4" />
+      <path d="M8 21h8" />
     </svg>
   );
 }
 
-export function ChartIcon({ size = 22, stroke = 'currentColor', className = 'btn-icon', ...props }) {
+export function ChartIcon({ size = 22, stroke = 'currentColor', fill = 'none', className = 'btn-icon', ...props }) {
   return (
     <svg
       width={size}
       height={size}
       viewBox="0 0 24 24"
-      fill="none"
+      fill={fill}
       stroke={stroke}
       strokeWidth="2.2"
       strokeLinecap="round"
@@ -364,6 +364,7 @@ export function ChartIcon({ size = 22, stroke = 'currentColor', className = 'btn
       <line x1="18" y1="20" x2="18" y2="10" />
       <line x1="12" y1="20" x2="12" y2="4" />
       <line x1="6" y1="20" x2="6" y2="14" />
+      <line x1="2" y1="20" x2="22" y2="20" strokeWidth="2" />
     </svg>
   );
 }
