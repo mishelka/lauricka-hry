@@ -1,11 +1,12 @@
 import { useMemo, useRef, useState } from 'react';
 import { SLOVA_YI_GROUPS, SLOVA_YI_TASKS } from '../data/tasks';
-import { getStarCount, getVybraneOptionId, getVybraneOptions, shuffleArray, triggerFireworks } from '../utils/gameUtils';
+import { getStarCount, getVybraneOptionId, shuffleArray, triggerFireworks } from '../utils/gameUtils';
 import { getLevelStars, updateLevelBestStars } from '../utils/player';
 import useDevUnlock from '../utils/useDevUnlock';
 import AudioTalePlayer from './AudioTalePlayer';
 import { AUDIO_TALES } from '../data/audioTales';
 import { RestartIcon, NextLevelIcon, LevelsMenuIcon, PlayIcon, PauseIcon, HeadphonesIcon } from './Icons';
+import IyChoiceButtons from './IyChoiceButtons';
 
 const MAX_STARS = 5;
 
@@ -227,21 +228,12 @@ export default function SlovaYiGame() {
           Správne: <span className="score-hit">{hit}</span> | Chyby: <span className="score-miss">{miss}</span>
         </div>
         <div className="prompt prompt-words">{displayWord}</div>
-        <div className="button-grid-2x2">
-          {getVybraneOptions(currentTask).map(option => (
-            <button
-              key={option.id}
-              className={option.className}
-              onClick={() => check(option.id)}
-              disabled={disabledOptions.has(option.id)}
-            >
-              {option.label}
-              {feedbackMap[option.id] && (
-                <span className="icon">{feedbackMap[option.id] === 'correct' ? '✅' : '❌'}</span>
-              )}
-            </button>
-          ))}
-        </div>
+        <IyChoiceButtons
+          task={currentTask}
+          onCheck={check}
+          disabledOptions={disabledOptions}
+          feedbackMap={feedbackMap}
+        />
       </div>
       <div className="fireworks-overlay" ref={fireworksRef} />
     </>

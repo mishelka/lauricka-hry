@@ -1,12 +1,13 @@
 import { useContext, useEffect, useMemo, useRef, useState } from 'react';
 import { VYBRANE_Z_GROUPS, VYBRANE_Z_RULES, VYBRANE_Z_CHYTAKY } from '../data/vybraneZSlova';
-import { getStarCount, getVybraneOptionId, getVybraneOptions, shuffleArray, triggerFireworks } from '../utils/gameUtils';
+import { getStarCount, getVybraneOptionId, shuffleArray, triggerFireworks } from '../utils/gameUtils';
 import { getLevelStars, updateLevelBestStars } from '../utils/player';
 import useDevUnlock from '../utils/useDevUnlock';
 import BlockOutGame from '../rewards/BlockOutGame';
 import { isBlockOutLevelImplemented } from '../rewards/blockOutLevels';
 import { RestartIcon, NextLevelIcon, LevelsMenuIcon, GameIcon, HelpIcon } from './Icons';
 import { TopActionsContext } from '../App';
+import IyChoiceButtons from './IyChoiceButtons';
 
 const QUESTIONS_PER_LEVEL = 15;
 const MAX_STARS = 5;
@@ -372,24 +373,12 @@ export default function VybraneZGame() {
           </div>
         )}
 
-        <div className="button-grid-2x2">
-          {getVybraneOptions(currentTask).map(option => {
-            const marker = feedbackMap[option.id];
-            const icon = marker === 'correct' ? '✅' : '❌';
-
-            return (
-              <button
-                key={option.id}
-                className={option.className}
-                onClick={() => check(option.id)}
-                disabled={disabledOptions.has(option.id)}
-              >
-                {option.label}
-                {marker && <span className="icon">{icon}</span>}
-              </button>
-            );
-          })}
-        </div>
+        <IyChoiceButtons
+          task={currentTask}
+          onCheck={check}
+          disabledOptions={disabledOptions}
+          feedbackMap={feedbackMap}
+        />
       </div>
 
       <div className="fireworks-overlay" ref={fireworksRef} />

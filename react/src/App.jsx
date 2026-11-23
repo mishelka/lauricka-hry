@@ -1,7 +1,7 @@
 import { Navigate, Route, Routes, useLocation, useNavigate } from 'react-router-dom';
 import { DOPLNOVACKY_DTNL_GROUPS, DOPLNOVACKY_B_GROUPS } from './data/tasks';
-import { NASOBENIE_3_GROUPS } from './data/nasobenie3Data';
-import { DELENIE_3_GROUPS } from './data/delenie3Data';
+import { NASOBENIE_5_GROUPS } from './data/nasobenie5Data';
+import { DELENIE_5_GROUPS } from './data/delenie5Data';
 import { VYBRANE_B_GROUPS } from './data/vybraneBSlova';
 import { VYBRANE_M_GROUPS } from './data/vybraneMSlova';
 import { VYBRANE_P_GROUPS } from './data/vybranePSlova';
@@ -9,11 +9,12 @@ import { VYBRANE_R_GROUPS } from './data/vybraneRSlova';
 import { VYBRANE_S_GROUPS } from './data/vybraneSSlova';
 import { VYBRANE_V_GROUPS } from './data/vybraneVSlova';
 import { VYBRANE_Z_GROUPS } from './data/vybraneZSlova';
-import { getBestStars, getLevelStars, unlockAllLevels } from './utils/player';
+import { getBestStars, getCollectedSmileyIds, getLevelStars, getTotalStars, unlockAllLevels } from './utils/player';
 import useDevUnlock from './utils/useDevUnlock';
 import YiGame from './components/YiGame';
 import ObojakeGame from './components/ObojakeGame';
 import SlovaYiGame from './components/SlovaYiGame';
+import VybraneOpakovanieGame from './components/VybraneOpakovanieGame';
 import VybraneBGame from './components/VybraneBGame';
 import VybraneMGame from './components/VybraneMGame';
 import VybranePGame from './components/VybranePGame';
@@ -22,15 +23,16 @@ import VybraneSGame from './components/VybraneSGame';
 import VybraneVGame from './components/VybraneVGame';
 import VybraneZGame from './components/VybraneZGame';
 import RatanieGame from './components/RatanieGame';
-import Nasobenie3Game from './components/Nasobenie3Game';
-import Delenie3Game from './components/Delenie3Game';
+import Nasobenie5Game from './components/Nasobenie5Game';
+import Delenie5Game from './components/Delenie5Game';
 import AudioTalePlayer from './components/AudioTalePlayer';
 import DoplnovackyMenu, { DoplnovackyDtnlGame, DoplnovackyBGame } from './components/DoplnovackyGame';
 import CudzieGame from './components/CudzieGame';
 import BlockOutGame from './rewards/BlockOutGame';
 import { BLOCK_OUT_LEVELS } from './rewards/blockOutLevels';
 import { AUDIO_TALES } from './data/audioTales';
-import { HomeIcon, PlayIcon, PauseIcon } from './components/Icons';
+import { HomeIcon, PlayIcon, PauseIcon, UserIcon, SmileyIcon } from './components/Icons';
+import PlayerProfileModal from './components/PlayerProfileModal';
 import { createContext, useContext, useEffect, useMemo, useState } from "react";
 
 export const TopActionsContext = createContext({
@@ -46,6 +48,9 @@ function renderStars(starsCount) {
 function MenuPage() {
   const navigate = useNavigate();
   const location = useLocation();
+  const [showProfileModal, setShowProfileModal] = useState(false);
+  const [collectedSmileysCount, setCollectedSmileysCount] = useState(() => getCollectedSmileyIds().length);
+  const [totalStarsCount, setTotalStarsCount] = useState(() => getTotalStars());
   const [menuStars, setMenuStars] = useState(() => ({
     yi: getBestStars('yi'),
     obojake: getBestStars('obojake'),
@@ -53,9 +58,10 @@ function MenuPage() {
     doplnovackyBLevels: getLevelStars('doplnovacky_b', DOPLNOVACKY_B_GROUPS.length),
     cudzie: getBestStars('cudzie'),
     ratanieLevels: getLevelStars('ratanie', 10),
-    nasobenie3Levels: getLevelStars('nasobenie3', NASOBENIE_3_GROUPS.length),
-    delenie3Levels: getLevelStars('delenie3', DELENIE_3_GROUPS.length),
+    nasobenie5Levels: getLevelStars('nasobenie5', NASOBENIE_5_GROUPS.length),
+    delenie5Levels: getLevelStars('delenie5', DELENIE_5_GROUPS.length),
     slovaLevels: getLevelStars('slovaYi', 8),
+    vybraneOpakovanie: getBestStars('vybraneOpakovanie'),
     vybraneBLevels: getLevelStars('vybraneB', VYBRANE_B_GROUPS.length),
     vybraneMLevels: getLevelStars('vybraneM', VYBRANE_M_GROUPS.length),
     vybranePLevels: getLevelStars('vybraneP', VYBRANE_P_GROUPS.length),
@@ -67,6 +73,8 @@ function MenuPage() {
   }));
 
   function refreshMenuStars() {
+    setCollectedSmileysCount(getCollectedSmileyIds().length);
+    setTotalStarsCount(getTotalStars());
     setMenuStars({
       yi: getBestStars('yi'),
       obojake: getBestStars('obojake'),
@@ -74,9 +82,10 @@ function MenuPage() {
       doplnovackyBLevels: getLevelStars('doplnovacky_b', DOPLNOVACKY_B_GROUPS.length),
       cudzie: getBestStars('cudzie'),
       ratanieLevels: getLevelStars('ratanie', 10),
-      nasobenie3Levels: getLevelStars('nasobenie3', NASOBENIE_3_GROUPS.length),
-      delenie3Levels: getLevelStars('delenie3', DELENIE_3_GROUPS.length),
+      nasobenie5Levels: getLevelStars('nasobenie5', NASOBENIE_5_GROUPS.length),
+      delenie5Levels: getLevelStars('delenie5', DELENIE_5_GROUPS.length),
       slovaLevels: getLevelStars('slovaYi', 8),
+      vybraneOpakovanie: getBestStars('vybraneOpakovanie'),
       vybraneBLevels: getLevelStars('vybraneB', VYBRANE_B_GROUPS.length),
       vybraneMLevels: getLevelStars('vybraneM', VYBRANE_M_GROUPS.length),
       vybranePLevels: getLevelStars('vybraneP', VYBRANE_P_GROUPS.length),
@@ -127,9 +136,10 @@ function MenuPage() {
   const yiStars = menuStars.yi;
   const obojakeStars = menuStars.obojake;
   const cudzieStars = menuStars.cudzie;
+  const vybraneOpakovanieStars = menuStars.vybraneOpakovanie || 0;
   const ratanieFinished = useMemo(() => menuStars.ratanieLevels.filter(stars => stars === 5).length, [menuStars.ratanieLevels]);
-  const nasobenieFinished = useMemo(() => menuStars.nasobenie3Levels.filter(stars => stars === 5).length, [menuStars.nasobenie3Levels]);
-  const delenieFinished = useMemo(() => menuStars.delenie3Levels.filter(stars => stars === 5).length, [menuStars.delenie3Levels]);
+  const nasobenieFinished = useMemo(() => menuStars.nasobenie5Levels.filter(stars => stars === 5).length, [menuStars.nasobenie5Levels]);
+  const delenieFinished = useMemo(() => menuStars.delenie5Levels.filter(stars => stars === 5).length, [menuStars.delenie5Levels]);
   const slovaFinished = useMemo(() => menuStars.slovaLevels.filter(stars => stars === 5).length, [menuStars.slovaLevels]);
   const vybraneBFinished = useMemo(() => menuStars.vybraneBLevels.filter(stars => stars === 5).length, [menuStars.vybraneBLevels]);
   const vybraneMFinished = useMemo(() => menuStars.vybraneMLevels.filter(stars => stars === 5).length, [menuStars.vybraneMLevels]);
@@ -156,7 +166,30 @@ function MenuPage() {
 
   return (
     <>
-      <h1>Vyber si hru:</h1>
+      <div className="menu-header-bar">
+        <h1>Vyber si hru:</h1>
+        <button
+          type="button"
+          className="btn-header-profile"
+          onClick={() => setShowProfileModal(true)}
+          title="Profil hráča"
+          aria-label="Profil hráča"
+        >
+          <span className="header-profile-icon"><UserIcon size={18} /></span>
+          <span className="header-profile-label">Tvoj profil</span>
+          <span className="header-profile-badge header-profile-stars-badge">⭐ {totalStarsCount}</span>
+          <span className="header-profile-badge header-profile-smileys-badge">😊 {collectedSmileysCount}</span>
+        </button>
+      </div>
+
+      <PlayerProfileModal
+        isOpen={showProfileModal}
+        onClose={() => {
+          setShowProfileModal(false);
+          refreshMenuStars();
+        }}
+      />
+
       <div className="menu-container">
         <div className="menu-section">
           <div className="menu-divider" role="separator" aria-label="Oddelovač kategórií">
@@ -172,16 +205,16 @@ function MenuPage() {
             </div>
 
             <div className="menu-card">
-              <button className="btn-menu-nasobenie menu-card-btn" onClick={() => navigate('/nasobenie-3')}>
-                <span className="menu-title">Násobenie do 3</span>
-                <span className="menu-stars">{`${nasobenieFinished} z ${NASOBENIE_3_GROUPS.length}`}</span>
+              <button className="btn-menu-nasobenie menu-card-btn" onClick={() => navigate('/nasobenie-5')}>
+                <span className="menu-title">Násobenie do 5</span>
+                <span className="menu-stars">{`${nasobenieFinished} z ${NASOBENIE_5_GROUPS.length}`}</span>
               </button>
             </div>
 
             <div className="menu-card">
-              <button className="btn-menu-delenie menu-card-btn" onClick={() => navigate('/delenie-3')}>
-                <span className="menu-title">Delenie do 3</span>
-                <span className="menu-stars">{`${delenieFinished} z ${DELENIE_3_GROUPS.length}`}</span>
+              <button className="btn-menu-delenie menu-card-btn" onClick={() => navigate('/delenie-5')}>
+                <span className="menu-title">Delenie do 5</span>
+                <span className="menu-stars">{`${delenieFinished} z ${DELENIE_5_GROUPS.length}`}</span>
               </button>
             </div>
           </div>
@@ -252,6 +285,18 @@ function MenuPage() {
           </div>
 
           <div className="menu-cards">
+            <div className="menu-card">
+              <button
+                className="btn-menu-vybrane-opakovanie menu-card-btn"
+                onClick={() => navigate('/vybrane-opakovanie')}
+              >
+                <span className="menu-title">Opakovanie</span>
+                <span className="menu-stars">
+                  {vybraneOpakovanieStars > 0 ? renderStars(vybraneOpakovanieStars) : 'Chytáky'}
+                </span>
+              </button>
+            </div>
+
             <div className="menu-card">
               <button className="btn-menu-vybrane-b menu-card-btn" onClick={() => navigate('/vybrane-b')}>
                 <span className="menu-title">B</span>
@@ -419,6 +464,7 @@ export default function App() {
           <Route path="/doplnovacky/dtnl" element={<GamePage backTo="/doplnovacky"><DoplnovackyDtnlGame /></GamePage>} />
           <Route path="/doplnovacky/b" element={<GamePage backTo="/doplnovacky"><DoplnovackyBGame /></GamePage>} />
           <Route path="/cudzie" element={<GamePage><CudzieGame /></GamePage>} />
+          <Route path="/vybrane-opakovanie" element={<GamePage><VybraneOpakovanieGame /></GamePage>} />
           <Route path="/vybrane-b" element={<GamePage><VybraneBGame /></GamePage>} />
           <Route path="/vybrane-m" element={isVybraneLetterUnlocked('m') ? <GamePage><VybraneMGame /></GamePage> : <Navigate to="/vybrane-b" replace />} />
           <Route path="/vybrane-p" element={isVybraneLetterUnlocked('p') ? <GamePage><VybranePGame /></GamePage> : <Navigate to="/vybrane-b" replace />} />
@@ -427,8 +473,10 @@ export default function App() {
           <Route path="/vybrane-v" element={isVybraneLetterUnlocked('v') ? <GamePage><VybraneVGame /></GamePage> : <Navigate to="/vybrane-b" replace />} />
           <Route path="/vybrane-z" element={isVybraneLetterUnlocked('z') ? <GamePage><VybraneZGame /></GamePage> : <Navigate to="/vybrane-b" replace />} />
           <Route path="/ratanie" element={<GamePage><RatanieGame /></GamePage>} />
-          <Route path="/nasobenie-3" element={<GamePage><Nasobenie3Game /></GamePage>} />
-          <Route path="/delenie-3" element={<GamePage><Delenie3Game /></GamePage>} />
+          <Route path="/nasobenie-5" element={<GamePage><Nasobenie5Game /></GamePage>} />
+          <Route path="/delenie-5" element={<GamePage><Delenie5Game /></GamePage>} />
+          <Route path="/nasobenie-3" element={<Navigate to="/nasobenie-5" replace />} />
+          <Route path="/delenie-3" element={<Navigate to="/delenie-5" replace />} />
           <Route path="/block-out" element={<GamePage><BlockOutGame /></GamePage>} />
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>

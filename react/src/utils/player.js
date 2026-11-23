@@ -1,3 +1,5 @@
+import { SMILEYS_CATALOG, SMILEYS_MAP } from '../data/smileysData';
+
 const STORAGE_KEY = 'laurickaPlayerV1';
 const MAX_STARS = 5;
 
@@ -100,6 +102,20 @@ function migrateLegacyIfNeeded(state) {
   if (oldDoplnovacky.bestStars > dtnlRec.bestStars) {
     dtnlRec.bestStars = oldDoplnovacky.bestStars;
     changed = true;
+  }
+
+  const oldNasobenie3 = state.games && state.games.nasobenie3;
+  if (oldNasobenie3 && Array.isArray(oldNasobenie3.levelStars) && oldNasobenie3.levelStars.some(s => s > 0)) {
+    if (mergeLevelStars(state, 'nasobenie5', oldNasobenie3.levelStars, 8)) {
+      changed = true;
+    }
+  }
+
+  const oldDelenie3 = state.games && state.games.delenie3;
+  if (oldDelenie3 && Array.isArray(oldDelenie3.levelStars) && oldDelenie3.levelStars.some(s => s > 0)) {
+    if (mergeLevelStars(state, 'delenie5', oldDelenie3.levelStars, 8)) {
+      changed = true;
+    }
   }
 
   const wasMigrated = Boolean(state.migratedLegacyV1);
@@ -245,4 +261,119 @@ export function clearAllBlockOutSavedStates() {
   const rec = getRecord(state, 'blockOut');
   rec.savedStates = {};
   saveState(state);
+}
+
+export function getCollectedSmileyIds() {
+  const state = loadState();
+  if (!Array.isArray(state.smileys)) {
+    return [];
+  }
+  return state.smileys.filter(id => Boolean(SMILEYS_MAP[id]));
+}
+
+export function awardRandomSmiley() {
+  const state = loadState();
+  if (!Array.isArray(state.smileys)) {
+    state.smileys = [];
+  }
+  const collectedSet = new Set(state.smileys);
+  const uncollected = SMILEYS_CATALOG.filter(s => !collectedSet.has(s.id));
+
+  let awardedSmiley;
+  let isNew = false;
+  if (uncollected.length > 0) {
+    const randomIndex = Math.floor(Math.random() * uncollected.length);
+    awardedSmiley = uncollected[randomIndex];
+    state.smileys.push(awardedSmiley.id);
+    isNew = true;
+    saveState(state);
+  } else {
+    const randomIndex = Math.floor(Math.random() * SMILEYS_CATALOG.length);
+    awardedSmiley = SMILEYS_CATALOG[randomIndex];
+    isNew = false;
+  }
+
+  return {
+    smiley: awardedSmiley,
+    isNew,
+    totalCollected: new Set(state.smileys).size,
+    totalAvailable: SMILEYS_CATALOG.length
+  };
+}
+
+export function getSmileyCollection() {
+  const collectedIds = new Set(getCollectedSmileyIds());
+  return SMILEYS_CATALOG.map(s => ({
+    ...s,
+    unlocked: collectedIds.has(s.id)
+  }));
+}
+
+export function getPlayerStats() {
+  const state = loadState();
+  migrateLegacyIfNeeded(state);
+
+  const gameRecords = state.games || {};
+  let totalStars = 0;
+  let totalPossibleStars = 0;
+  let completed5StarLevels = 0;
+
+  // Single star games
+  const singleGames = ['yi', 'obojake', 'cudzie', 'vybraneOpakovanie'];
+  singleGames.forEach(gid => {
+    const rec = gameRecords[gid];
+    const stars = rec ? clampStars(rec.bestStars) : 0;
+    totalStars += stars;
+    totalPossibleStars += 5;
+    if (stars === 5) completed5StarLevels += 1;
+  });
+
+  // Multi-level games
+  const multiGames = [
+    { id: 'slovaYi', count: 8 },
+    { id: 'doplnovacky_dtnl', count: 5 },
+    { id: 'doplnovacky_b', count: 5 },
+    { id: 'vybraneB', count: 9 },
+    { id: 'vybraneM', count: 9 },
+    { id: 'vybraneP', count: 9 },
+    { id: 'vybraneR', count: 9 },
+    { id: 'vybraneS', count: 9 },
+    { id: 'vybraneV', count: 9 },
+    { id: 'vybraneZ', count: 9 },
+    { id: 'ratanie', count: 10 },
+    { id: 'nasobenie5', count: 8 },
+    { id: 'delenie5', count: 8 },
+    { id: 'blockOut', count: 9 }
+  ];
+
+  multiGames.forEach(({ id, count }) => {
+    const rec = gameRecords[id];
+    const levels = Array.isArray(rec?.levelStars) ? rec.levelStars : [];
+    totalPossibleStars += count * 5;
+    for (let i = 0; i < count; i++) {
+      const s = clampStars(levels[i]);
+      totalStars += s;
+      if (s === 5) completed5StarLevels += 1;
+    }
+  });
+
+  const opakovanieRec = gameRecords.vybraneOpakovanie;
+  const opakovanieStars = opakovanieRec ? clampStars(opakovanieRec.bestStars) : 0;
+  const opakovaniePlays = opakovanieRec && Array.isArray(opakovanieRec.levelPlays) ? (opakovanieRec.levelPlays[0] || 0) : 0;
+
+  const collectedSmileys = getCollectedSmileyIds();
+
+  return {
+    totalStars,
+    totalPossibleStars,
+    completed5StarLevels,
+    opakovanieStars,
+    opakovaniePlays,
+    collectedSmileysCount: collectedSmileys.length,
+    totalSmileysCount: SMILEYS_CATALOG.length
+  };
+}
+
+export function getTotalStars() {
+  return getPlayerStats().totalStars;
 }

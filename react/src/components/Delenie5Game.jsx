@@ -1,5 +1,5 @@
 import { useContext, useEffect, useMemo, useRef, useState } from 'react';
-import { NASOBENIE_3_GROUPS, NASOBENIE_3_RULES } from '../data/nasobenie3Data';
+import { DELENIE_5_GROUPS, DELENIE_5_RULES } from '../data/delenie5Data';
 import { getStarCount, shuffleArray, triggerFireworks } from '../utils/gameUtils';
 import { getLevelStars, updateLevelBestStars } from '../utils/player';
 import useDevUnlock from '../utils/useDevUnlock';
@@ -15,11 +15,11 @@ function renderStars(stars) {
   return `${'★'.repeat(stars)}${'☆'.repeat(MAX_STARS - stars)}`;
 }
 
-export default function Nasobenie3Game() {
+export default function Delenie5Game() {
   const { setRightAction } = useContext(TopActionsContext);
-  const groups = useMemo(() => NASOBENIE_3_GROUPS, []);
-  const [levelStars, setLevelStars] = useState(() => getLevelStars('nasobenie3', groups.length));
-  useDevUnlock({ gameId: 'nasobenie3', levelCount: groups.length, onUnlock: setLevelStars });
+  const groups = useMemo(() => DELENIE_5_GROUPS, []);
+  const [levelStars, setLevelStars] = useState(() => getLevelStars('delenie5', groups.length));
+  useDevUnlock({ gameId: 'delenie5', levelCount: groups.length, onUnlock: setLevelStars });
   const [selectedLevel, setSelectedLevel] = useState(null);
   const [playingRewardLevel, setPlayingRewardLevel] = useState(null);
   const [showRules, setShowRules] = useState(false);
@@ -34,8 +34,8 @@ export default function Nasobenie3Game() {
         type="button"
         className={`btn-top-action btn-help${showRules ? ' active' : ''}`}
         onClick={() => setShowRules(prev => !prev)}
-        title={showRules ? 'Skryť pravidlá' : 'Pravidlá násobenia'}
-        aria-label="Pravidlá násobenia"
+        title={showRules ? 'Skryť pravidlá' : 'Pravidlá delenia do 5'}
+        aria-label="Pravidlá delenia do 5"
       >
         <HelpIcon size={24} />
       </button>
@@ -92,7 +92,7 @@ export default function Nasobenie3Game() {
     const stars = getStarCount(finalMiss);
     const previous = levelStars[selectedLevel] || 0;
     const best = Math.max(previous, stars);
-    const updated = updateLevelBestStars('nasobenie3', selectedLevel, best, groups.length);
+    const updated = updateLevelBestStars('delenie5', selectedLevel, best, groups.length);
     setLevelStars(updated);
     setWrongItems(new Set(wrongSet));
     setResultVisible(true);
@@ -198,7 +198,7 @@ export default function Nasobenie3Game() {
   if (selectedLevel === null) {
     return (
       <div>
-        <h1>Násobenie do 3</h1>
+        <h1>Delenie do 5</h1>
         <p className="level-menu-help">
           Na odomknutie ďalšieho levelu potrebuješ 5 hviezd v aktuálnom leveli.
         </p>
@@ -206,7 +206,7 @@ export default function Nasobenie3Game() {
         {showRules && (
           <div className="rules-panel">
             <h3>
-              <span>Pravidlá násobenia do 3</span>
+              <span>Pravidlá delenia do 5</span>
               <button
                 type="button"
                 className="btn-rules-close"
@@ -217,7 +217,7 @@ export default function Nasobenie3Game() {
               </button>
             </h3>
             <ul>
-              {NASOBENIE_3_RULES.map((rule, idx) => (
+              {DELENIE_5_RULES.map((rule, idx) => (
                 <li key={idx}>{rule}</li>
               ))}
             </ul>
@@ -265,7 +265,7 @@ export default function Nasobenie3Game() {
         </div>
         <div className="level-progress-message">
           {levelDone
-            ? (hasNextLevel ? 'Level splnený na 5★! Odomkla sa ti odmena Block Out a ďalší level.' : 'Fantastické! Zvládla si všetky úrovne násobenia do 3!')
+            ? (hasNextLevel ? 'Level splnený na 5★! Odomkla sa ti odmena Block Out a ďalší level.' : 'Fantastické! Zvládla si všetky úrovne delenia do 5!')
             : `Získala si ${stars}/5 ★. Na postup do ďalšieho levelu a odmenu potrebuješ 5/5 ★.`}
         </div>
         <div className="wrong-list">
@@ -314,14 +314,17 @@ export default function Nasobenie3Game() {
     );
   }
 
+  if (!current) return null;
+
   return (
-    <>
-      <div className="game-ui">
-        <h1>Násobenie do 3</h1>
-        <div className="current-level">
-          {`Level ${selectedLevel + 1} • Úloha ${index + 1}/${examples.length}`}
+    <div className="game-screen">
+      <div ref={fireworksRef} className="fireworks-container" />
+
+      <div className="card">
+        <div className="round-info">
+          Level {selectedLevel + 1} • Úloha {index + 1}/{examples.length}
         </div>
-        <div className="score-board">
+        <div className="score-live">
           Správne: <span className="score-hit">{hit}</span> | Chyby: <span className="score-miss">{miss}</span>
         </div>
 
@@ -329,44 +332,49 @@ export default function Nasobenie3Game() {
           <div className="math-expr-text">
             {current.text} =
           </div>
-          <div className={`math-input-box ${status === 'correct' ? 'correct' : (status === 'wrong' ? 'wrong' : '')}`}>
-            {inputDigits !== '' ? inputDigits : <span className="math-cursor">?</span>}
+          <div className={`math-input-box ${status}`}>
+            {inputDigits === '' ? <span className="math-cursor">|</span> : inputDigits}
           </div>
         </div>
 
         {activeHint && (
-          <div className="hint-box" style={{
-            fontSize: '17px',
-            color: '#1a365d',
-            background: '#e2f1fc',
-            padding: '10px 14px',
-            borderRadius: '12px',
-            marginBottom: '14px',
-            fontWeight: 'bold',
-            border: '1px solid #90cdf4'
-          }}>
+          <div className="hint-text" style={{ marginTop: '10px' }}>
             💡 {activeHint}
           </div>
         )}
 
-        <div className="keyboard-grid">
-          {[1, 2, 3, 4, 5, 6, 7, 8, 9].map(n => (
-            <button key={n} type="button" className="btn-key" onClick={() => pressDigit(String(n))}>
-              {n}
+        <div className="keypad">
+          {[1, 2, 3, 4, 5, 6, 7, 8, 9, 0].map(digit => (
+            <button
+              key={digit}
+              type="button"
+              className="keypad-btn"
+              onClick={() => pressDigit(String(digit))}
+              disabled={status === 'correct'}
+            >
+              {digit}
             </button>
           ))}
-          <button type="button" className="btn-key btn-util" onClick={backspace}>
-            ⌦
+          <button
+            type="button"
+            className="keypad-btn keypad-backspace"
+            onClick={backspace}
+            disabled={status === 'correct' || inputDigits === ''}
+            title="Zmazať"
+          >
+            ⌫
           </button>
-          <button key={0} type="button" className="btn-key" onClick={() => pressDigit('0')}>
-            0
-          </button>
-          <button type="button" className="btn-key btn-ok" onClick={submitAnswer}>
+          <button
+            type="button"
+            className="keypad-btn keypad-enter"
+            onClick={submitAnswer}
+            disabled={status === 'correct' || inputDigits === ''}
+            title="Potvrdiť"
+          >
             OK
           </button>
         </div>
       </div>
-      <div className="fireworks-overlay" ref={fireworksRef} />
-    </>
+    </div>
   );
 }

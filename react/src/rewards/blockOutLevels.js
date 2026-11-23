@@ -815,7 +815,7 @@ export const BLOCK_OUT_LEVELS = [
       { side: 'bottom', index: 1, span: 3, color: 'red' },
       { side: 'left', index: 4, span: 2, color: 'pink', locked: 12 },
       { side: 'left', index: 6, span: 2, color: 'blue', locked: 7 },
-      { side: 'right', index: 4, span: 2, color: 'white', locked: 1 },
+      { side: 'right', index: 4, span: 2, color: 'yellow', locked: 1 },
       { side: 'right', index: 6, span: 2, color: 'blue' }
     ],
     blocks: createLevel8Blocks()
