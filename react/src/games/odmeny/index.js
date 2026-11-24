@@ -1,3 +1,3 @@
 export { default as BlockOutGame } from './BlockOutGame';
-export * from './blockOutLevels';
+export * from './levels';
 export * from './soundEffects';

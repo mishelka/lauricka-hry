@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef, useCallback, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { BLOCK_OUT_LEVELS, COLOR_CONFIG, getBlockCells, getOccupiedCells, getBlockDimensions, isDirAllowedForBlock, isBlockFrozen, isDoorLocked, getLevelWalls } from './blockOutLevels';
+import { BLOCK_OUT_LEVELS, COLOR_CONFIG, getBlockCells, getOccupiedCells, getBlockDimensions, isDirAllowedForBlock, isBlockFrozen, isDoorLocked, getLevelWalls } from './levels';
 import { sounds } from './soundEffects';
 import { triggerFireworks } from '../../utils/gameUtils';
 import { getLevelStars, updateLevelBestStars, getLevelPlays, incrementLevelPlays, getBlockOutSavedState, saveBlockOutSavedState, clearBlockOutSavedState, getBlockOutSavedStates } from '../../utils/player';
