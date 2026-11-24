@@ -1,0 +1,21 @@
+.number {
+  position: absolute;
+  transform: translate(-50%, -50%);
+  z-index: 25;
+  pointer-events: none;
+  font-weight: 900;
+  font-family: inherit;
+  color: #0f172a;
+  text-shadow: -1.5px -1.5px 0 #ffffff, 1.5px -1.5px 0 #ffffff, -1.5px 1.5px 0 #ffffff, 1.5px 1.5px 0 #ffffff, 0 2px 6px rgba(0, 0, 0, 0.45);
+  line-height: 1;
+  user-select: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  animation: frozenNumberPulse 2.2s ease-in-out infinite;
+}
+
+@keyframes frozenNumberPulse {
+  0%, 100% { transform: translate(-50%, -50%) scale(1); }
+  50% { transform: translate(-50%, -50%) scale(1.1); }
+}

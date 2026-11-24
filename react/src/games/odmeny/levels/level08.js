@@ -1,4 +1,4 @@
-export const level8 = {
+export const level08 = {
   id: 8,
   name: 'Level 8 - Veľké ľadové jadro',
   width: 5,
@@ -42,4 +42,4 @@ export const level8 = {
   ]
 };
 
-export default level8;
+export default level08;

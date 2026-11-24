@@ -1,0 +1,7 @@
+.arrow { pointer-events: none; transition: transform 0.2s ease; }
+.pulsing { animation: iconPulse 0.9s infinite alternate ease-in-out; }
+
+@keyframes iconPulse {
+  from { transform: scale(1); }
+  to { transform: scale(1.25); }
+}

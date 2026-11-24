@@ -1,4 +1,4 @@
-export const level2 = {
+export const level02 = {
   id: 2,
   name: 'Level 2 - Farebné bludisko',
   width: 7,
@@ -151,4 +151,4 @@ export const level2 = {
   ]
 };
 
-export default level2;
+export default level02;

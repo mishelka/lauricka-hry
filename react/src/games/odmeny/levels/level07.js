@@ -1,4 +1,4 @@
-export const level7 = {
+export const level07 = {
   id: 7,
   name: 'Level 7 - Ľadové komory a dvojfarebné bloky',
   width: 6,
@@ -60,4 +60,4 @@ export const level7 = {
   ]
 };
 
-export default level7;
+export default level07;

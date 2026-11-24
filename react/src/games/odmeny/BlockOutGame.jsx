@@ -1,263 +1,14 @@
 import { useState, useEffect, useRef, useCallback, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { BLOCK_OUT_LEVELS, COLOR_CONFIG, getBlockCells, getOccupiedCells, getBlockDimensions, isDirAllowedForBlock, isBlockFrozen, isDoorLocked, getLevelWalls } from './levels';
+import { BLOCK_OUT_LEVELS, getBlockCells, getOccupiedCells, isDirAllowedForBlock, isBlockFrozen, isDoorLocked, getLevelWalls, revealUnfrozenGroups } from './levels';
 import { sounds } from './soundEffects';
 import { triggerFireworks } from '../../utils/gameUtils';
 import { getLevelStars, updateLevelBestStars, getLevelPlays, incrementLevelPlays, getBlockOutSavedState, saveBlockOutSavedState, clearBlockOutSavedState, getBlockOutSavedStates } from '../../utils/player';
-import { RestartIcon, NextLevelIcon, LevelsMenuIcon, BackIcon, UndoIcon, SoundOnIcon, SoundOffIcon } from '../../atomic/Icons';
-import './blockOut.css';
-
-const DEFAULT_CELL_SIZE = 54;
-const DEFAULT_GAP = 8;
-const DEFAULT_PADDING = 12;
-const DEFAULT_DOOR_DEPTH = 22;
-const DRAG_THRESHOLD = 16;
-const MAX_LEVEL_PLAYS = 3;
-
-function DoorArrow({ side, color, size }) {
-  const isLight = color === 'white' || color === 'yellow';
-  const fill = isLight ? '#334155' : '#ffffff';
-
-  let rotation = 0;
-  if (side === 'top') rotation = -90;
-  if (side === 'right') rotation = 0;
-  if (side === 'bottom') rotation = 90;
-  if (side === 'left') rotation = 180;
-
-  return (
-    <svg
-      width={size}
-      height={size}
-      viewBox="0 0 24 24"
-      className="blockout-door-arrow-svg"
-      style={{
-        transform: `rotate(${rotation}deg)`,
-        display: 'block'
-      }}
-    >
-      <path
-        d="M8 5.5c0-.75.85-1.2 1.5-.8l9 6.5c.55.4.55 1.2 0 1.6l-9 6.5c-.65.4-1.5-.05-1.5-.8z"
-        fill={fill}
-      />
-    </svg>
-  );
-}
-
-function BlockArrowOverlay({ block, width, height, cellSize, gap = 0 }) {
-  const dir = block.direction || block.axis;
-  if (!dir) return null;
-
-  const cells = getBlockCells(block);
-  const arrowPadding = Math.max(6, Math.round(cellSize * 0.18));
-  const headSize = Math.max(7, Math.round(cellSize * 0.22));
-  const strokeW = Math.max(3.5, Math.round(cellSize * 0.08));
-
-  // Determine best row for horizontal arrows (row with most cells)
-  let targetRow = block.arrowRow;
-  if (targetRow === undefined) {
-    const rowCounts = {};
-    for (const [r] of cells) {
-      rowCounts[r] = (rowCounts[r] || 0) + 1;
-    }
-    let maxCount = -1;
-    for (const [rStr, count] of Object.entries(rowCounts)) {
-      const r = Number(rStr);
-      if (count > maxCount) {
-        maxCount = count;
-        targetRow = r;
-      }
-    }
-  }
-
-  // Determine best col for vertical arrows (col with most cells)
-  let targetCol = block.arrowCol;
-  if (targetCol === undefined) {
-    const colCounts = {};
-    for (const [_, c] of cells) {
-      colCounts[c] = (colCounts[c] || 0) + 1;
-    }
-    let maxCount = -1;
-    for (const [cStr, count] of Object.entries(colCounts)) {
-      const c = Number(cStr);
-      if (count > maxCount) {
-        maxCount = count;
-        targetCol = c;
-      }
-    }
-  }
-
-  const rowCells = cells.filter(([r]) => r === targetRow);
-  const rowCols = rowCells.map(([_, c]) => c);
-  const minC = rowCols.length > 0 ? Math.min(...rowCols) : 0;
-  const maxC = rowCols.length > 0 ? Math.max(...rowCols) : 0;
-
-  const cy = (targetRow || 0) * (cellSize + gap) + cellSize / 2;
-  const xLeft = minC * (cellSize + gap) + arrowPadding;
-  const xRight = maxC * (cellSize + gap) + cellSize - arrowPadding;
-
-  const colCells = cells.filter(([_, c]) => c === targetCol);
-  const colRows = colCells.map(([r]) => r);
-  const minR = colRows.length > 0 ? Math.min(...colRows) : 0;
-  const maxR = colRows.length > 0 ? Math.max(...colRows) : 0;
-
-  const cx = (targetCol || 0) * (cellSize + gap) + cellSize / 2;
-  const yTop = minR * (cellSize + gap) + arrowPadding;
-  const yBottom = maxR * (cellSize + gap) + cellSize - arrowPadding;
-
-  if (dir === 'vertical' || dir === 'v' || dir === 'y') {
-    return (
-      <svg className="blockout-direction-arrow" width={width} height={height} viewBox={`0 0 ${width} ${height}`}>
-        <defs>
-          <filter id={`arrow-glow-${block.id}`} x="-20%" y="-20%" width="140%" height="140%">
-            <feDropShadow dx="0" dy="1" stdDeviation="1.5" floodColor="#000" floodOpacity="0.45" />
-          </filter>
-        </defs>
-        <g filter={`url(#arrow-glow-${block.id})`}>
-          <line
-            x1={cx}
-            y1={yTop + headSize * 0.6}
-            x2={cx}
-            y2={yBottom - headSize * 0.6}
-            stroke="white"
-            strokeWidth={strokeW}
-            strokeLinecap="round"
-          />
-          <polygon
-            points={`${cx},${yTop} ${cx - headSize},${yTop + headSize * 1.3} ${cx + headSize},${yTop + headSize * 1.3}`}
-            fill="white"
-          />
-          <polygon
-            points={`${cx},${yBottom} ${cx - headSize},${yBottom - headSize * 1.3} ${cx + headSize},${yBottom - headSize * 1.3}`}
-            fill="white"
-          />
-        </g>
-      </svg>
-    );
-  }
-
-  if (dir === 'horizontal' || dir === 'h' || dir === 'x') {
-    return (
-      <svg className="blockout-direction-arrow" width={width} height={height} viewBox={`0 0 ${width} ${height}`}>
-        <defs>
-          <filter id={`arrow-glow-${block.id}`} x="-20%" y="-20%" width="140%" height="140%">
-            <feDropShadow dx="0" dy="1" stdDeviation="1.5" floodColor="#000" floodOpacity="0.45" />
-          </filter>
-        </defs>
-        <g filter={`url(#arrow-glow-${block.id})`}>
-          <line
-            x1={xLeft + headSize * 0.6}
-            y1={cy}
-            x2={xRight - headSize * 0.6}
-            y2={cy}
-            stroke="white"
-            strokeWidth={strokeW}
-            strokeLinecap="round"
-          />
-          <polygon
-            points={`${xLeft},${cy} ${xLeft + headSize * 1.3},${cy - headSize} ${xLeft + headSize * 1.3},${cy + headSize}`}
-            fill="white"
-          />
-          <polygon
-            points={`${xRight},${cy} ${xRight - headSize * 1.3},${cy - headSize} ${xRight - headSize * 1.3},${cy + headSize}`}
-            fill="white"
-          />
-        </g>
-      </svg>
-    );
-  }
-
-  if (dir === 'up') {
-    return (
-      <svg className="blockout-direction-arrow" width={width} height={height} viewBox={`0 0 ${width} ${height}`}>
-        <defs>
-          <filter id={`arrow-glow-${block.id}`} x="-20%" y="-20%" width="140%" height="140%">
-            <feDropShadow dx="0" dy="1" stdDeviation="1.5" floodColor="#000" floodOpacity="0.45" />
-          </filter>
-        </defs>
-        <g filter={`url(#arrow-glow-${block.id})`}>
-          <line x1={cx} y1={yTop + headSize * 0.6} x2={cx} y2={yBottom} stroke="white" strokeWidth={strokeW} strokeLinecap="round" />
-          <polygon points={`${cx},${yTop} ${cx - headSize},${yTop + headSize * 1.4} ${cx + headSize},${yTop + headSize * 1.4}`} fill="white" />
-        </g>
-      </svg>
-    );
-  }
-
-  if (dir === 'down') {
-    return (
-      <svg className="blockout-direction-arrow" width={width} height={height} viewBox={`0 0 ${width} ${height}`}>
-        <defs>
-          <filter id={`arrow-glow-${block.id}`} x="-20%" y="-20%" width="140%" height="140%">
-            <feDropShadow dx="0" dy="1" stdDeviation="1.5" floodColor="#000" floodOpacity="0.45" />
-          </filter>
-        </defs>
-        <g filter={`url(#arrow-glow-${block.id})`}>
-          <line x1={cx} y1={yTop} x2={cx} y2={yBottom - headSize * 0.6} stroke="white" strokeWidth={strokeW} strokeLinecap="round" />
-          <polygon points={`${cx},${yBottom} ${cx - headSize},${yBottom - headSize * 1.4} ${cx + headSize},${yBottom - headSize * 1.4}`} fill="white" />
-        </g>
-      </svg>
-    );
-  }
-
-  if (dir === 'left') {
-    return (
-      <svg className="blockout-direction-arrow" width={width} height={height} viewBox={`0 0 ${width} ${height}`}>
-        <defs>
-          <filter id={`arrow-glow-${block.id}`} x="-20%" y="-20%" width="140%" height="140%">
-            <feDropShadow dx="0" dy="1" stdDeviation="1.5" floodColor="#000" floodOpacity="0.45" />
-          </filter>
-        </defs>
-        <g filter={`url(#arrow-glow-${block.id})`}>
-          <line x1={xLeft + headSize * 0.6} y1={cy} x2={xRight} y2={cy} stroke="white" strokeWidth={strokeW} strokeLinecap="round" />
-          <polygon points={`${xLeft},${cy} ${xLeft + headSize * 1.4},${cy - headSize} ${xLeft + headSize * 1.4},${cy + headSize}`} fill="white" />
-        </g>
-      </svg>
-    );
-  }
-
-  if (dir === 'right') {
-    return (
-      <svg className="blockout-direction-arrow" width={width} height={height} viewBox={`0 0 ${width} ${height}`}>
-        <defs>
-          <filter id={`arrow-glow-${block.id}`} x="-20%" y="-20%" width="140%" height="140%">
-            <feDropShadow dx="0" dy="1" stdDeviation="1.5" floodColor="#000" floodOpacity="0.45" />
-          </filter>
-        </defs>
-        <g filter={`url(#arrow-glow-${block.id})`}>
-          <line x1={xLeft} y1={cy} x2={xRight - headSize * 0.6} y2={cy} stroke="white" strokeWidth={strokeW} strokeLinecap="round" />
-          <polygon points={`${xRight},${cy} ${xRight - headSize * 1.4},${cy - headSize} ${xRight - headSize * 1.4},${cy + headSize}`} fill="white" />
-        </g>
-      </svg>
-    );
-  }
-
-  return null;
-}
-
-function FrozenBlockNumber({ block, cellSize, gap = 0 }) {
-  const count = block.frozen ?? block.freezeCount ?? block.count ?? 0;
-  if (!count || count <= 0) return null;
-
-  const cells = getBlockCells(block);
-  const avgR = cells.reduce((sum, [r]) => sum + r, 0) / cells.length;
-  const avgC = cells.reduce((sum, [_, c]) => sum + c, 0) / cells.length;
-
-  const cx = avgC * (cellSize + gap) + cellSize / 2;
-  const cy = avgR * (cellSize + gap) + cellSize / 2;
-  const fontSize = Math.max(22, Math.round(cellSize * 0.58));
-
-  return (
-    <div
-      className="blockout-frozen-number-overlay"
-      style={{
-        left: `${cx}px`,
-        top: `${cy}px`,
-        fontSize: `${fontSize}px`
-      }}
-    >
-      {count}
-    </div>
-  );
-}
+import { BlockOutHeader as HeaderComponent, GameBoard as GameBoardComponent, LevelSelect as LevelSelectComponent, MessageBanner as MessageBannerComponent, StatusBar as StatusBarComponent, VictoryModal as VictoryModalComponent } from './components';
+import { DRAG_THRESHOLD, MAX_LEVEL_PLAYS } from './constants';
+import useBoardLayout from './hooks/useBoardLayout';
+import useViewportLock from './hooks/useViewportLock';
+import styles from './BlockOutGame.module.scss';
 
 export default function BlockOutGame({
   rewardLevel = null,
@@ -291,7 +42,9 @@ export default function BlockOutGame({
           ...b,
           frozen: b.frozen ?? b.freezeCount ?? b.count ?? 0,
           exiting: false,
-          exitSide: null
+          exitSide: null,
+          justUnfrozen: false,
+          justRevealed: false
         }));
       }
       return lvl.blocks.map(b => ({
@@ -323,121 +76,14 @@ export default function BlockOutGame({
   const [muted, setMuted] = useState(false);
   const [message, setMessage] = useState('');
   
-  const [boardLayout, setBoardLayout] = useState({
-    cellSize: DEFAULT_CELL_SIZE,
-    gap: DEFAULT_GAP,
-    padding: DEFAULT_PADDING,
-    doorDepth: DEFAULT_DOOR_DEPTH
-  });
-
   const fireworksRef = useRef(null);
   const dragRef = useRef(null);
 
   const level = BLOCK_OUT_LEVELS[currentLevelIndex] || BLOCK_OUT_LEVELS[0];
   const levelWalls = useMemo(() => getLevelWalls(level), [level]);
+  useViewportLock();
+  const boardLayout = useBoardLayout(level);
   const { cellSize, gap, padding, doorDepth } = boardLayout;
-
-  // Lock viewport scroll & disable long-press/contextmenu/selection on HTML
-  useEffect(() => {
-    const prevBodyOverflow = document.body.style.overflow;
-    const prevBodyTouchAction = document.body.style.touchAction;
-    const prevBodyOverscroll = document.body.style.overscrollBehavior;
-    const prevDocOverflow = document.documentElement.style.overflow;
-    const prevDocOverscroll = document.documentElement.style.overscrollBehavior;
-
-    document.body.style.overflow = 'hidden';
-    document.body.style.touchAction = 'none';
-    document.body.style.overscrollBehavior = 'none';
-    document.documentElement.style.overflow = 'hidden';
-    document.documentElement.style.overscrollBehavior = 'none';
-
-    const handleContextMenu = (e) => {
-      e.preventDefault();
-      return false;
-    };
-
-    const handleSelectStart = (e) => {
-      e.preventDefault();
-      return false;
-    };
-
-    const handleDragStart = (e) => {
-      e.preventDefault();
-      return false;
-    };
-
-    const handleTouchMove = (e) => {
-      if (e.target && e.target.closest && e.target.closest('.blockout-levels-grid')) {
-        return;
-      }
-      e.preventDefault();
-    };
-
-    window.addEventListener('contextmenu', handleContextMenu, { passive: false });
-    window.addEventListener('selectstart', handleSelectStart, { passive: false });
-    window.addEventListener('dragstart', handleDragStart, { passive: false });
-    window.addEventListener('touchmove', handleTouchMove, { passive: false });
-
-    return () => {
-      document.body.style.overflow = prevBodyOverflow;
-      document.body.style.touchAction = prevBodyTouchAction;
-      document.body.style.overscrollBehavior = prevBodyOverscroll;
-      document.documentElement.style.overflow = prevDocOverflow;
-      document.documentElement.style.overscrollBehavior = prevDocOverscroll;
-
-      window.removeEventListener('contextmenu', handleContextMenu);
-      window.removeEventListener('selectstart', handleSelectStart);
-      window.removeEventListener('dragstart', handleDragStart);
-      window.removeEventListener('touchmove', handleTouchMove);
-    };
-  }, []);
-
-  useEffect(() => {
-    function handleResize() {
-      if (typeof window === 'undefined') return;
-
-      const winW = window.innerWidth;
-      const winH = window.innerHeight;
-      const isSmallMobile = winW < 380 || winH < 620;
-      const isMobile = winW < 540 || winH < 720;
-
-      const currentGap = isSmallMobile ? 4 : isMobile ? 5 : 7;
-      const currentPadding = isSmallMobile ? 6 : isMobile ? 8 : 10;
-      const currentDoorDepth = isSmallMobile ? 18 : isMobile ? 20 : 24;
-
-      // Available width calculation
-      // Screen padding + board wrapper padding + doors on left and right
-      const screenPadding = isSmallMobile ? 8 : isMobile ? 12 : 20;
-      const wrapperPadding = isSmallMobile ? 12 : isMobile ? 16 : 24;
-      const overheadW = screenPadding + wrapperPadding + (currentDoorDepth * 2);
-      const maxAvailableWidth = Math.min(winW, 580) - overheadW;
-      const cellFromWidth = Math.floor(
-        (maxAvailableWidth - currentPadding * 2 - (level.width - 1) * currentGap) / level.width
-      );
-
-      // Available height calculation
-      // Space for header (~46px), status bar (~36px), message banner (~28px), board margins & doors
-      const overheadH = (isSmallMobile ? 130 : isMobile ? 148 : 166) + (currentDoorDepth * 2) + currentPadding * 2;
-      const maxAvailableHeight = winH - overheadH;
-      const cellFromHeight = Math.floor(
-        (Math.max(100, maxAvailableHeight) - (level.height - 1) * currentGap) / level.height
-      );
-
-      const calculated = Math.min(cellFromWidth, cellFromHeight);
-      const safeCellSize = Math.max(18, Math.min(60, calculated));
-
-      setBoardLayout({
-        cellSize: safeCellSize,
-        gap: currentGap,
-        padding: currentPadding,
-        doorDepth: currentDoorDepth
-      });
-    }
-
-    handleResize();
-    window.addEventListener('resize', handleResize);
-    return () => window.removeEventListener('resize', handleResize);
-  }, [level.width, level.height]);
 
   // Level je odomknutý, kým nebol odohratý maximálne 3-krát
   const isLevelUnlocked = useCallback((idx) => {
@@ -539,7 +185,8 @@ export default function BlockOutGame({
         frozen: b.frozen ?? 0,
         arrowRow: b.arrowRow,
         arrowCol: b.arrowCol,
-        innerColor: b.innerColor
+        innerColor: b.innerColor,
+        children: b.children
       }));
 
     if (cleanBlocks.length === 0) {
@@ -711,7 +358,7 @@ export default function BlockOutGame({
     if (history.length === 0 || gameState !== 'playing') return;
     const last = history[history.length - 1];
     setHistory(history.slice(0, -1));
-    setBlocks(last.blocks);
+    setBlocks(last.blocks.map(b => ({ ...b, justUnfrozen: false, justRevealed: false })));
     if (last.doors) {
       setDoors(last.doors.map(d => ({ ...d, justUnlocked: false })));
     }
@@ -934,6 +581,17 @@ export default function BlockOutGame({
     });
   }, [cellSize, gap, doorDepth, checkBlockStep, blocks]);
 
+  // Po skončení unfreeze-pop animácie (0.65s) zruší príznak justUnfrozen, aby trieda
+  // .just-unfrozen (animation ... forwards) neprepisovala transform pri ďalšom ťahaní bloku
+  const scheduleClearUnfrozenFlags = useCallback(() => {
+    setTimeout(() => {
+      setBlocks(current => {
+        if (!current.some(b => b.justUnfrozen)) return current;
+        return current.map(b => (b.justUnfrozen ? { ...b, justUnfrozen: false } : b));
+      });
+    }, 700);
+  }, []);
+
   const handlePointerUp = useCallback((e) => {
     if (!dragRef.current || dragRef.current.pointerId !== e.pointerId) return;
 
@@ -1029,7 +687,8 @@ export default function BlockOutGame({
           sounds.playIceCrack();
         }
 
-        setBlocks(updated);
+        setBlocks(revealUnfrozenGroups(updated));
+        if (didUnfreeze) scheduleClearUnfrozenFlags();
 
         setTimeout(() => {
           setBlocks(current => current.map(b => {
@@ -1080,7 +739,8 @@ export default function BlockOutGame({
         sounds.playIceCrack();
       }
 
-      setBlocks(updated);
+      setBlocks(revealUnfrozenGroups(updated));
+      if (didUnfreeze) scheduleClearUnfrozenFlags();
 
       setTimeout(() => {
         setBlocks(current => {
@@ -1124,7 +784,7 @@ export default function BlockOutGame({
         prev.map(b => (b.id === blockId ? { ...b, r: currentR, c: currentC } : b))
       );
     }
-  }, [blocks, doors, moves, currentLevelIndex]);
+  }, [blocks, doors, moves, currentLevelIndex, scheduleClearUnfrozenFlags]);
 
   const handlePointerCancel = useCallback((e) => {
     if (dragRef.current && dragRef.current.pointerId === e.pointerId) {
@@ -1185,7 +845,7 @@ export default function BlockOutGame({
 
   return (
     <div
-      className="blockout-container"
+      className={styles.container}
       onContextMenu={(e) => e.preventDefault()}
       onSelectStart={(e) => e.preventDefault()}
       onDragStart={(e) => e.preventDefault()}
@@ -1194,590 +854,59 @@ export default function BlockOutGame({
 
       {gameState === 'levels' && (
         <>
-          <div className="blockout-header">
-            <button
-              className="blockout-btn-icon blockout-btn-back"
-              onClick={handleExit}
-              title="Späť do menu"
-            >
-              <BackIcon size={20} stroke="currentColor" />
-            </button>
-            <h2 className="blockout-title">🧩 Block Out! - Výber levelu</h2>
-            <div className="blockout-header-actions">
-              <button
-                className="blockout-btn-icon blockout-btn-sound"
-                onClick={toggleMute}
-                title={muted ? 'Zapnúť zvuk' : 'Vypnúť zvuk'}
-              >
-                {muted ? <SoundOffIcon size={20} stroke="currentColor" /> : <SoundOnIcon size={20} stroke="currentColor" />}
-              </button>
-            </div>
-          </div>
-
-          <div className="blockout-levels-grid">
-            {BLOCK_OUT_LEVELS.map((lvl, idx) => {
-              const unlocked = isLevelUnlocked(idx);
-              const stars = levelStars[idx] || 0;
-              const plays = levelPlays[idx] || 0;
-              const saved = savedStates[idx];
-              const hasSavedProgress = Boolean(
-                unlocked && saved && (saved.moves > 0 || (Array.isArray(saved.blocks) && saved.blocks.length < lvl.blocks.length))
-              );
-
-              return (
-                <button
-                  key={lvl.id}
-                  className={`blockout-level-card ${!unlocked ? 'locked' : ''} ${hasSavedProgress ? 'has-saved-progress' : ''}`}
-                  disabled={!unlocked}
-                  onClick={() => startLevel(idx, { countPlay: true })}
-                  title={!unlocked ? `Level je zamknutý (odohrané ${plays}/${MAX_LEVEL_PLAYS})` : (hasSavedProgress ? `Level ${lvl.id} - rozohraný (odohrané ${plays}/${MAX_LEVEL_PLAYS})` : `Level ${lvl.id} (odohrané ${plays}/${MAX_LEVEL_PLAYS})`)}
-                >
-                  <div className="blockout-level-number">{lvl.id}</div>
-                  {unlocked ? (
-                    <>
-                      <div className="blockout-level-stars">
-                        {'★'.repeat(stars)}{'☆'.repeat(5 - stars)}
-                      </div>
-                      <div className="blockout-level-plays">
-                        {plays}/{MAX_LEVEL_PLAYS}
-                      </div>
-                      {hasSavedProgress && (
-                        <div className="blockout-level-in-progress" title="Rozohraný level">
-                          ▶ Rozohrané
-                        </div>
-                      )}
-                    </>
-                  ) : (
-                    <>
-                      <div className="blockout-level-lock">🔒</div>
-                      <div className="blockout-level-plays maxed">
-                        {plays}/{MAX_LEVEL_PLAYS}
-                      </div>
-                    </>
-                  )}
-                </button>
-              );
-            })}
-          </div>
+          <HeaderComponent title="🧩 Block Out! - Výber levelu" onBack={handleExit} backTitle="Späť do menu" muted={muted} onToggleMute={toggleMute} />
+          <LevelSelectComponent
+            levels={BLOCK_OUT_LEVELS}
+            levelStars={levelStars}
+            levelPlays={levelPlays}
+            savedStates={savedStates}
+            isLevelUnlocked={isLevelUnlocked}
+            onSelect={(index) => startLevel(index, { countPlay: true })}
+            maxLevelPlays={MAX_LEVEL_PLAYS}
+          />
         </>
       )}
 
       {(gameState === 'playing' || gameState === 'win') && (
         <>
-          <div className="blockout-header">
-            <button
-              className="blockout-btn-icon blockout-btn-back"
-              onClick={() => {
-                if (rewardLevel !== null) {
-                  handleExit();
-                } else {
-                  setSavedStates(getBlockOutSavedStates());
-                  setGameState('levels');
-                }
-              }}
-              title={rewardLevel !== null ? 'Späť' : 'Výber levelov'}
-            >
-              {rewardLevel !== null ? <BackIcon size={20} stroke="currentColor" /> : <LevelsMenuIcon size={20} stroke="currentColor" />}
-            </button>
-            <h2 className="blockout-title">{level.name}</h2>
-            <div className="blockout-header-actions">
-              <button
-                className="blockout-btn-icon blockout-btn-undo"
-                onClick={undoMove}
-                disabled={history.length === 0}
-                title="Krok späť"
-              >
-                <UndoIcon size={20} stroke="currentColor" />
-              </button>
-              <button
-                className="blockout-btn-icon blockout-btn-restart"
-                onClick={resetCurrentLevel}
-                title="Reštartovať level"
-              >
-                <RestartIcon size={20} stroke="currentColor" />
-              </button>
-              <button
-                className="blockout-btn-icon blockout-btn-sound"
-                onClick={toggleMute}
-                title={muted ? 'Zapnúť zvuk' : 'Vypnúť zvuk'}
-              >
-                {muted ? <SoundOffIcon size={20} stroke="currentColor" /> : <SoundOnIcon size={20} stroke="currentColor" />}
-              </button>
-            </div>
-          </div>
+          <HeaderComponent
+            title={level.name}
+            onBack={() => {
+              if (rewardLevel !== null) {
+                handleExit();
+              } else {
+                setSavedStates(getBlockOutSavedStates());
+                setGameState('levels');
+              }
+            }}
+            backTitle={rewardLevel !== null ? 'Späť' : 'Výber levelov'}
+            backIcon={rewardLevel !== null ? null : 'levels'}
+            onUndo={undoMove}
+            canUndo={history.length > 0}
+            onRestart={resetCurrentLevel}
+            muted={muted}
+            onToggleMute={toggleMute}
+          />
 
-          <div className="blockout-status-bar">
-            <span className="blockout-moves-badge">Ťahy: {moves}</span>
-          </div>
+          <StatusBarComponent moves={moves} />
 
-          <div className="blockout-board-wrapper">
-            <div
-              className="blockout-board-outer"
-              style={{
-                width: level.width * cellSize + (level.width - 1) * gap + padding * 2,
-                height: level.height * cellSize + (level.height - 1) * gap + padding * 2,
-                marginTop: doorDepth + 4,
-                marginBottom: doorDepth + 4
-              }}
-            >
-              {/* Doors */}
-              {doors.map((door, dIdx) => {
-                const conf = COLOR_CONFIG[door.color] || COLOR_CONFIG.red;
-                const span = door.span || 1;
-                const isLocked = isDoorLocked(door);
-                const doorWidth = door.side === 'top' || door.side === 'bottom'
-                  ? span * cellSize + (span - 1) * gap
-                  : doorDepth;
-                const doorHeight = door.side === 'left' || door.side === 'right'
-                  ? span * cellSize + (span - 1) * gap
-                  : doorDepth;
+          <GameBoardComponent level={level} levelWalls={levelWalls} doors={doors} blocks={blocks} dragInfo={dragInfo} cellSize={cellSize} gap={gap} padding={padding} doorDepth={doorDepth} onPointerDown={handlePointerDown} />
 
-                let doorStyle = {
-                  backgroundColor: isLocked ? '#94a3b8' : conf.bg,
-                  borderColor: isLocked ? '#64748b' : conf.border,
-                  boxShadow: isLocked
-                    ? 'inset 0 2px 4px rgba(255, 255, 255, 0.25), inset 0 -2px 4px rgba(0, 0, 0, 0.2), 0 2px 5px rgba(0, 0, 0, 0.15)'
-                    : `0 0 10px ${conf.glow}`
-                };
+          <MessageBannerComponent message={message} />
 
-                if (door.side === 'top') {
-                  doorStyle.left = padding + door.index * (cellSize + gap);
-                  doorStyle.width = doorWidth;
-                  doorStyle.top = -doorDepth;
-                  doorStyle.height = doorDepth;
-                } else if (door.side === 'bottom') {
-                  doorStyle.left = padding + door.index * (cellSize + gap);
-                  doorStyle.width = doorWidth;
-                  doorStyle.bottom = -doorDepth;
-                  doorStyle.height = doorDepth;
-                } else if (door.side === 'left') {
-                  doorStyle.top = padding + door.index * (cellSize + gap);
-                  doorStyle.height = doorHeight;
-                  doorStyle.left = -doorDepth;
-                  doorStyle.width = doorDepth;
-                } else if (door.side === 'right') {
-                  doorStyle.top = padding + door.index * (cellSize + gap);
-                  doorStyle.height = doorHeight;
-                  doorStyle.right = -doorDepth;
-                  doorStyle.width = doorDepth;
-                }
-
-                // Otvor sa zvýrazní LEN vtedy, keď je pri ňom kocka rovnakej farby a nie je zamknutý
-                const isMatchingBlockAdjacent = !isLocked && blocks.some(b => {
-                  if (b.exiting || b.color !== door.color) return false;
-                  const effectiveBlock = (dragInfo && dragInfo.blockId === b.id)
-                    ? { ...b, r: dragInfo.currentR, c: dragInfo.currentC }
-                    : b;
-                  const occupied = getOccupiedCells(effectiveBlock);
-                  return occupied.some(cell => {
-                    if (door.side === 'top') return cell.r === 0 && cell.c >= door.index && cell.c < door.index + span;
-                    if (door.side === 'bottom') return cell.r === level.height - 1 && cell.c >= door.index && cell.c < door.index + span;
-                    if (door.side === 'left') return cell.c === 0 && cell.r >= door.index && cell.r < door.index + span;
-                    if (door.side === 'right') return cell.c === level.width - 1 && cell.r >= door.index && cell.r < door.index + span;
-                    return false;
-                  });
-                });
-
-                const isAbsorbing = !isLocked && (blocks.some(b => {
-                  if (!b.exiting || b.exitSide !== door.side || b.color !== door.color) return false;
-                  const occupied = getOccupiedCells(b);
-                  return occupied.some(cell => {
-                    if (door.side === 'top' || door.side === 'bottom') return cell.c >= door.index && cell.c < door.index + span;
-                    if (door.side === 'left' || door.side === 'right') return cell.r >= door.index && cell.r < door.index + span;
-                    return false;
-                  });
-                }) || (dragInfo && dragInfo.isExiting && dragInfo.exitSide === door.side && (() => {
-                  const activeB = blocks.find(b => b.id === dragInfo.blockId);
-                  if (!activeB || activeB.color !== door.color) return false;
-                  const occ = getOccupiedCells({ ...activeB, r: dragInfo.currentR, c: dragInfo.currentC });
-                  return occ.some(cell => {
-                    if (door.side === 'top' || door.side === 'bottom') return cell.c >= door.index && cell.c < door.index + span;
-                    if (door.side === 'left' || door.side === 'right') return cell.r >= door.index && cell.r < door.index + span;
-                    return false;
-                  });
-                })()));
-
-                return (
-                  <div
-                    key={door.id || dIdx}
-                    className={`blockout-door blockout-door-${door.side} ${
-                      isLocked ? 'blockout-door-locked' : ''
-                    } ${door.justUnlocked ? 'just-unlocked' : ''} ${
-                      isMatchingBlockAdjacent ? 'highlight' : ''
-                    } ${isAbsorbing ? 'absorbing' : ''}`}
-                    style={doorStyle}
-                    title={isLocked ? `Zamknutý východ (zostáva ${door.locked})` : undefined}
-                  >
-                    {isLocked ? (
-                      <span
-                        className="blockout-door-lock-count"
-                        style={{
-                          fontSize: `${Math.max(14, Math.round(doorDepth * 0.78))}px`
-                        }}
-                      >
-                        {door.locked}
-                      </span>
-                    ) : (
-                      <DoorArrow
-                        side={door.side}
-                        color={door.color}
-                        size={Math.max(12, Math.round(cellSize * 0.4))}
-                      />
-                    )}
-                  </div>
-                );
-              })}
-
-              {/* Grid Background Cells & Walls */}
-              <div
-                className="blockout-grid"
-                style={{
-                  padding: `${padding}px`,
-                  gap: `${gap}px`,
-                  gridTemplateColumns: `repeat(${level.width}, ${cellSize}px)`,
-                  gridTemplateRows: `repeat(${level.height}, ${cellSize}px)`
-                }}
-              >
-                {Array.from({ length: level.height * level.width }).map((_, cIdx) => {
-                  const r = Math.floor(cIdx / level.width);
-                  const c = cIdx % level.width;
-                  const isWall = levelWalls.some(w => w.r === r && w.c === c);
-
-                  if (!isWall) {
-                    return (
-                      <div
-                        key={cIdx}
-                        className="blockout-cell"
-                        style={{
-                          borderRadius: Math.max(6, Math.round(cellSize * 0.22)) + 'px'
-                        }}
-                      />
-                    );
-                  }
-
-                  const hasTop = levelWalls.some(w => w.r === r - 1 && w.c === c);
-                  const hasBottom = levelWalls.some(w => w.r === r + 1 && w.c === c);
-                  const hasLeft = levelWalls.some(w => w.r === r && w.c === c - 1);
-                  const hasRight = levelWalls.some(w => w.r === r && w.c === c + 1);
-                  const hasBottomRight = levelWalls.some(w => w.r === r + 1 && w.c === c + 1);
-                  const wallRadius = Math.max(8, Math.round(cellSize * 0.24));
-
-                  return (
-                    <div
-                      key={cIdx}
-                      className="blockout-cell blockout-cell-wall"
-                      style={{
-                        borderTopLeftRadius: !hasTop && !hasLeft ? `${wallRadius}px` : '0px',
-                        borderTopRightRadius: !hasTop && !hasRight ? `${wallRadius}px` : '0px',
-                        borderBottomLeftRadius: !hasBottom && !hasLeft ? `${wallRadius}px` : '0px',
-                        borderBottomRightRadius: !hasBottom && !hasRight ? `${wallRadius}px` : '0px',
-                        borderTop: !hasTop ? '2px solid #090d16' : 'none',
-                        borderBottom: !hasBottom ? '2px solid #090d16' : 'none',
-                        borderLeft: !hasLeft ? '2px solid #090d16' : 'none',
-                        borderRight: !hasRight ? '2px solid #090d16' : 'none',
-                      }}
-                      title="Stena"
-                    >
-                      {/* Seamless bridge between adjacent horizontal wall cells */}
-                      {hasRight && (
-                        <div
-                          className="blockout-wall-bridge blockout-wall-bridge-h"
-                          style={{
-                            top: 0,
-                            left: 'calc(100% - 1px)',
-                            width: gap + 2,
-                            height: cellSize,
-                            borderTop: (!levelWalls.some(w => w.r === r - 1 && w.c === c) && !levelWalls.some(w => w.r === r - 1 && w.c === c + 1)) ? '2px solid #090d16' : 'none',
-                            borderBottom: (!levelWalls.some(w => w.r === r + 1 && w.c === c) && !levelWalls.some(w => w.r === r + 1 && w.c === c + 1)) ? '2px solid #090d16' : 'none',
-                          }}
-                        />
-                      )}
-
-                      {/* Seamless bridge between adjacent vertical wall cells */}
-                      {hasBottom && (
-                        <div
-                          className="blockout-wall-bridge blockout-wall-bridge-v"
-                          style={{
-                            top: 'calc(100% - 1px)',
-                            left: 0,
-                            width: cellSize,
-                            height: gap + 2,
-                            borderLeft: (!levelWalls.some(w => w.r === r && w.c === c - 1) && !levelWalls.some(w => w.r === r + 1 && w.c === c - 1)) ? '2px solid #090d16' : 'none',
-                            borderRight: (!levelWalls.some(w => w.r === r && w.c === c + 1) && !levelWalls.some(w => w.r === r + 1 && w.c === c + 1)) ? '2px solid #090d16' : 'none',
-                          }}
-                        />
-                      )}
-
-                      {/* Seamless center bridge for 2x2 wall clusters */}
-                      {hasRight && hasBottom && hasBottomRight && (
-                        <div
-                          className="blockout-wall-bridge blockout-wall-bridge-c"
-                          style={{
-                            top: 'calc(100% - 1px)',
-                            left: 'calc(100% - 1px)',
-                            width: gap + 2,
-                            height: gap + 2,
-                          }}
-                        />
-                      )}
-                    </div>
-                  );
-                })}
-              </div>
-
-              {/* Blocks */}
-              {blocks.map((block) => {
-                  const conf = COLOR_CONFIG[block.color] || COLOR_CONFIG.red;
-                  const innerConf = block.innerColor ? (COLOR_CONFIG[block.innerColor] || COLOR_CONFIG.red) : null;
-                  const isDragging = dragInfo && dragInfo.blockId === block.id;
-                  const isFrozen = isBlockFrozen(block);
-                  const cells = getBlockCells(block);
-                  const dims = getBlockDimensions(block);
-
-                  const containerW = dims.cols * cellSize + (dims.cols - 1) * gap;
-                  const containerH = dims.rows * cellSize + (dims.rows - 1) * gap;
-
-                  let top = padding + block.r * (cellSize + gap);
-                  let left = padding + block.c * (cellSize + gap);
-
-                  const pieceStyle = {
-                    top,
-                    left,
-                    width: containerW,
-                    height: containerH
-                  };
-
-                  if (isDragging) {
-                    pieceStyle.transform = `translate3d(${dragInfo.offsetX}px, ${dragInfo.offsetY}px, 0)`;
-                  }
-
-                  const exitClass = block.exiting ? `exiting exit-${block.exitSide}` : '';
-                  const frozenClass = isFrozen ? 'is-frozen' : (block.justUnfrozen ? 'just-unfrozen' : '');
-                  const revealedClass = block.justRevealed ? 'just-revealed' : '';
-                  const cellRadius = Math.max(8, Math.round(cellSize * 0.24));
-                  const isRectangular = cells.length === dims.rows * dims.cols;
-
-                  // Pozadie dlaždice: pri dvojfarebných blokoch je pozadie druhá farba (innerConf), inak conf
-                  const bgConf = innerConf ? innerConf : conf;
-                  const hasTwoColorBorder = !isFrozen && (Boolean(innerConf) || Boolean(block.borderDestroying));
-                  const outerBorderColor = block.destroyingColor
-                    ? (COLOR_CONFIG[block.destroyingColor]?.bg || conf.bg)
-                    : conf.bg;
-                  const innerBorderThickness = Math.min(
-                    Math.round(cellSize / 2),
-                    Math.max(6, Math.round(Math.min(containerW, containerH) / 3.2))
-                  );
-
-                  return (
-                    <div
-                      key={block.id}
-                      className={`blockout-piece-container ${
-                        hasTwoColorBorder ? 'has-two-color' : ''
-                      } ${exitClass} ${frozenClass} ${revealedClass} ${
-                        isDragging ? 'dragging' : ''
-                      }`}
-                      style={pieceStyle}
-                      onPointerDown={(e) => handlePointerDown(block, e)}
-                    >
-                      {/* Unified seamless ice crystal surface for frozen blocks */}
-                      {isFrozen && isRectangular && (
-                        <div
-                          className="blockout-frozen-block-surface"
-                          style={{
-                            width: `${containerW}px`,
-                            height: `${containerH}px`,
-                            borderRadius: `${cellRadius}px`
-                          }}
-                        >
-                          <div className="blockout-frozen-crystal-glow" />
-                          <div className="blockout-frozen-facets" />
-                        </div>
-                      )}
-
-                      {/* Directional arrow overlay for restricted blocks (↕, ↔, ↑, ↓, etc.) */}
-                      <BlockArrowOverlay
-                        block={block}
-                        width={containerW}
-                        height={containerH}
-                        cellSize={cellSize}
-                        gap={gap}
-                      />
-
-                      {/* Frozen countdown number without badge/icon */}
-                      <FrozenBlockNumber
-                        block={block}
-                        cellSize={cellSize}
-                        gap={gap}
-                      />
-
-                      {/* Inner border layer for two-color blocks (hrúbka = polovica dlaždice) */}
-                      {hasTwoColorBorder && (
-                        <div
-                          className={`blockout-two-color-border ${block.borderDestroying ? 'destroying' : ''}`}
-                          style={{
-                            borderWidth: `${innerBorderThickness}px`,
-                            borderColor: outerBorderColor,
-                            borderRadius: `${cellRadius}px`
-                          }}
-                        />
-                      )}
-
-                      {(!isFrozen || !isRectangular) && cells.map(([dr, dc], cellIdx) => {
-                        const hasTop = cells.some(([r, c]) => r === dr - 1 && c === dc);
-                        const hasBottom = cells.some(([r, c]) => r === dr + 1 && c === dc);
-                        const hasLeft = cells.some(([r, c]) => r === dr && c === dc - 1);
-                        const hasRight = cells.some(([r, c]) => r === dr && c === dc + 1);
-
-                        const subStyle = {
-                          top: dr * (cellSize + gap),
-                          left: dc * (cellSize + gap),
-                          width: cellSize,
-                          height: cellSize,
-                          backgroundColor: isFrozen ? '#cbd5e1' : bgConf.bg,
-                          borderColor: isFrozen ? '#94a3b8' : bgConf.border,
-                          borderTopLeftRadius: !hasTop && !hasLeft ? `${cellRadius}px` : '0px',
-                          borderTopRightRadius: !hasTop && !hasRight ? `${cellRadius}px` : '0px',
-                          borderBottomLeftRadius: !hasBottom && !hasLeft ? `${cellRadius}px` : '0px',
-                          borderBottomRightRadius: !hasBottom && !hasRight ? `${cellRadius}px` : '0px',
-                        };
-
-                        return (
-                          <div key={cellIdx} className="blockout-subcell-wrapper">
-                            <div className="blockout-subcell" style={subStyle}>
-                              {isFrozen && <div className="blockout-subcell-ice" />}
-                            </div>
-
-                            {/* Seamless bridge between adjacent horizontal cells */}
-                            {hasRight && (
-                              <div
-                                className="blockout-cell-bridge blockout-cell-bridge-h"
-                                style={{
-                                  top: dr * (cellSize + gap),
-                                  left: dc * (cellSize + gap) + cellSize - 1,
-                                  width: gap + 2,
-                                  height: cellSize,
-                                  backgroundColor: isFrozen ? '#cbd5e1' : bgConf.bg,
-                                  borderTop: `2px solid ${isFrozen ? '#94a3b8' : bgConf.border}`,
-                                  borderBottom: `2px solid ${isFrozen ? '#94a3b8' : bgConf.border}`
-                                }}
-                              />
-                            )}
-
-                            {/* Seamless bridge between adjacent vertical cells */}
-                            {hasBottom && (
-                              <div
-                                className="blockout-cell-bridge blockout-cell-bridge-v"
-                                style={{
-                                  top: dr * (cellSize + gap) + cellSize - 1,
-                                  left: dc * (cellSize + gap),
-                                  width: cellSize,
-                                  height: gap + 2,
-                                  backgroundColor: isFrozen ? '#cbd5e1' : bgConf.bg,
-                                  borderLeft: `2px solid ${isFrozen ? '#94a3b8' : bgConf.border}`,
-                                  borderRight: `2px solid ${isFrozen ? '#94a3b8' : bgConf.border}`
-                                }}
-                              />
-                            )}
-
-                            {/* Seamless center bridge for 2x2 blocks */}
-                            {hasRight && hasBottom && cells.some(([r, c]) => r === dr + 1 && c === dc + 1) && (
-                              <div
-                                className="blockout-cell-bridge blockout-cell-bridge-c"
-                                style={{
-                                  top: dr * (cellSize + gap) + cellSize - 1,
-                                  left: dc * (cellSize + gap) + cellSize - 1,
-                                  width: gap + 2,
-                                  height: gap + 2,
-                                  backgroundColor: isFrozen ? '#cbd5e1' : bgConf.bg
-                                }}
-                              />
-                            )}
-                          </div>
-                        );
-                      })}
-                    </div>
-                  );
-                })}
-              </div>
-          </div>
-
-          {/* Temporary feedback banner under the game board */}
-          <div
-            className={`blockout-message-banner ${message ? 'visible' : ''}`}
-            aria-live="polite"
-          >
-            {message || ' '}
-          </div>
-
-          {/* Victory Modal */}
           {gameState === 'win' && (
-            <div className="blockout-modal-backdrop">
-              <div className="blockout-modal-card">
-                <div style={{ fontSize: 48 }}>🎉</div>
-                <h3 className="blockout-win-title">Výborne!</h3>
-                <div className="blockout-win-stars">★★★★★</div>
-                <p style={{ margin: 0, color: '#475569', fontSize: 16 }}>
-                  Všetky kocky úspešne vyradené na {moves} {moves === 1 ? 'ťah' : (moves < 5 ? 'ťahy' : 'ťahov')}!
-                </p>
-                <div className="result-actions" style={{ width: '100%', marginTop: 8 }}>
-                  <div className="result-actions-icons">
-                    {isLevelUnlocked(currentLevelIndex) && (
-                      <button
-                        type="button"
-                        className="btn-icon-action btn-icon-restart"
-                        onClick={() => startLevel(currentLevelIndex, true)}
-                        title="Hrať znova"
-                      >
-                        <RestartIcon size={26} />
-                      </button>
-                    )}
-                  </div>
-                  <div className="result-actions-nav">
-                    {onBack || onCloseReward ? (
-                      <button
-                        className="btn-secondary btn-levels-menu"
-                        onClick={handleExit}
-                      >
-                        <BackIcon size={20} />
-                        <span>Späť</span>
-                      </button>
-                    ) : (
-                      <button
-                        className="btn-secondary btn-levels-menu"
-                        onClick={() => {
-                          setSavedStates(getBlockOutSavedStates());
-                          setGameState('levels');
-                        }}
-                      >
-                        <LevelsMenuIcon size={20} />
-                        <span>Výber levelov</span>
-                      </button>
-                    )}
-                    {onNextVybraneLevel ? (
-                      hasNextVybraneLevel && (
-                        <button
-                          className="btn-next-level"
-                          onClick={onNextVybraneLevel}
-                        >
-                          <NextLevelIcon size={20} />
-                          <span>Ďalší level</span>
-                        </button>
-                      )
-                    ) : (
-                      currentLevelIndex + 1 < BLOCK_OUT_LEVELS.length && isLevelUnlocked(currentLevelIndex + 1) && (
-                        <button
-                          className="btn-next-level"
-                          onClick={() => startLevel(currentLevelIndex + 1, true)}
-                        >
-                          <NextLevelIcon size={20} />
-                          <span>Ďalší level</span>
-                        </button>
-                      )
-                    )}
-                  </div>
-                </div>
-              </div>
-            </div>
+            <VictoryModalComponent
+              moves={moves}
+              canReplay={isLevelUnlocked(currentLevelIndex)}
+              onReplay={() => startLevel(currentLevelIndex, true)}
+              onExit={onBack || onCloseReward ? handleExit : () => {
+                setSavedStates(getBlockOutSavedStates());
+                setGameState('levels');
+              }}
+              exitLabel={onBack || onCloseReward ? 'Späť' : 'Výber levelov'}
+              canNextLevel={onNextVybraneLevel ? hasNextVybraneLevel : currentLevelIndex + 1 < BLOCK_OUT_LEVELS.length && isLevelUnlocked(currentLevelIndex + 1)}
+              onNextLevel={onNextVybraneLevel || (() => startLevel(currentLevelIndex + 1, true))}
+            />
           )}
         </>
       )}

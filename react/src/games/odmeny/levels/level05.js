@@ -1,4 +1,4 @@
-export const level5 = {
+export const level05 = {
   id: 5,
   name: 'Level 5 - Zámkový stĺp',
   width: 6,
@@ -50,4 +50,4 @@ export const level5 = {
   ]
 };
 
-export default level5;
+export default level05;

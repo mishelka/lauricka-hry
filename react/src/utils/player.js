@@ -194,6 +194,23 @@ export function unlockAllLevels(gameId, levelCount) {
   return levels;
 }
 
+export function unlockAllLevelsOnce(gameId, levelCount, unlockId) {
+  const state = loadState();
+  migrateLegacyIfNeeded(state);
+  if (state.oneTimeUnlocks?.[unlockId]) return null;
+
+  const rec = getRecord(state, gameId);
+  const levels = new Array(levelCount).fill(MAX_STARS);
+  rec.levelStars = levels;
+  rec.bestStars = MAX_STARS;
+  if (!state.oneTimeUnlocks || typeof state.oneTimeUnlocks !== 'object' || Array.isArray(state.oneTimeUnlocks)) {
+    state.oneTimeUnlocks = {};
+  }
+  state.oneTimeUnlocks[unlockId] = true;
+  saveState(state);
+  return levels;
+}
+
 export function getLevelPlays(gameId, levelCount) {
   const state = loadState();
   migrateLegacyIfNeeded(state);

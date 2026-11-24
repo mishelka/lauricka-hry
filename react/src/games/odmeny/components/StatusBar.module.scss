@@ -1,0 +1,24 @@
+.statusBar {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+  max-width: 580px;
+  min-height: 36px;
+  padding: 4px 14px;
+  margin-top: 6px;
+  background: #ffffff;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+  font-size: 14px;
+  font-weight: 600;
+  color: #475569;
+  flex-shrink: 0;
+}
+
+.movesBadge { background: #f1f5f9; padding: 4px 12px; border-radius: 20px; color: #0f172a; }
+
+@media (max-width: 540px) {
+  .statusBar { padding: 6px 12px; font-size: 13px; border-radius: 12px; }
+  .movesBadge { padding: 3px 8px; font-size: 12px; }
+}

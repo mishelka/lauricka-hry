@@ -1,0 +1,40 @@
+.modalBackdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(15, 23, 42, 0.6);
+  backdrop-filter: blur(4px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 100;
+  padding: 16px;
+}
+
+.modalCard {
+  background: #ffffff;
+  border-radius: 28px;
+  padding: 32px 24px;
+  max-width: 400px;
+  width: 100%;
+  text-align: center;
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+  animation: popIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+.winTitle { font-size: 28px; font-weight: 900; color: #0f172a; margin: 0; }
+.winStars { font-size: 36px; letter-spacing: 4px; color: #eab308; }
+
+@keyframes popIn {
+  0% { transform: scale(0.8); opacity: 0; }
+  100% { transform: scale(1); opacity: 1; }
+}
+
+@media (max-width: 540px) {
+  .modalCard { padding: 24px 16px; border-radius: 22px; max-width: 92vw; }
+  .winTitle { font-size: 24px; }
+  .winStars { font-size: 30px; letter-spacing: 2px; }
+}

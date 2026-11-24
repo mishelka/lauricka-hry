@@ -1,4 +1,4 @@
-function createLevel1Blocks() {
+function createLevel01Blocks() {
   const blocks = [
     { id: 'b_pink', color: 'pink', r: 0, c: 0, shape: '1x2' },
     { id: 'b_red', color: 'red', r: 1, c: 0, shape: '1x2' },
@@ -27,7 +27,7 @@ function createLevel1Blocks() {
   return blocks;
 }
 
-export const level1 = {
+export const level01 = {
   id: 1,
   name: 'Level 1 - Block Out Originál',
   width: 6,
@@ -45,7 +45,7 @@ export const level1 = {
     { side: 'right', index: 7, color: 'green' },
     { side: 'right', index: 8, color: 'orange' }
   ],
-  blocks: createLevel1Blocks()
+  blocks: createLevel01Blocks()
 };
 
-export default level1;
+export default level01;

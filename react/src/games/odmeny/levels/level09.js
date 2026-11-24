@@ -1,4 +1,4 @@
-export const level9 = {
+export const level09 = {
   id: 9,
   name: 'Level 9 - Ľadová pevnosť (Level 19)',
   width: 6,
@@ -74,4 +74,4 @@ export const level9 = {
   ]
 };
 
-export default level9;
+export default level09;

@@ -1,4 +1,4 @@
-export const level3 = {
+export const level03 = {
   id: 3,
   name: 'Level 3 - Presýpacie hodiny a zámky',
   width: 6,
@@ -45,4 +45,4 @@ export const level3 = {
   ]
 };
 
-export default level3;
+export default level03;

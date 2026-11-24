@@ -1,26 +1,52 @@
-import level1 from './level1';
-import level2 from './level2';
-import level3 from './level3';
-import level4 from './level4';
-import level5 from './level5';
-import level6 from './level6';
-import level7 from './level7';
-import level8 from './level8';
-import level9 from './level9';
+import level01 from './level01';
+import level02 from './level02';
+import level03 from './level03';
+import level04 from './level04';
+import level05 from './level05';
+import level06 from './level06';
+import level07 from './level07';
+import level08 from './level08';
+import level09 from './level09';
+import level10 from './level10';
+import level11 from './level11';
 
-export { level1, level2, level3, level4, level5, level6, level7, level8, level9 };
+export { level01, level02, level03, level04, level05, level06, level07, level08, level09, level10, level11 };
 
 export const BLOCK_OUT_LEVELS = [
-  level1,
-  level2,
-  level3,
-  level4,
-  level5,
-  level6,
-  level7,
-  level8,
-  level9
+  level01,
+  level02,
+  level03,
+  level04,
+  level05,
+  level06,
+  level07,
+  level08,
+  level09,
+  level10,
+  level11
 ];
+
+export function revealUnfrozenGroups(blocks) {
+  const revealBlock = (block, offsetR = 0, offsetC = 0, justRevealed = false) => {
+    const positionedBlock = {
+      ...block,
+      r: block.r + offsetR,
+      c: block.c + offsetC,
+      frozen: block.frozen ?? block.freezeCount ?? block.count ?? 0,
+      ...(justRevealed ? { justUnfrozen: true } : {})
+    };
+
+    if (Array.isArray(block.children) && positionedBlock.frozen === 0) {
+      return block.children.flatMap(child =>
+        revealBlock(child, positionedBlock.r, positionedBlock.c, true)
+      );
+    }
+
+    return [positionedBlock];
+  };
+
+  return blocks.flatMap(block => revealBlock(block));
+}
 
 export function isBlockOutLevelImplemented(levelIndex) {
   return typeof levelIndex === 'number' && levelIndex >= 0 && levelIndex < BLOCK_OUT_LEVELS.length;
@@ -136,20 +162,19 @@ export function getBlockCells(block) {
     return block.cells;
   }
   if (block.shape) {
+    const match = block.shape.match(/^(\d+)x(\d+)$/);
+    if (match) {
+      const rows = parseInt(match[1], 10);
+      const cols = parseInt(match[2], 10);
+      const list = [];
+      for (let dr = 0; dr < rows; dr++) {
+        for (let dc = 0; dc < cols; dc++) {
+          list.push([dr, dc]);
+        }
+      }
+      return list;
+    }
     switch (block.shape) {
-      case '1x1': return [[0, 0]];
-      case '1x2': return [[0, 0], [0, 1]];
-      case '2x1': return [[0, 0], [1, 0]];
-      case '1x3': return [[0, 0], [0, 1], [0, 2]];
-      case '3x1': return [[0, 0], [1, 0], [2, 0]];
-      case '1x4': return [[0, 0], [0, 1], [0, 2], [0, 3]];
-      case '4x1': return [[0, 0], [1, 0], [2, 0], [3, 0]];
-      case '2x2': return [[0, 0], [0, 1], [1, 0], [1, 1]];
-      case '3x3': return [
-        [0, 0], [0, 1], [0, 2],
-        [1, 0], [1, 1], [1, 2],
-        [2, 0], [2, 1], [2, 2]
-      ];
       case 'L':
       case 'L1': return [[0, 0], [1, 0], [1, 1]]; // L pointing right-bottom
       case 'L2': return [[0, 0], [0, 1], [1, 0]]; // L pointing top-left

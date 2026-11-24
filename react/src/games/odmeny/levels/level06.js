@@ -1,4 +1,4 @@
-export const level6 = {
+export const level06 = {
   id: 6,
   name: 'Level 6 - Schody a zámky',
   width: 6,
@@ -53,4 +53,4 @@ export const level6 = {
   ]
 };
 
-export default level6;
+export default level06;

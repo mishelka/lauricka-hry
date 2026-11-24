@@ -1,0 +1,21 @@
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
+  gap: 12px;
+  width: 100%;
+  max-width: 580px;
+  margin-top: 10px;
+  padding: 4px 4px 20px;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  touch-action: pan-y;
+  flex: 1;
+}
+
+@media (max-width: 540px) {
+  .grid { grid-template-columns: repeat(3, 1fr); gap: 8px; }
+}
+
+@media (max-width: 360px) {
+  .grid { grid-template-columns: repeat(2, 1fr); gap: 6px; }
+}

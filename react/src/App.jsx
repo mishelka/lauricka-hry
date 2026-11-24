@@ -9,7 +9,7 @@ import { VYBRANE_R_GROUPS } from './data/vybraneRSlova';
 import { VYBRANE_S_GROUPS } from './data/vybraneSSlova';
 import { VYBRANE_V_GROUPS } from './data/vybraneVSlova';
 import { VYBRANE_Z_GROUPS } from './data/vybraneZSlova';
-import { getBestStars, getCollectedSmileyIds, getLevelStars, getPlayerName, getTotalStars, unlockAllLevels } from './utils/player';
+import { getBestStars, getCollectedSmileyIds, getLevelStars, getPlayerName, getTotalStars, unlockAllLevels, unlockAllLevelsOnce } from './utils/player';
 import useDevUnlock from './utils/useDevUnlock';
 import { YiGame, ObojakeGame, SlovaYiGame, CudzieGame, DoplnovackyMenu, DoplnovackyDtnlGame, DoplnovackyBGame } from './games/slovencina';
 import { VybraneBGame, VybraneMGame, VybranePGame, VybraneRGame, VybraneSGame, VybraneVGame, VybraneZGame, VybraneOpakovanieGame } from './games/vybraneSlova';
@@ -440,6 +440,7 @@ function isVybraneLetterUnlocked(letter) {
 }
 
 export default function App() {
+  useState(() => unlockAllLevelsOnce('vybraneM', VYBRANE_M_GROUPS.length, 'vybraneM_all_2026-11'));
 
   return (
     <div className="app-shell">

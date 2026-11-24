@@ -11,6 +11,7 @@ import IyChoiceButtons from '../../atomic/IyChoiceButtons';
 
 const QUESTIONS_PER_LEVEL = 15;
 const MAX_STARS = 5;
+const REWARD_LEVEL_OFFSET = 9; // Prvý level po M odomyká Block Out Level 10 (index 9)
 
 function renderStars(stars) {
   return `${'★'.repeat(stars)}${'☆'.repeat(MAX_STARS - stars)}`;
@@ -190,10 +191,11 @@ export default function VybraneMGame() {
 
   if (playingRewardLevel !== null) {
     const hasNextVybraneLevel = playingRewardLevel < groups.length - 1;
+    const blockOutRewardIndex = REWARD_LEVEL_OFFSET + playingRewardLevel;
     return (
       <div className="reward-game-view">
         <BlockOutGame
-          rewardLevel={playingRewardLevel}
+          rewardLevel={blockOutRewardIndex}
           onBack={() => setPlayingRewardLevel(null)}
           onNextVybraneLevel={
             hasNextVybraneLevel
@@ -222,7 +224,8 @@ export default function VybraneMGame() {
           {groups.map((_, level) => {
             const best = levelStars[level] || 0;
             const unlocked = isLevelUnlocked(level);
-            const isRewardImplemented = isBlockOutLevelImplemented(level);
+            const rewardLevelIndex = REWARD_LEVEL_OFFSET + level;
+            const isRewardImplemented = isBlockOutLevelImplemented(rewardLevelIndex);
             const classes = ['level-btn'];
             if (best === MAX_STARS) classes.push('completed');
             if (!unlocked && best < MAX_STARS) classes.push('locked');
@@ -246,8 +249,8 @@ export default function VybraneMGame() {
                     disabled={!isRewardImplemented}
                     title={
                       isRewardImplemented
-                        ? `Hrať odmenu: Block Out - Level ${level + 1}`
-                        : `Odmena (Block Out - Level ${level + 1}) zatiaľ nie je implementovaná`
+                        ? `Hrať odmenu: Block Out - Level ${rewardLevelIndex + 1}`
+                        : `Odmena (Block Out - Level ${rewardLevelIndex + 1}) zatiaľ nie je implementovaná`
                     }
                     style={{ background: isRewardImplemented ? '#2563eb' : '#94a3b8' }}
                   >
@@ -264,7 +267,8 @@ export default function VybraneMGame() {
 
   if (resultVisible) {
     const stars = getStarCount(miss);
-    const isRewardImplemented = selectedLevel !== null && isBlockOutLevelImplemented(selectedLevel);
+    const rewardLevelIndex = selectedLevel !== null ? REWARD_LEVEL_OFFSET + selectedLevel : null;
+    const isRewardImplemented = rewardLevelIndex !== null && isBlockOutLevelImplemented(rewardLevelIndex);
     return (
       <div className="result-box">
         <h2>Koniec hry!</h2>
@@ -299,8 +303,8 @@ export default function VybraneMGame() {
                 disabled={!isRewardImplemented}
                 title={
                   isRewardImplemented
-                    ? `Hrať odmenu: Block Out (${selectedLevel + 1}. level)`
-                    : `Odmena (Block Out - Level ${selectedLevel + 1}) zatiaľ nie je implementovaná`
+                    ? `Hrať odmenu: Block Out (${rewardLevelIndex + 1}. level)`
+                    : `Odmena (Block Out - Level ${rewardLevelIndex + 1}) zatiaľ nie je implementovaná`
                 }
               >
                 <GameIcon size={26} />
