@@ -113,11 +113,19 @@
 .main-game-header .header-game-actions > button[title$="zvuk"] { background: #8a2be2; }
 
 /* Reserve only the space used by a live word question and its hint. */
-.game-status-words { height: 176px; padding: 8px 12px; }
+.game-status-words {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  height: 180px;
+  padding: 16px 12px;
+}
+.game-status-words > * { flex-shrink: 0; }
 .game-status-words .current-level, .game-status-words .score-board { margin: 0; font-size: 14px; line-height: 18px; }
 .game-status.game-status-words .prompt { margin: 4px 0 !important; padding: 6px !important; min-height: 40px !important; font-size: 28px; line-height: 1.2; }
 .game-status.game-status-words .prompt-sentence { font-size: 22px !important; }
 .game-status.game-status-words .hint-box { margin: 4px 0 0 !important; padding: 6px !important; font-size: 15px !important; line-height: 18px; }
+.game-status.game-status-words > :last-child { margin-bottom: 0 !important; }
 .button-grid-2x2.word-answer-grid { gap: 12px; padding: 0; }
 .word-answer-grid button { height: clamp(48px, 9vh, 76px); padding: 0; font-size: 28px; }
 @media (max-width: 600px) {
