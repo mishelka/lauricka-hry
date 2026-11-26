@@ -13,7 +13,7 @@ import { getBestStars, getCollectedSmileyIds, getLevelStars, getPlayerName, getT
 import useDevUnlock from './utils/useDevUnlock';
 import { YiGame, ObojakeGame, SlovaYiGame, CudzieGame, DoplnovackyMenu, DoplnovackyDtnlGame, DoplnovackyBGame } from './games/slovencina';
 import { VybraneBGame, VybraneMGame, VybranePGame, VybraneRGame, VybraneSGame, VybraneVGame, VybraneZGame, VybraneOpakovanieGame } from './games/vybraneSlova';
-import { RatanieGame, Nasobenie5Game, Delenie5Game } from './games/matematika';
+import { RatanieGame, Nasobenie5Game, Delenie5Game, AdaptivneOpakovanieGame } from './games/matematika';
 import { BlockOutGame, BLOCK_OUT_LEVELS } from './games/odmeny';
 import { AudioTalePlayer, HomeIcon, PlayIcon, PauseIcon, UserIcon, SmileyIcon, PlayerProfileModal } from './atomic';
 import { AUDIO_TALES } from './data/audioTales';
@@ -206,6 +206,15 @@ function MenuPage() {
                 <span className="menu-stars">{`${delenieFinished} z ${DELENIE_5_GROUPS.length}`}</span>
               </button>
             </div>
+
+            <div className="menu-card">
+              <button className="btn-menu-adaptivne menu-card-btn" onClick={() => navigate('/adaptivne-opakovanie')}>
+                <span className="menu-title">Adaptívne opakovanie</span>
+                <span className="menu-stars" aria-label="Smajlíky">
+                  <SmileyIcon size={20} stroke="currentColor" />
+                </span>
+              </button>
+            </div>
           </div>
         </div>
 
@@ -280,8 +289,8 @@ function MenuPage() {
                 onClick={() => navigate('/vybrane-opakovanie')}
               >
                 <span className="menu-title">Opakovanie</span>
-                <span className="menu-stars">
-                  {vybraneOpakovanieStars > 0 ? renderStars(vybraneOpakovanieStars) : 'Chytáky'}
+                <span className="menu-stars" aria-label="Smajlíky">
+                  <SmileyIcon size={20} stroke="currentColor" />
                 </span>
               </button>
             </div>
@@ -465,6 +474,7 @@ export default function App() {
           <Route path="/ratanie" element={<GamePage><RatanieGame /></GamePage>} />
           <Route path="/nasobenie-5" element={<GamePage><Nasobenie5Game /></GamePage>} />
           <Route path="/delenie-5" element={<GamePage><Delenie5Game /></GamePage>} />
+          <Route path="/adaptivne-opakovanie" element={<GamePage><AdaptivneOpakovanieGame /></GamePage>} />
           <Route path="/nasobenie-3" element={<Navigate to="/nasobenie-5" replace />} />
           <Route path="/delenie-3" element={<Navigate to="/delenie-5" replace />} />
           <Route path="/block-out" element={<GamePage><BlockOutGame /></GamePage>} />

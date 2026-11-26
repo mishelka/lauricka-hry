@@ -1,4 +1,4 @@
-import { SMILEYS_CATALOG, SMILEYS_MAP } from '../data/smileysData';
+import { ALL_SMILEYS, SMILEYS_CATALOG, SMILEYS_MAP } from '../data/smileysData';
 
 const STORAGE_KEY = 'laurickaPlayerV1';
 const MAX_STARS = 5;
@@ -155,6 +155,44 @@ export function updateBestStars(gameId, stars) {
     saveState(state);
   }
   return rec.bestStars;
+}
+
+function normalizeAdaptiveProgress(progress) {
+  if (!progress || typeof progress !== 'object' || Array.isArray(progress)) return null;
+
+  const normalized = {};
+  for (const [factId, stat] of Object.entries(progress)) {
+    if (!factId || !stat || typeof stat !== 'object' || Array.isArray(stat)) return null;
+    const { correct, wrong, streak } = stat;
+    if (![correct, wrong, streak].every(value => Number.isInteger(value) && value >= 0)) return null;
+    normalized[factId] = { correct, wrong, streak };
+  }
+  return normalized;
+}
+
+export function getAdaptiveProgress(gameId) {
+  const state = loadState();
+  migrateLegacyIfNeeded(state);
+  const rec = getRecord(state, gameId);
+  return normalizeAdaptiveProgress(rec.adaptive) || {};
+}
+
+export function saveAdaptiveProgress(gameId, progress) {
+  const state = loadState();
+  migrateLegacyIfNeeded(state);
+  const rec = getRecord(state, gameId);
+  rec.adaptive = normalizeAdaptiveProgress(progress) || {};
+  saveState(state);
+  return rec.adaptive;
+}
+
+export function resetAdaptiveProgress(gameId) {
+  const state = loadState();
+  migrateLegacyIfNeeded(state);
+  const rec = getRecord(state, gameId);
+  rec.adaptive = {};
+  saveState(state);
+  return rec.adaptive;
 }
 
 export function getLevelStars(gameId, levelCount) {
@@ -314,13 +352,35 @@ export function awardRandomSmiley() {
     smiley: awardedSmiley,
     isNew,
     totalCollected: new Set(state.smileys).size,
-    totalAvailable: SMILEYS_CATALOG.length
+    totalAvailable: ALL_SMILEYS.length
+  };
+}
+
+export function awardSmileyById(smileyId) {
+  const smiley = SMILEYS_MAP[smileyId];
+  if (!smiley) return null;
+
+  const state = loadState();
+  if (!Array.isArray(state.smileys)) {
+    state.smileys = [];
+  }
+  const isNew = !state.smileys.includes(smileyId);
+  if (isNew) {
+    state.smileys.push(smileyId);
+    saveState(state);
+  }
+
+  return {
+    smiley,
+    isNew,
+    totalCollected: new Set(state.smileys).size,
+    totalAvailable: ALL_SMILEYS.length
   };
 }
 
 export function getSmileyCollection() {
   const collectedIds = new Set(getCollectedSmileyIds());
-  return SMILEYS_CATALOG.map(s => ({
+  return ALL_SMILEYS.map(s => ({
     ...s,
     unlocked: collectedIds.has(s.id)
   }));
@@ -336,7 +396,7 @@ export function getPlayerStats() {
   let completed5StarLevels = 0;
 
   // Single star games
-  const singleGames = ['yi', 'obojake', 'cudzie', 'vybraneOpakovanie'];
+  const singleGames = ['yi', 'obojake', 'cudzie', 'vybraneOpakovanie', 'adaptivneOpakovanie'];
   singleGames.forEach(gid => {
     const rec = gameRecords[gid];
     const stars = rec ? clampStars(rec.bestStars) : 0;
@@ -387,7 +447,7 @@ export function getPlayerStats() {
     opakovanieStars,
     opakovaniePlays,
     collectedSmileysCount: collectedSmileys.length,
-    totalSmileysCount: SMILEYS_CATALOG.length
+    totalSmileysCount: ALL_SMILEYS.length
   };
 }
 

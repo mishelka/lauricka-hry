@@ -1,6 +1,10 @@
 import React, { useEffect, useMemo, useState } from 'react';
-import { getPlayerName, getPlayerStats, getSmileyCollection, setPlayerName } from '../utils/player';
-import { TrophyIcon, SmileyIcon, ChartIcon } from './Icons';
+import { getAdaptiveProgress, getCollectedSmileyIds, getPlayerName, getPlayerStats, getSmileyCollection, setPlayerName } from '../utils/player';
+import { getNasobilkaOverview } from '../utils/nasobilkaRewards';
+import { MASTERY_STREAK } from '../utils/adaptiveRepetition';
+import { SmileyIcon, ChartIcon, CalculatorIcon } from './Icons';
+
+const ADAPTIVE_GAME_ID = 'adaptivneOpakovanie';
 
 export default function PlayerProfileModal({ isOpen, onClose, onNameChange, initialTab = 'stats' }) {
   const [activeTab, setActiveTab] = useState(initialTab);
@@ -14,11 +18,25 @@ export default function PlayerProfileModal({ isOpen, onClose, onNameChange, init
       setPlayerNameState(getPlayerName());
       setIsEditingName(false);
       setSelectedSmiley(null);
+      setActiveTab(initialTab);
     }
-  }, [isOpen]);
+  }, [isOpen, initialTab]);
 
   const smileys = useMemo(() => (isOpen ? getSmileyCollection() : []), [isOpen]);
   const stats = useMemo(() => (isOpen ? getPlayerStats() : null), [isOpen]);
+  const nasobilkaOverview = useMemo(
+    () => (isOpen ? getNasobilkaOverview(getAdaptiveProgress(ADAPTIVE_GAME_ID)) : []),
+    [isOpen]
+  );
+  const collectedSmileyIds = useMemo(() => new Set(isOpen ? getCollectedSmileyIds() : []), [isOpen]);
+  const nasobilkaRewardsEarned = nasobilkaOverview.reduce(
+    (sum, table) => sum + table.ops.filter(item => item.reward && collectedSmileyIds.has(item.reward.id)).length,
+    0
+  );
+  const nasobilkaRewardsTotal = nasobilkaOverview.reduce(
+    (sum, table) => sum + table.ops.filter(item => item.reward).length,
+    0
+  );
 
   if (!isOpen) return null;
 
@@ -132,6 +150,19 @@ export default function PlayerProfileModal({ isOpen, onClose, onNameChange, init
             <SmileyIcon size={18} stroke="#000000" />
             <span>Zbierka smajlíkov ({collectedCount}/{totalSmileys})</span>
           </button>
+          <button
+            type="button"
+            className={`profile-tab-btn${activeTab === 'nasobilka' ? ' active' : ''}`}
+            onClick={() => {
+              setActiveTab('nasobilka');
+              setSelectedSmiley(null);
+            }}
+            role="tab"
+            aria-selected={activeTab === 'nasobilka'}
+          >
+            <CalculatorIcon size={18} stroke="#000000" />
+            <span>Násobilka ({nasobilkaRewardsEarned}/{nasobilkaRewardsTotal})</span>
+          </button>
         </div>
 
         <div className="profile-modal-content">
@@ -186,7 +217,7 @@ export default function PlayerProfileModal({ isOpen, onClose, onNameChange, init
 
                 <div className="stats-category-item">
                   <div className="stats-category-header">
-                    <span>🔢 Matematika (Rátanie, Násobenie, Delenie)</span>
+                    <span>🔢 Matematika (Rátanie, Násobenie, Delenie, Adaptívne opakovanie)</span>
                   </div>
                   <p className="stats-category-desc">
                     Hravé precvičovanie počítania a matematických operácií.
@@ -210,6 +241,7 @@ export default function PlayerProfileModal({ isOpen, onClose, onNameChange, init
                 </div>
                 <p className="smileys-hint">
                   💡 Hraj hru <strong>Opakovanie</strong> pred vybranými slovami a získaj za každé úspešné kolo nového smajlíka do zbierky!
+                  Ďalších smajlíkov získaš v hre <strong>Adaptívne opakovanie</strong> za zvládnutie celej násobilky.
                 </p>
               </div>
 
@@ -229,6 +261,89 @@ export default function PlayerProfileModal({ isOpen, onClose, onNameChange, init
                   </button>
                 ))}
               </div>
+            </div>
+          )}
+
+          {activeTab === 'nasobilka' && (
+            <div className="profile-nasobilka-view">
+              <div className="smileys-progress-banner">
+                <div className="smileys-progress-info">
+                  <span className="smileys-progress-text">
+                    Zvládnuté násobilky: <strong>{nasobilkaRewardsEarned}</strong> z <strong>{nasobilkaRewardsTotal}</strong>
+                  </span>
+                </div>
+                <div className="nasobilka-legend">
+                  <span className="nasobilka-legend-item">
+                    <span className="nasobilka-fact fresh nasobilka-legend-swatch" /> ešte neprecvičený
+                  </span>
+                  <span className="nasobilka-legend-item">
+                    <span className="nasobilka-fact learning nasobilka-legend-swatch" /> učím sa (1–{MASTERY_STREAK - 1}× správne)
+                  </span>
+                  <span className="nasobilka-legend-item">
+                    <span className="nasobilka-fact mastered nasobilka-legend-swatch" /> zvládnutý ({MASTERY_STREAK}× správne)
+                  </span>
+                </div>
+                <p className="smileys-hint">
+                  💡 Hraj <strong>Adaptívne opakovanie</strong>. Keď zvládneš všetky príklady jednej násobilky, získaš smajlíka.
+                </p>
+              </div>
+
+              {nasobilkaOverview.map(tableInfo => (
+                <div key={tableInfo.table} className="nasobilka-table-card">
+                  <div className="nasobilka-table-header">
+                    <h3>Násobilka {tableInfo.table}</h3>
+                    <span className="nasobilka-table-progress">
+                      {tableInfo.mastered} z {tableInfo.total}
+                    </span>
+                  </div>
+                  <div className="smileys-progress-bar-bg">
+                    <div
+                      className="smileys-progress-bar-fill nasobilka-progress-fill"
+                      style={{ width: `${tableInfo.total ? Math.round((tableInfo.mastered / tableInfo.total) * 100) : 0}%` }}
+                    />
+                  </div>
+
+                  {tableInfo.ops.map(opInfo => {
+                    const rewardUnlocked = Boolean(opInfo.reward && collectedSmileyIds.has(opInfo.reward.id));
+                    return (
+                      <div key={opInfo.op} className="nasobilka-op-section">
+                        <div className="nasobilka-op-header">
+                          <span className="nasobilka-op-title">
+                            {opInfo.label} <span className="nasobilka-op-count">({opInfo.mastered}/{opInfo.total})</span>
+                          </span>
+                          {opInfo.reward && (
+                            <button
+                              type="button"
+                              className={`nasobilka-reward-badge${rewardUnlocked ? ' unlocked' : ' locked'}`}
+                              onClick={() => setSelectedSmiley({ ...opInfo.reward, unlocked: rewardUnlocked })}
+                              title={rewardUnlocked ? opInfo.reward.name : 'Smajlík za zvládnutie'}
+                              aria-label={rewardUnlocked ? opInfo.reward.name : 'Smajlík za zvládnutie – ešte neodomknutý'}
+                            >
+                              {rewardUnlocked ? opInfo.reward.emoji : '🔒'}
+                            </button>
+                          )}
+                        </div>
+                        <div className="nasobilka-facts-grid">
+                          {opInfo.facts.map(fact => (
+                            <div
+                              key={fact.id}
+                              className={`nasobilka-fact ${fact.state}`}
+                              title={`${fact.text} = ${fact.result}`}
+                            >
+                              <span className="nasobilka-fact-text">{fact.text}</span>
+                              <span className="nasobilka-fact-dots" aria-label={`${fact.streak} z ${MASTERY_STREAK} správne za sebou`}>
+                                {Array.from({ length: MASTERY_STREAK }).map((_, dotIndex) => (
+                                  <span key={dotIndex} className={dotIndex < fact.streak ? 'dot on' : 'dot'} />
+                                ))}
+                              </span>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              ))}
             </div>
           )}
         </div>
@@ -262,7 +377,8 @@ export default function PlayerProfileModal({ isOpen, onClose, onNameChange, init
                 <p>
                   {selectedSmiley.unlocked
                     ? selectedSmiley.desc
-                    : 'Tento smajlík čaká na odomknutie. Získaš ho úspešným dokončením kola v hre Opakovanie!'}
+                    : selectedSmiley.unlockHint ||
+                      'Tento smajlík čaká na odomknutie. Získaš ho úspešným dokončením kola v hre Opakovanie!'}
                 </p>
                 <span className="smiley-detail-count">
                   V zbierke máš už <strong>{collectedCount}</strong> z <strong>{totalSmileys}</strong> smajlíkov!

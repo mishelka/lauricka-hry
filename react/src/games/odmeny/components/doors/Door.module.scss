@@ -18,6 +18,11 @@
 .left { border-right: none; border-radius: 10px 0 0 10px; }
 .right { border-left: none; border-radius: 0 10px 10px 0; }
 
+.white {
+  box-sizing: border-box;
+  border: 2px solid #334155;
+}
+
 .highlight {
   z-index: 12;
   filter: brightness(1.25);
@@ -28,20 +33,12 @@
 .absorbing { z-index: 22 !important; animation: absorbDoor 0.45s ease-out; }
 
 .locked {
-  background: #94a3b8 !important;
-  border: 2px solid #64748b !important;
-  box-shadow: inset 0 2px 4px rgba(255, 255, 255, 0.3), inset 0 -2px 4px rgba(0, 0, 0, 0.25), 0 2px 5px rgba(0, 0, 0, 0.15) !important;
+  box-sizing: border-box;
+  background: #bfe9f8 !important;
+  border: 2px solid #7fcfee !important;
+  box-shadow: inset 0 0 6px 2px rgba(79, 179, 220, 0.85), inset 0 0 14px 5px rgba(79, 179, 220, 0.45), 0 2px 5px rgba(0, 0, 0, 0.15) !important;
   cursor: not-allowed;
   filter: none;
-
-  &::after {
-    content: '';
-    position: absolute;
-    inset: 0;
-    background: repeating-linear-gradient(45deg, rgba(255, 255, 255, 0.15), rgba(255, 255, 255, 0.15) 3px, transparent 3px, transparent 6px);
-    border-radius: inherit;
-    pointer-events: none;
-  }
 }
 
 .lockCount {

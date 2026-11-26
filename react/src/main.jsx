@@ -25,7 +25,10 @@ restorePathFromFallback();
 
 ReactDOM.createRoot(document.getElementById('root')).render(
   <React.StrictMode>
-    <BrowserRouter basename={basePath}>
+    <BrowserRouter
+      basename={basePath}
+      future={{ v7_startTransition: true, v7_relativeSplatPath: true }}
+    >
       <App />
     </BrowserRouter>
   </React.StrictMode>

@@ -9,8 +9,10 @@ import level08 from './level08';
 import level09 from './level09';
 import level10 from './level10';
 import level11 from './level11';
+import level12 from './level12';
+import level13 from './level13';
 
-export { level01, level02, level03, level04, level05, level06, level07, level08, level09, level10, level11 };
+export { level01, level02, level03, level04, level05, level06, level07, level08, level09, level10, level11, level12, level13 };
 
 export const BLOCK_OUT_LEVELS = [
   level01,
@@ -23,7 +25,9 @@ export const BLOCK_OUT_LEVELS = [
   level08,
   level09,
   level10,
-  level11
+  level11,
+  level12,
+  level13
 ];
 
 export function revealUnfrozenGroups(blocks) {

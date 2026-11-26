@@ -6,20 +6,22 @@ export default function Door({ door, blocks, dragInfo, levelWidth, levelHeight, 
   const conf = COLOR_CONFIG[door.color] || COLOR_CONFIG.red;
   const span = door.span || 1;
   const isLocked = isDoorLocked(door);
-  const doorWidth = door.side === 'top' || door.side === 'bottom' ? span * cellSize + (span - 1) * gap : doorDepth;
-  const doorHeight = door.side === 'left' || door.side === 'right' ? span * cellSize + (span - 1) * gap : doorDepth;
+  const depth = isLocked ? Math.round(doorDepth * 1.4) : doorDepth;
+  const doorWidth = door.side === 'top' || door.side === 'bottom' ? span * cellSize + (span - 1) * gap : depth;
+  const doorHeight = door.side === 'left' || door.side === 'right' ? span * cellSize + (span - 1) * gap : depth;
+  const isWhiteDoor = door.color === 'white';
   const doorStyle = {
-    backgroundColor: isLocked ? '#94a3b8' : conf.bg,
-    borderColor: isLocked ? '#64748b' : conf.border,
+    backgroundColor: isLocked ? '#bfe9f8' : conf.bg,
+    borderColor: isLocked ? '#7fcfee' : isWhiteDoor ? '#334155' : conf.border,
     boxShadow: isLocked
-      ? 'inset 0 2px 4px rgba(255, 255, 255, 0.25), inset 0 -2px 4px rgba(0, 0, 0, 0.2), 0 2px 5px rgba(0, 0, 0, 0.15)'
-      : `0 0 10px ${conf.glow}`
+      ? 'inset 0 0 6px 2px rgba(79, 179, 220, 0.85), inset 0 0 14px 5px rgba(79, 179, 220, 0.45), 0 2px 5px rgba(0, 0, 0, 0.15)'
+      : isWhiteDoor ? '0 3px 8px rgba(0, 0, 0, 0.25)' : `0 0 10px ${conf.glow}`
   };
 
-  if (door.side === 'top') Object.assign(doorStyle, { left: padding + door.index * (cellSize + gap), width: doorWidth, top: -doorDepth, height: doorDepth });
-  else if (door.side === 'bottom') Object.assign(doorStyle, { left: padding + door.index * (cellSize + gap), width: doorWidth, bottom: -doorDepth, height: doorDepth });
-  else if (door.side === 'left') Object.assign(doorStyle, { top: padding + door.index * (cellSize + gap), height: doorHeight, left: -doorDepth, width: doorDepth });
-  else if (door.side === 'right') Object.assign(doorStyle, { top: padding + door.index * (cellSize + gap), height: doorHeight, right: -doorDepth, width: doorDepth });
+  if (door.side === 'top') Object.assign(doorStyle, { left: padding + door.index * (cellSize + gap), width: doorWidth, top: -depth, height: depth });
+  else if (door.side === 'bottom') Object.assign(doorStyle, { left: padding + door.index * (cellSize + gap), width: doorWidth, bottom: -depth, height: depth });
+  else if (door.side === 'left') Object.assign(doorStyle, { top: padding + door.index * (cellSize + gap), height: doorHeight, left: -depth, width: depth });
+  else if (door.side === 'right') Object.assign(doorStyle, { top: padding + door.index * (cellSize + gap), height: doorHeight, right: -depth, width: depth });
 
   const isMatchingBlockAdjacent = !isLocked && blocks.some(b => {
     if (b.exiting || b.color !== door.color) return false;
@@ -52,7 +54,7 @@ export default function Door({ door, blocks, dragInfo, levelWidth, levelHeight, 
 
   return (
     <div
-      className={[styles.door, styles[door.side], isLocked && styles.locked, door.justUnlocked && styles.justUnlocked, isMatchingBlockAdjacent && styles.highlight, isAbsorbing && styles.absorbing].filter(Boolean).join(' ')}
+      className={[styles.door, styles[door.side], isWhiteDoor && !isLocked && styles.white, isLocked && styles.locked, door.justUnlocked && styles.justUnlocked, isMatchingBlockAdjacent && styles.highlight, isAbsorbing && styles.absorbing].filter(Boolean).join(' ')}
       style={doorStyle}
       title={isLocked ? `Zamknutý východ (zostáva ${door.locked})` : undefined}
     >

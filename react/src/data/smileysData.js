@@ -37,7 +37,27 @@ export const SMILEYS_CATALOG = [
   { id: 'sm_bear', emoji: '🧸', name: 'Plyšový macík', category: 'Zábava', desc: 'Prítulný plyšák pre dobrú náladu.' }
 ];
 
-export const SMILEYS_MAP = SMILEYS_CATALOG.reduce((acc, item) => {
+// Smajlíky za zvládnutie celej násobilky v hre Adaptívne opakovanie.
+// Neudeľujú sa náhodne – každý je pevne priradený k násobilke a operácii.
+export const NASOBILKA_SMILEYS = [
+  { id: 'nas_2_multiply', table: 2, op: 'multiply', emoji: '🐥', name: 'Kuriatko dvojka', category: 'Násobilka', desc: 'Zvládla si celé násobenie dvojkou!' },
+  { id: 'nas_2_divide', table: 2, op: 'divide', emoji: '🐸', name: 'Žabka dvojka', category: 'Násobilka', desc: 'Zvládla si celé delenie dvojkou!' },
+  { id: 'nas_3_multiply', table: 3, op: 'multiply', emoji: '🐙', name: 'Chobotnička trojka', category: 'Násobilka', desc: 'Zvládla si celé násobenie trojkou!' },
+  { id: 'nas_3_divide', table: 3, op: 'divide', emoji: '🐢', name: 'Korytnačka trojka', category: 'Násobilka', desc: 'Zvládla si celé delenie trojkou!' },
+  { id: 'nas_4_multiply', table: 4, op: 'multiply', emoji: '🦜', name: 'Papagáj štvorka', category: 'Násobilka', desc: 'Zvládla si celé násobenie štvorkou!' },
+  { id: 'nas_4_divide', table: 4, op: 'divide', emoji: '🐨', name: 'Koala štvorka', category: 'Násobilka', desc: 'Zvládla si celé delenie štvorkou!' },
+  { id: 'nas_5_multiply', table: 5, op: 'multiply', emoji: '🧮', name: 'Počítadlo päťka', category: 'Násobilka', desc: 'Zvládla si celé násobenie päťkou!' },
+  { id: 'nas_5_divide', table: 5, op: 'divide', emoji: '🏅', name: 'Medaila päťka', category: 'Násobilka', desc: 'Zvládla si celé delenie päťkou!' }
+].map(item => ({
+  ...item,
+  unlockHint: `Získaš ho, keď v hre Adaptívne opakovanie zvládneš všetky príklady na ${
+    item.op === 'multiply' ? 'násobenie' : 'delenie'
+  } z násobilky ${item.table}.`
+}));
+
+export const ALL_SMILEYS = [...SMILEYS_CATALOG, ...NASOBILKA_SMILEYS];
+
+export const SMILEYS_MAP = ALL_SMILEYS.reduce((acc, item) => {
   acc[item.id] = item;
   return acc;
 }, {});

@@ -1,0 +1,9 @@
+.outline {
+  position: absolute;
+  inset: -3px;
+  width: calc(100% + 6px);
+  height: calc(100% + 6px);
+  overflow: visible;
+  pointer-events: none;
+  z-index: 0;
+}

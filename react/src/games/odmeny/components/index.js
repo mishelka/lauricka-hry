@@ -8,7 +8,7 @@ export { default as FrozenBlockNumber } from './blocks/FrozenBlockNumber';
 export { default as FrozenBlockSurface } from './blocks/FrozenBlockSurface';
 export { default as GameBoard } from './board/GameBoard';
 export { default as BoardGrid } from './board/BoardGrid';
-export { default as WallCell } from './board/WallCell';
+export { default as BoardOutline } from './board/BoardOutline';
 export { default as Door } from './doors/Door';
 export { default as DoorArrow } from './doors/DoorArrow';
 export { default as LevelSelect } from './levels/LevelSelect';

@@ -1,5 +1,16 @@
 * { box-sizing: border-box; }
 
+/* Jednotka výšky obrazovky – dvh (ak ju prehliadač pozná) počíta so skutočne viditeľnou plochou aj na mobile */
+:root {
+  --vh: 1vh;
+}
+
+@supports (height: 1dvh) {
+  :root {
+    --vh: 1dvh;
+  }
+}
+
 body {
   margin: 0;
   font-family: sans-serif;
@@ -129,6 +140,7 @@ button:disabled {
 .btn-menu-ratanie { background-color: #f08c00; }
 .btn-menu-nasobenie { background-color: #d97706; }
 .btn-menu-delenie { background-color: #0284c7; }
+.btn-menu-adaptivne { background-color: #7c3aed; }
 .btn-menu-slova { background-color: #8430ce; }
 .btn-menu-vybrane-opakovanie { background: linear-gradient(135deg, #f59e0b 0%, #ea580c 100%); }
 .btn-menu-vybrane-b { background-color: #e11d48; }
@@ -149,6 +161,7 @@ button:disabled {
 .btn-menu-ratanie,
 .btn-menu-nasobenie,
 .btn-menu-delenie,
+.btn-menu-adaptivne,
 .btn-menu-slova,
 .btn-menu-vybrane-opakovanie,
 .btn-menu-vybrane-b,
@@ -232,6 +245,11 @@ button:disabled {
   opacity: 0.95;
   text-align: right;
   white-space: nowrap;
+}
+
+.menu-stars svg {
+  display: inline-block;
+  vertical-align: middle;
 }
 
 .btn-back,
@@ -495,25 +513,26 @@ button:disabled {
   box-shadow: 0 0 0 3px rgba(42, 146, 204, 0.2);
 }
 
+/* Príklad aj klávesnica sa škálujú podľa výšky obrazovky (clamp s --vh), aby sa hra vždy zmestila bez rolovania */
 .math-horizontal-container {
   display: flex;
   align-items: center;
   justify-content: center;
   gap: 16px;
-  margin: 18px 0 22px;
-  min-height: 84px;
+  margin: clamp(8px, calc(var(--vh) * 2), 18px) 0 clamp(10px, calc(var(--vh) * 2.5), 22px);
+  min-height: clamp(56px, calc(var(--vh) * 10), 84px);
 }
 
 .math-expr-text {
-  font-size: 52px;
+  font-size: clamp(32px, calc(var(--vh) * 6.5), 52px);
   font-weight: 800;
   color: #1e293b;
   letter-spacing: 2px;
 }
 
 .math-input-box {
-  min-width: 90px;
-  height: 72px;
+  min-width: clamp(64px, calc(var(--vh) * 11), 90px);
+  height: clamp(52px, calc(var(--vh) * 9), 72px);
   padding: 0 18px;
   border-radius: 14px;
   border: 3px solid #8da5ba;
@@ -521,7 +540,7 @@ button:disabled {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  font-size: 48px;
+  font-size: clamp(30px, calc(var(--vh) * 6), 48px);
   font-weight: 800;
   color: #0f172a;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.06);
@@ -571,6 +590,52 @@ button:disabled {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 12px;
+}
+
+/* Numerická klávesnica (ako na fyzickej klávesnici / kalkulačke): 7 8 9 / 4 5 6 / 1 2 3 / ⌫ 0 OK */
+.keypad {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: clamp(6px, calc(var(--vh) * 1.2), 10px);
+  width: 100%;
+  max-width: clamp(240px, calc(var(--vh) * 40), 320px);
+  margin: clamp(8px, calc(var(--vh) * 2), 18px) auto 0;
+}
+
+.keypad-btn {
+  width: 100%;
+  height: clamp(44px, calc(var(--vh) * 8.5), 68px);
+  padding: 0;
+  font-size: clamp(22px, calc(var(--vh) * 4), 32px);
+  font-weight: 800;
+  border-radius: 14px;
+  background: #4682b4;
+  color: #ffffff;
+  box-shadow: 0 4px 0 rgba(0, 0, 0, 0.18), 0 4px 10px rgba(0, 0, 0, 0.08);
+  transition: transform 0.1s ease, filter 0.15s ease, box-shadow 0.1s ease;
+}
+
+.keypad-btn:hover:not(:disabled) {
+  filter: brightness(1.08);
+}
+
+.keypad-btn:active:not(:disabled) {
+  transform: translateY(2px);
+  box-shadow: 0 2px 0 rgba(0, 0, 0, 0.18), 0 2px 6px rgba(0, 0, 0, 0.08);
+}
+
+.keypad-btn:disabled {
+  opacity: 0.45;
+}
+
+.keypad-backspace {
+  background: #6c757d;
+  font-size: clamp(20px, calc(var(--vh) * 3.5), 28px);
+}
+
+.keypad-enter {
+  background: #22c55e;
+  font-size: clamp(17px, calc(var(--vh) * 3), 24px);
 }
 
 .btn-key {
@@ -1055,20 +1120,39 @@ button:disabled {
 
   .math-horizontal-container {
     gap: 10px;
-    margin: 14px 0 16px;
-    min-height: 68px;
+    margin: clamp(8px, calc(var(--vh) * 2), 14px) 0 clamp(10px, calc(var(--vh) * 2.5), 16px);
+    min-height: clamp(52px, calc(var(--vh) * 10), 68px);
   }
 
   .math-expr-text {
-    font-size: 38px;
+    font-size: clamp(28px, calc(var(--vh) * 6.5), 38px);
     letter-spacing: 1px;
   }
 
   .math-input-box {
-    min-width: 70px;
-    height: 58px;
+    min-width: clamp(56px, calc(var(--vh) * 11), 70px);
+    height: clamp(48px, calc(var(--vh) * 9), 58px);
     padding: 0 12px;
-    font-size: 36px;
+    font-size: clamp(26px, calc(var(--vh) * 6), 36px);
+  }
+
+  .keypad {
+    gap: clamp(6px, calc(var(--vh) * 1.2), 8px);
+    max-width: clamp(220px, calc(var(--vh) * 40), 280px);
+    margin-top: clamp(8px, calc(var(--vh) * 2), 14px);
+  }
+
+  .keypad-btn {
+    height: clamp(42px, calc(var(--vh) * 8.5), 58px);
+    font-size: clamp(20px, calc(var(--vh) * 4), 28px);
+  }
+
+  .keypad-backspace {
+    font-size: clamp(18px, calc(var(--vh) * 3.5), 24px);
+  }
+
+  .keypad-enter {
+    font-size: clamp(15px, calc(var(--vh) * 3), 20px);
   }
 
   .btn-icon-action {
@@ -1084,6 +1168,52 @@ button:disabled {
     padding: 10px 12px;
     font-size: 15px;
     gap: 6px;
+  }
+}
+
+/* Nízke obrazovky (napr. notebook so zväčšeným zoomom alebo mobil naležato): stiahnu sa okraje hlavičky, aby sa hra zmestila aj na výšku */
+@media (max-height: 760px) {
+  .app-container {
+    padding-top: 8px;
+  }
+
+  .top-actions {
+    margin-bottom: 6px;
+  }
+
+  h1 {
+    font-size: 26px;
+    margin: 6px 0 10px;
+  }
+
+  .level-progress-message {
+    font-size: 18px;
+    margin-bottom: 8px;
+  }
+}
+
+@media (max-height: 600px) {
+  .app-container {
+    padding-top: 0;
+  }
+
+  .top-actions {
+    margin-bottom: 4px;
+  }
+
+  h1 {
+    font-size: 22px;
+    margin: 2px 0 6px;
+  }
+
+  .level-progress-message {
+    font-size: 16px;
+    margin-bottom: 4px;
+  }
+
+  .btn-icon-action {
+    width: 46px;
+    height: 46px;
   }
 }
 
@@ -1800,6 +1930,213 @@ button:disabled {
   line-height: 1.35;
 }
 
+/* Násobilka View (Adaptívne opakovanie) */
+.nasobilka-legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 16px;
+  margin-bottom: 8px;
+  font-size: 13px;
+  color: #475569;
+}
+
+.nasobilka-legend-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.nasobilka-fact.nasobilka-legend-swatch {
+  width: 16px;
+  height: 16px;
+  min-height: 0;
+  padding: 0;
+  border-radius: 5px;
+}
+
+.nasobilka-table-card {
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 18px;
+  padding: 14px 16px;
+  margin-bottom: 12px;
+}
+
+.nasobilka-table-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  margin-bottom: 8px;
+}
+
+.nasobilka-table-header h3 {
+  margin: 0;
+  font-size: 18px;
+  color: #1e293b;
+}
+
+.nasobilka-table-progress {
+  font-size: 14px;
+  font-weight: 700;
+  color: #0f766e;
+}
+
+.nasobilka-progress-fill {
+  background: linear-gradient(90deg, #34d399 0%, #059669 100%);
+}
+
+.nasobilka-op-section {
+  margin-top: 12px;
+}
+
+.nasobilka-op-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8px;
+}
+
+.nasobilka-op-title {
+  font-size: 15px;
+  font-weight: 700;
+  color: #334155;
+}
+
+.nasobilka-op-count {
+  font-weight: 600;
+  color: #64748b;
+}
+
+.nasobilka-reward-badge {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 22px;
+  line-height: 1;
+  padding: 0;
+  cursor: pointer;
+  border: 2px solid #e2e8f0;
+  background: #ffffff;
+  transition: all 0.15s ease;
+}
+
+.nasobilka-reward-badge.unlocked {
+  background: #fef3c7;
+  border-color: #f59e0b;
+  box-shadow: 0 3px 10px rgba(245, 158, 11, 0.3);
+}
+
+.nasobilka-reward-badge.unlocked:hover {
+  transform: scale(1.08);
+}
+
+.nasobilka-reward-badge.locked {
+  background: #f1f5f9;
+  font-size: 16px;
+  opacity: 0.75;
+}
+
+.nasobilka-facts-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(64px, 1fr));
+  gap: 6px;
+}
+
+.nasobilka-fact {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  min-height: 44px;
+  padding: 6px 4px;
+  border-radius: 10px;
+  border: 1.5px solid #e2e8f0;
+  background: #f1f5f9;
+  color: #94a3b8;
+  font-size: 14px;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.nasobilka-fact.learning {
+  background: #fef9c3;
+  border-color: #facc15;
+  color: #854d0e;
+}
+
+.nasobilka-fact.mastered {
+  background: #dcfce7;
+  border-color: #22c55e;
+  color: #166534;
+}
+
+.nasobilka-fact-dots {
+  display: inline-flex;
+  gap: 3px;
+}
+
+.nasobilka-fact-dots .dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: rgba(100, 116, 139, 0.25);
+}
+
+.nasobilka-fact.learning .dot.on {
+  background: #eab308;
+}
+
+.nasobilka-fact.mastered .dot.on {
+  background: #16a34a;
+}
+
+/* Reward overlay in game (new smiley for a mastered table) */
+.reward-overlay-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(15, 23, 42, 0.65);
+  backdrop-filter: blur(4px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 900;
+  padding: 16px;
+  animation: fadeIn 0.2s ease-out;
+}
+
+.reward-overlay-card {
+  background: #ffffff;
+  border-radius: 24px;
+  max-width: 520px;
+  width: 100%;
+  padding: 22px 24px;
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.25);
+  animation: slideUp 0.25s ease-out;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.reward-overlay-card h2 {
+  margin: 0 0 6px;
+  font-size: 24px;
+  color: #1e293b;
+  text-align: center;
+}
+
+.reward-overlay-card .smiley-reward-banner {
+  width: 100%;
+  margin: 12px 0;
+}
+
+.reward-overlay-actions {
+  margin-top: 8px;
+}
+
 .profile-modal-footer {
   padding: 14px 24px;
   border-top: 1px solid #e2e8f0;
@@ -1865,6 +2202,20 @@ button:disabled {
   .stats-cards-grid {
     grid-template-columns: repeat(2, 1fr);
     gap: 8px;
+  }
+
+  .profile-tab-btn {
+    font-size: 13px;
+    padding: 8px 6px;
+    gap: 5px;
+  }
+
+  .nasobilka-facts-grid {
+    grid-template-columns: repeat(4, 1fr);
+  }
+
+  .nasobilka-fact {
+    font-size: 13px;
   }
 
   .smiley-detail-backdrop {

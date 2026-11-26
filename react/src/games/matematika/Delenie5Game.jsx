@@ -344,7 +344,7 @@ export default function Delenie5Game() {
         )}
 
         <div className="keypad">
-          {[1, 2, 3, 4, 5, 6, 7, 8, 9, 0].map(digit => (
+          {[7, 8, 9, 4, 5, 6, 1, 2, 3].map(digit => (
             <button
               key={digit}
               type="button"
@@ -363,6 +363,14 @@ export default function Delenie5Game() {
             title="Zmazať"
           >
             ⌫
+          </button>
+          <button
+            type="button"
+            className="keypad-btn"
+            onClick={() => pressDigit('0')}
+            disabled={status === 'correct'}
+          >
+            0
           </button>
           <button
             type="button"
