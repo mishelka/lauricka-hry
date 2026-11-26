@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
-import { initializeLauraMathProgress } from './lauraMathProgress.js';
+import { initializeLauraMathProgress, resetLauraTwosProgressOnce } from './lauraMathProgress.js';
 import { NASOBENIE_DELENIE_FACTS } from '../data/nasobenieDelenieData.js';
 import { isMastered } from './adaptiveRepetition.js';
 
@@ -66,4 +66,46 @@ test('an ineligible profile does not consume the one-time initialization', () =>
   assert.equal(initializeLauraMathProgress(state), null);
   state.playerName = 'Laura';
   assert.ok(initializeLauraMathProgress(state));
+});
+
+test('resets Laura’s twos, both multiplication orders and inverse division, without changing other progress', () => {
+  const adaptive = Object.fromEntries(NASOBENIE_DELENIE_FACTS.map(fact => [fact.id, { correct: 4, wrong: 1, streak: 3 }]));
+  const state = {
+    playerName: 'Laura', smileys: ['nas_2_multiply', 'existing'],
+    oneTimeUnlocks: { laura_math_1_2_10_v1: true },
+    games: { yi: { bestStars: 5 }, adaptivneOpakovanie: { bestStars: 4, adaptive } }
+  };
+  const before = structuredClone(state);
+  const next = resetLauraTwosProgressOnce(state);
+  for (const fact of NASOBENIE_DELENIE_FACTS) {
+    const factors = fact.op === 'multiply' ? [fact.a, fact.b] : [fact.b, fact.result];
+    const stat = next.games.adaptivneOpakovanie.adaptive[fact.id];
+    assert.deepEqual(stat, { correct: 4, wrong: 1, streak: factors.includes(2) ? 0 : 3 }, fact.text);
+  }
+  assert.deepEqual(state, before);
+  assert.deepEqual(next.smileys, before.smileys);
+  assert.deepEqual(next.games.yi, before.games.yi);
+  assert.equal(next.games.adaptivneOpakovanie.bestStars, 4);
+});
+
+test('the correction applies only to the Laura login and does not consume other players’ migration', () => {
+  for (const playerName of ['Laura', ' LAURA ']) assert.ok(resetLauraTwosProgressOnce({ playerName }));
+  for (const playerName of ['Eva', 'Lauricka', 'Laura2', '', null]) {
+    const state = { playerName, games: {} };
+    assert.equal(resetLauraTwosProgressOnce(state), null);
+    assert.deepEqual(state, { playerName, games: {} });
+  }
+});
+
+test('reset runs once and does not clear subsequently earned knowledge after a reload', () => {
+  const granted = initializeLauraMathProgress({ playerName: 'Laura', games: {} });
+  const reset = resetLauraTwosProgressOnce(granted);
+  assert.equal(reset.games.adaptivneOpakovanie.adaptive['multiply-2-3'].streak, 0);
+  reset.games.adaptivneOpakovanie.adaptive['multiply-2-3'].streak = 1;
+  const reloaded = JSON.parse(JSON.stringify(reset));
+  assert.equal(initializeLauraMathProgress(reloaded), null);
+  assert.equal(resetLauraTwosProgressOnce(reloaded), null);
+  assert.equal(reloaded.games.adaptivneOpakovanie.adaptive['multiply-2-3'].streak, 1);
+  assert.equal(reloaded.games.adaptivneOpakovanie.adaptive['multiply-1-3'].streak, 2);
+  assert.equal(reloaded.games.adaptivneOpakovanie.adaptive['multiply-3-10'].streak, 2);
 });

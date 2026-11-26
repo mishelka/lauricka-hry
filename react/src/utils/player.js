@@ -1,5 +1,5 @@
 import { ALL_SMILEYS, SMILEYS_CATALOG, SMILEYS_MAP } from '../data/smileysData';
-import { initializeLauraMathProgress } from './lauraMathProgress.js';
+import { initializeLauraMathProgress, resetLauraTwosProgressOnce } from './lauraMathProgress.js';
 
 const STORAGE_KEY = 'laurickaPlayerV1';
 const MAX_STARS = 5;
@@ -38,7 +38,10 @@ function saveState(state) {
 
 export function initializeLauraMathProgressOnce() {
   try {
-    const nextState = initializeLauraMathProgress(loadState());
+    const state = loadState();
+    const initialized = initializeLauraMathProgress(state);
+    // Apply the correction after the earlier one-time grant, including on new browsers.
+    const nextState = resetLauraTwosProgressOnce(initialized || state) || initialized;
     if (nextState) saveState(nextState);
   } catch {
     // Unavailable browser storage must not prevent the app from starting.
