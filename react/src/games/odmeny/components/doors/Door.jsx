@@ -6,16 +6,14 @@ export default function Door({ door, blocks, dragInfo, levelWidth, levelHeight, 
   const conf = COLOR_CONFIG[door.color] || COLOR_CONFIG.red;
   const span = door.span || 1;
   const isLocked = isDoorLocked(door);
-  const depth = isLocked ? Math.round(doorDepth * 1.4) : doorDepth;
+  const depth = doorDepth;
   const doorWidth = door.side === 'top' || door.side === 'bottom' ? span * cellSize + (span - 1) * gap : depth;
   const doorHeight = door.side === 'left' || door.side === 'right' ? span * cellSize + (span - 1) * gap : depth;
   const isWhiteDoor = door.color === 'white';
   const doorStyle = {
-    backgroundColor: isLocked ? '#bfe9f8' : conf.bg,
-    borderColor: isLocked ? '#7fcfee' : isWhiteDoor ? '#334155' : conf.border,
-    boxShadow: isLocked
-      ? 'inset 0 0 6px 2px rgba(79, 179, 220, 0.85), inset 0 0 14px 5px rgba(79, 179, 220, 0.45), 0 2px 5px rgba(0, 0, 0, 0.15)'
-      : isWhiteDoor ? '0 3px 8px rgba(0, 0, 0, 0.25)' : `0 0 10px ${conf.glow}`
+    backgroundColor: isLocked ? undefined : conf.bg,
+    borderColor: isLocked ? undefined : isWhiteDoor ? '#334155' : conf.border,
+    boxShadow: isLocked ? undefined : isWhiteDoor ? '0 3px 8px rgba(0, 0, 0, 0.25)' : `0 0 10px ${conf.glow}`
   };
 
   if (door.side === 'top') Object.assign(doorStyle, { left: padding + door.index * (cellSize + gap), width: doorWidth, top: -depth, height: depth });
@@ -59,7 +57,7 @@ export default function Door({ door, blocks, dragInfo, levelWidth, levelHeight, 
       title={isLocked ? `Zamknutý východ (zostáva ${door.locked})` : undefined}
     >
       {isLocked ? (
-        <span className={styles.lockCount} style={{ fontSize: `${Math.max(14, Math.round(doorDepth * 0.78))}px` }}>{door.locked}</span>
+        <span className={styles.lockCount} style={{ fontSize: `${Math.max(12, Math.round(doorDepth * (String(door.locked).length > 1 ? 0.6 : 0.82)))}px` }}>{door.locked}</span>
       ) : <DoorArrow side={door.side} color={door.color} size={Math.max(12, Math.round(cellSize * 0.4))} pulsing={isMatchingBlockAdjacent} />}
     </div>
   );
