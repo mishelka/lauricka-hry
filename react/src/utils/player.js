@@ -1,4 +1,5 @@
 import { ALL_SMILEYS, SMILEYS_CATALOG, SMILEYS_MAP } from '../data/smileysData';
+import { initializeLauraMathProgress } from './lauraMathProgress.js';
 
 const STORAGE_KEY = 'laurickaPlayerV1';
 const MAX_STARS = 5;
@@ -33,6 +34,16 @@ function loadState() {
 
 function saveState(state) {
   localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+}
+
+export function initializeLauraMathProgressOnce() {
+  try {
+    const nextState = initializeLauraMathProgress(loadState());
+    if (nextState) saveState(nextState);
+  } catch {
+    // Unavailable browser storage must not prevent the app from starting.
+    // The marker is saved with progress, so a later load can retry safely.
+  }
 }
 
 function mergeLevelStars(state, gameId, starsArray, levelCount) {

@@ -1,8 +1,8 @@
 export const ADAPTIVNE_OPAKOVANIE_RULES = [
   'V hre sa striedajú príklady na násobenie a delenie z násobilky 2 až 5.',
   'Príklady, ktoré vyriešiš správne na prvý pokus, sa budú objavovať menej často.',
-  'Keď vyriešiš rovnaký príklad trikrát po sebe bez chyby, zvládneš ho a hra ti ho už nezadá.',
-  'Ak sa pomýliš, séria správnych odpovedí pri danom príklade sa vynuluje.',
+  'Keď vyriešiš rovnaký príklad dvakrát správne na prvý pokus, zvládneš ho a hra ti ho už nezadá.',
+  'Ak sa pomýliš, dosiahnutá úroveň poznania daného príkladu zostáva zachovaná.',
   'Keď zvládneš všetky príklady jednej násobilky (napr. celé násobenie trojkou), získaš smajlíka do zbierky.'
 ];
 

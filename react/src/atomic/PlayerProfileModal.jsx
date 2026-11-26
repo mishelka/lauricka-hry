@@ -277,7 +277,7 @@ export default function PlayerProfileModal({ isOpen, onClose, onNameChange, init
                     <span className="nasobilka-fact fresh nasobilka-legend-swatch" /> ešte neprecvičený
                   </span>
                   <span className="nasobilka-legend-item">
-                    <span className="nasobilka-fact learning nasobilka-legend-swatch" /> učím sa (1–{MASTERY_STREAK - 1}× správne)
+                    <span className="nasobilka-fact learning nasobilka-legend-swatch" /> učím sa (1× správne)
                   </span>
                   <span className="nasobilka-legend-item">
                     <span className="nasobilka-fact mastered nasobilka-legend-swatch" /> zvládnutý ({MASTERY_STREAK}× správne)
@@ -331,7 +331,7 @@ export default function PlayerProfileModal({ isOpen, onClose, onNameChange, init
                               title={`${fact.text} = ${fact.result}`}
                             >
                               <span className="nasobilka-fact-text">{fact.text}</span>
-                              <span className="nasobilka-fact-dots" aria-label={`${fact.streak} z ${MASTERY_STREAK} správne za sebou`}>
+                              <span className="nasobilka-fact-dots" aria-label={`${fact.streak} z ${MASTERY_STREAK} správne`}>
                                 {Array.from({ length: MASTERY_STREAK }).map((_, dotIndex) => (
                                   <span key={dotIndex} className={dotIndex < fact.streak ? 'dot on' : 'dot'} />
                                 ))}

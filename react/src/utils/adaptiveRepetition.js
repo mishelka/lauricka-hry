@@ -1,4 +1,4 @@
-export const MASTERY_STREAK = 3;
+export const MASTERY_STREAK = 2;
 
 export function isMastered(stat) {
   return Number(stat?.streak) >= MASTERY_STREAK;
@@ -53,7 +53,7 @@ export function applyAnswer(progress, factId, wasCorrectFirstTry) {
     ...safeProgress,
     [factId]: wasCorrectFirstTry
       ? { correct: correct + 1, wrong, streak: streak + 1 }
-      : { correct, wrong: wrong + 1, streak: 0 }
+      : { correct, wrong: wrong + 1, streak }
   };
 }
 
