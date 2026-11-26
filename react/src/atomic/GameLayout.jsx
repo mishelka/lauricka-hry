@@ -36,7 +36,10 @@ export default function GameLayout({ children }) {
   const parentPath = pathname.startsWith('/doplnovacky/') ? '/doplnovacky' : null;
   const context = useMemo(() => ({ titleSlot, backSlot, actionSlot, statusSlot, setRightAction }), [titleSlot, backSlot, actionSlot, statusSlot]);
 
-  useLayoutEffect(() => { setMenuOpen(false); }, [pathname]);
+  useLayoutEffect(() => {
+    setMenuOpen(false);
+    window.scrollTo(0, 0);
+  }, [pathname]);
 
   useEffect(() => {
     if (!menuOpen) return;
@@ -119,6 +122,13 @@ export function GameToolbar({ title, onBack, backTitle = 'Späť na výber úrov
 
 export function GameStatus({ children, variant = 'quiz', inline = false }) {
   const { statusSlot } = useContext(GameLayoutContext);
+  useLayoutEffect(() => {
+    // Level menus and games can share a URL. Reset on entering/leaving a game
+    // as well as on route changes, without moving the page between questions.
+    const resetScroll = () => window.scrollTo(0, 0);
+    resetScroll();
+    return resetScroll;
+  }, []);
   const panel = <section className={`game-status game-status-${variant}`} aria-label="Stav hry">{children}</section>;
   return inline ? panel : statusSlot ? createPortal(panel, statusSlot) : null;
 }
