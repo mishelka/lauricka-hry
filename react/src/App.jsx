@@ -148,7 +148,7 @@ function MenuPage() {
 
             <div className="menu-card">
               <button className="btn-menu-adaptivne menu-card-btn" onClick={() => navigate('/adaptivne-opakovanie')}>
-                <span className="menu-title">Adaptívne rátanie</span>
+                <span className="menu-title">Adaptívne násobenie/delenie</span>
                 <span className="menu-stars" aria-label="Smajlíky">
                   <SmileyIcon size={20} stroke="currentColor" />
                 </span>
