@@ -1,3 +1,4 @@
+import { GameToolbar, GameStatus } from '../../atomic/GameLayout';
 import { useContext, useEffect, useMemo, useRef, useState } from 'react';
 import { NASOBENIE_5_GROUPS, NASOBENIE_5_RULES } from '../../data/nasobenie5Data';
 import { getStarCount, shuffleArray, triggerFireworks } from '../../utils/gameUtils';
@@ -198,7 +199,7 @@ export default function Nasobenie5Game() {
   if (selectedLevel === null) {
     return (
       <div>
-        <h1>Násobenie do 5</h1>
+        <GameToolbar title="Násobenie do 5" />
         <p className="level-menu-help">
           Na odomknutie ďalšieho levelu potrebuješ 5 hviezd v aktuálnom leveli.
         </p>
@@ -257,6 +258,7 @@ export default function Nasobenie5Game() {
     const isRewardImplemented = selectedLevel !== null && isBlockOutLevelImplemented(selectedLevel);
     return (
       <div className="result-box">
+        <GameToolbar onBack={() => setSelectedLevel(null)} onRestart={() => startLevel(selectedLevel)} />
         <h2>Koniec hry!</h2>
         <div className="stars">
           {Array.from({ length: 5 }).map((_, idx) => (
@@ -320,29 +322,32 @@ export default function Nasobenie5Game() {
     <div className="game-screen">
       <div ref={fireworksRef} className="fireworks-container" />
 
+      <GameToolbar title="Násobenie do 5" onBack={() => setSelectedLevel(null)} onRestart={() => startLevel(selectedLevel)} />
       <div className="card">
-        <div className="round-info">
-          Level {selectedLevel + 1} • Úloha {index + 1}/{examples.length}
-        </div>
-        <div className="score-live">
-          Správne: <span className="score-hit">{hit}</span> | Chyby: <span className="score-miss">{miss}</span>
-        </div>
-
-        <div className="math-horizontal-container">
-          <div className="math-expr-text">
-            {current.text} =
+        <GameStatus variant="math">
+          <div className="round-info">
+            Level {selectedLevel + 1} • Úloha {index + 1}/{examples.length}
           </div>
-          <div className={`math-input-box ${status}`}>
-            {inputDigits === '' ? <span className="math-cursor">|</span> : inputDigits}
+          <div className="score-live">
+            Správne: <span className="score-hit">{hit}</span> | Chyby: <span className="score-miss">{miss}</span>
           </div>
-        </div>
 
-        {activeHint && (
-          <div className="hint-text" style={{ marginTop: '10px' }}>
-            💡 {activeHint}
+          <div className="math-horizontal-container">
+            <div className="math-expr-text">
+              {current.text} =
+            </div>
+            <div className={`math-input-box ${status}`}>
+              {inputDigits === '' ? <span className="math-cursor">|</span> : inputDigits}
+            </div>
           </div>
-        )}
 
+          {activeHint && (
+            <div className="hint-text" style={{ marginTop: '10px' }}>
+              💡 {activeHint}
+            </div>
+          )}
+
+        </GameStatus>
         <div className="keypad">
           {[7, 8, 9, 4, 5, 6, 1, 2, 3].map(digit => (
             <button

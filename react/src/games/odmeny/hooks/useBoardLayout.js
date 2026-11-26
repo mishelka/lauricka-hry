@@ -26,7 +26,8 @@ export default function useBoardLayout(level) {
       const cellFromWidth = Math.floor(
         (maxAvailableWidth - currentPadding * 2 - (level.width - 1) * currentGap) / level.width
       );
-      const overheadH = (isSmallMobile ? 130 : isMobile ? 148 : 166) + (currentDoorDepth * 2) + currentPadding * 2;
+      const chromeHeight = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--game-chrome-height')) || 80;
+      const overheadH = chromeHeight + 48 + (currentDoorDepth * 2) + currentPadding * 2;
       const maxAvailableHeight = winH - overheadH;
       const cellFromHeight = Math.floor(
         (Math.max(100, maxAvailableHeight) - (level.height - 1) * currentGap) / level.height
@@ -44,7 +45,13 @@ export default function useBoardLayout(level) {
 
     handleResize();
     window.addEventListener('resize', handleResize);
-    return () => window.removeEventListener('resize', handleResize);
+    const chrome = document.querySelector('.game-chrome');
+    const observer = new ResizeObserver(handleResize);
+    if (chrome) observer.observe(chrome);
+    return () => {
+      window.removeEventListener('resize', handleResize);
+      observer.disconnect();
+    };
   }, [level.width, level.height]);
 
   return boardLayout;

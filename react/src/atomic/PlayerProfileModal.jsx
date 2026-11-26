@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { getAdaptiveProgress, getCollectedSmileyIds, getPlayerName, getPlayerStats, getSmileyCollection, setPlayerName } from '../utils/player';
 import { getNasobilkaOverview } from '../utils/nasobilkaRewards';
 import { MASTERY_STREAK } from '../utils/adaptiveRepetition';
@@ -7,11 +7,37 @@ import { SmileyIcon, ChartIcon, CalculatorIcon } from './Icons';
 const ADAPTIVE_GAME_ID = 'adaptivneOpakovanie';
 
 export default function PlayerProfileModal({ isOpen, onClose, onNameChange, initialTab = 'stats' }) {
+  const dialogRef = useRef(null);
   const [activeTab, setActiveTab] = useState(initialTab);
   const [selectedSmiley, setSelectedSmiley] = useState(null);
   const [playerName, setPlayerNameState] = useState(() => getPlayerName());
   const [isEditingName, setIsEditingName] = useState(false);
   const [nameInput, setNameInput] = useState('');
+
+  useEffect(() => {
+    if (!isOpen) return;
+    const previousFocus = document.activeElement;
+    dialogRef.current?.querySelector('button')?.focus();
+    return () => previousFocus?.focus();
+  }, [isOpen]);
+
+  function handleDialogKeyDown(event) {
+    // Keep game keyboard shortcuts inactive while using the profile.
+    event.stopPropagation();
+    if (event.key === 'Escape') onClose();
+    if (event.key === 'Tab') {
+      const buttons = [...dialogRef.current.querySelectorAll('button:not(:disabled), input, [tabindex="0"]')].filter(element => element.getClientRects().length > 0);
+      const first = buttons[0];
+      const last = buttons[buttons.length - 1];
+      if (event.shiftKey && document.activeElement === first) {
+        event.preventDefault();
+        last?.focus();
+      } else if (!event.shiftKey && document.activeElement === last) {
+        event.preventDefault();
+        first?.focus();
+      }
+    }
+  }
 
   useEffect(() => {
     if (isOpen) {
@@ -66,7 +92,7 @@ export default function PlayerProfileModal({ isOpen, onClose, onNameChange, init
   };
 
   return (
-    <div className="profile-modal-backdrop" onClick={onClose} role="dialog" aria-modal="true">
+    <div className="profile-modal-backdrop" ref={dialogRef} onClick={onClose} onKeyDown={handleDialogKeyDown} role="dialog" aria-modal="true" aria-label="Profil hráča" data-scrollable>
       <div className="profile-modal-card" onClick={e => e.stopPropagation()}>
         <div className="profile-modal-header">
           <div className="profile-modal-title">

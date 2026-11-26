@@ -1,3 +1,4 @@
+import { GameToolbar, GameStatus } from '../../atomic/GameLayout';
 import { useContext, useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ADAPTIVNE_OPAKOVANIE_RULES, NASOBENIE_DELENIE_FACTS } from '../../data/nasobenieDelenieData';
@@ -290,8 +291,7 @@ export default function AdaptivneOpakovanieGame() {
         </div>
       )}
 
-      <h1>Adaptívne opakovanie</h1>
-      <div className="level-progress-message">Nekonečný mód</div>
+      <GameToolbar title="Adaptívne opakovanie" />
 
       {showRules && (
         <div className="rules-panel">
@@ -309,18 +309,22 @@ export default function AdaptivneOpakovanieGame() {
 
       {current && (
         <div className="card">
-          <div className="math-horizontal-container">
-            <div className="math-expr-text">{current.text} =</div>
-            <div className={`math-input-box ${status}`}>
-              {inputDigits === '' ? <span className="math-cursor">|</span> : inputDigits}
+          <GameStatus variant="math">
+            <div className="current-level">Nekonečný mód • Úloha {index + 1}/{examples.length}</div>
+            <div className="score-board">Správne: {hit} | Chyby: {miss} • Zvládnuté: {masteredCount}</div>
+            <div className="math-horizontal-container">
+              <div className="math-expr-text">{current.text} =</div>
+              <div className={`math-input-box ${status}`}>
+                {inputDigits === '' ? <span className="math-cursor">|</span> : inputDigits}
+              </div>
             </div>
-          </div>
 
-          <div className={`math-feedback ${feedback ? feedback.type : ''}`} aria-live="polite">
-            {feedback?.type === 'correct' && <span>✅ {feedback.text}</span>}
-            {feedback?.type === 'wrong' && <span>💡 {feedback.text}</span>}
-          </div>
+            <div className={`math-feedback ${feedback ? feedback.type : ''}`} aria-live="polite">
+              {feedback?.type === 'correct' && <span>✅ {feedback.text}</span>}
+              {feedback?.type === 'wrong' && <span>💡 {feedback.text}</span>}
+            </div>
 
+          </GameStatus>
           <div className="keypad">
             {[7, 8, 9, 4, 5, 6, 1, 2, 3].map(digit => (
               <button

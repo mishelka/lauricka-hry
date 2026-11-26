@@ -1,3 +1,4 @@
+import { GameToolbar, GameStatus } from './GameLayout';
 import { useMemo, useRef, useState } from 'react';
 import ResultScreen from './ResultScreen';
 import { shuffleArray, triggerFireworks } from '../utils/gameUtils';
@@ -115,14 +116,16 @@ export default function QuizGame({
   return (
     <>
       <div className="game-ui">
-        <h1>{title}</h1>
-        <div className="score-board">
-          Správne: <span className="score-hit">{hit}</span> | Chyby: <span className="score-miss">{miss}</span>
-        </div>
-        {typeof bestStars === 'number' && <div className="best-stars">Najviac hviezd: {bestStars}/5 ★</div>}
+        <GameToolbar title={title} onRestart={restart} />
+        <GameStatus>
+          <div className="score-board">
+            Správne: <span className="score-hit">{hit}</span> | Chyby: <span className="score-miss">{miss}</span>
+          </div>
+          {typeof bestStars === 'number' && <div className="best-stars">Najviac hviezd: {bestStars}/5 ★</div>}
 
-        <div className={`prompt ${promptClassName}`.trim()}>{prompt}</div>
+          <div className={`prompt ${promptClassName}`.trim()}>{prompt}</div>
 
+        </GameStatus>
         <div className="button-container">
           {options.map(option => {
             const marker = feedbackMap[option.id];

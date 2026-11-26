@@ -1,3 +1,4 @@
+import { GameToolbar, GameStatus } from './GameLayout';
 import { useMemo, useRef, useState } from 'react';
 import { getStarCount, shuffleArray, triggerFireworks } from '../utils/gameUtils';
 import { getLevelStars, updateLevelBestStars } from '../utils/player';
@@ -253,7 +254,7 @@ export default function WordFillGame({ title, gameId, levelGroups, sourceWords }
   if (selectedLevel === null) {
     return (
       <div>
-        <h1>{title}</h1>
+        <GameToolbar title={title} />
         <p className="level-menu-help">
           Vyber si úroveň a doplň správne písmená do 10 slov. Získaj 5★ na odomknutie ďalšej úrovne.
         </p>
@@ -298,17 +299,17 @@ export default function WordFillGame({ title, gameId, levelGroups, sourceWords }
   return (
     <div className="dopln-game">
       <div ref={fireworksRef} className="fireworks-overlay" />
-      <h1>{`${title} - Level ${selectedLevel + 1}`}</h1>
+      <GameToolbar title={title} onBack={() => setSelectedLevel(null)} onRestart={() => startLevel(selectedLevel)} />
 
       {!submitted ? (
-        <>
-          <p className="level-menu-help">
-            Doplň správne písmená do všetkých 10 slov a stlač <strong>Skontrolovať</strong>:
-          </p>
-          <div className="score-board">
-            Doplnené: <span className="score-hit">{filledCount}</span> / {words.length}
-          </div>
-        </>
+        <GameStatus variant="info">
+            <p className="level-menu-help">
+              Doplň správne písmená do všetkých 10 slov a stlač <strong>Skontrolovať</strong>:
+            </p>
+            <div className="score-board">
+              Doplnené: <span className="score-hit">{filledCount}</span> / {words.length}
+            </div>
+        </GameStatus>
       ) : (
         <div className="result-box">
           <h2>Koniec levelu!</h2>

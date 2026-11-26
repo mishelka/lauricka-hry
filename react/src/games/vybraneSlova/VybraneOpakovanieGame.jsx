@@ -1,3 +1,4 @@
+import { GameToolbar, GameStatus } from '../../atomic/GameLayout';
 import { useContext, useEffect, useMemo, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { getAlternatingOpakovanieTasks } from '../../data/vybraneOpakovanieData';
@@ -207,55 +208,57 @@ export default function VybraneOpakovanieGame() {
 
       {!resultVisible ? (
         <div className="game-ui">
-          <h1>Opakovanie vybraných slov</h1>
-          <div className="current-level">
-            {order.length > 0 ? `Otázka ${index + 1}/${order.length}` : 'Otázka 0/0'}
-          </div>
-          <div className="score-board">
-            Správne: <span className="score-hit">{hit}</span> | Chyby: <span className="score-miss">{miss}</span>
-          </div>
-
-          <div
-            className={`prompt ${isSentence ? 'prompt-sentence' : 'prompt-words'}`}
-            style={
-              isSentence
-                ? {
-                    fontSize: '28px',
-                    letterSpacing: '1px',
-                    minHeight: '80px',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    padding: '12px',
-                    background: '#ffffff',
-                    borderRadius: '16px',
-                    border: '2px solid #b8d4e8',
-                    margin: '16px 0'
-                  }
-                : {}
-            }
-          >
-            {displayWord}
-          </div>
-
-          {activeHint && (
-            <div
-              className="hint-box"
-              style={{
-                fontSize: '17px',
-                color: '#1a365d',
-                background: '#e2f1fc',
-                padding: '10px 14px',
-                borderRadius: '12px',
-                marginBottom: '14px',
-                fontWeight: 'bold',
-                border: '1px solid #90cdf4'
-              }}
-            >
-              💡 {activeHint}
+          <GameToolbar title="Opakovanie vybraných slov" onRestart={() => startRound()} />
+          <GameStatus>
+            <div className="current-level">
+              {order.length > 0 ? `Otázka ${index + 1}/${order.length}` : 'Otázka 0/0'}
             </div>
-          )}
+            <div className="score-board">
+              Správne: <span className="score-hit">{hit}</span> | Chyby: <span className="score-miss">{miss}</span>
+            </div>
 
+            <div
+              className={`prompt ${isSentence ? 'prompt-sentence' : 'prompt-words'}`}
+              style={
+                isSentence
+                  ? {
+                      fontSize: '28px',
+                      letterSpacing: '1px',
+                      minHeight: '80px',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      padding: '12px',
+                      background: '#ffffff',
+                      borderRadius: '16px',
+                      border: '2px solid #b8d4e8',
+                      margin: '16px 0'
+                    }
+                  : {}
+              }
+            >
+              {displayWord}
+            </div>
+
+            {activeHint && (
+              <div
+                className="hint-box"
+                style={{
+                  fontSize: '17px',
+                  color: '#1a365d',
+                  background: '#e2f1fc',
+                  padding: '10px 14px',
+                  borderRadius: '12px',
+                  marginBottom: '14px',
+                  fontWeight: 'bold',
+                  border: '1px solid #90cdf4'
+                }}
+              >
+                💡 {activeHint}
+              </div>
+            )}
+
+          </GameStatus>
           <IyChoiceButtons
             task={currentTask}
             onCheck={check}

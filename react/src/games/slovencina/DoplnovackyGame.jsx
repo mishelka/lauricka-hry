@@ -1,3 +1,4 @@
+import { GameToolbar } from '../../atomic/GameLayout';
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { DOPLNOVACKY_DTNL_GROUPS, DOPLNOVACKY_B_GROUPS } from '../../data/tasks';
@@ -33,7 +34,7 @@ export function DoplnovackyMenu() {
 
   return (
     <div>
-      <h1>Doplňovačky</h1>
+      <GameToolbar title="Doplňovačky" />
       <p className="level-menu-help">Vyber si doplňovačku a precvič si správne dopĺňanie písmen po leveloch:</p>
 
       <div className="menu-container">

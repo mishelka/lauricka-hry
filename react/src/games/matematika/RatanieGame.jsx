@@ -1,3 +1,4 @@
+import { GameToolbar, GameStatus } from '../../atomic/GameLayout';
 import { useRef, useState } from 'react';
 import { getStarCount, triggerFireworks } from '../../utils/gameUtils';
 import { getBestStars, getLevelStars, updateLevelBestStars } from '../../utils/player';
@@ -201,7 +202,7 @@ export default function RatanieGame() {
   if (selectedLevel === null) {
     return (
       <div>
-        <h1>Rátanie: Levely 1-10</h1>
+        <GameToolbar title="Rátanie: Levely 1-10" />
         <p className="level-menu-help">Na odomknutie ďalšieho levelu potrebuješ 5 hviezd v aktuálnom leveli.</p>
         <div className="levels-grid">
           {LEVELS.map((config, level) => {
@@ -246,6 +247,7 @@ export default function RatanieGame() {
     const levelTaleUrl = AUDIO_TALES.math[selectedLevel] || AUDIO_TALES.math[0];
     return (
       <div className="result-box">
+        <GameToolbar onBack={() => setSelectedLevel(null)} onRestart={() => startLevel(selectedLevel)} />
         <h2>Koniec hry!</h2>
         <div className="stars">
           {Array.from({ length: 5 }).map((_, idx) => (
@@ -300,48 +302,50 @@ export default function RatanieGame() {
   return (
     <>
       <div className="game-ui">
-        <h1>Rátanie</h1>
-        <div className="current-level">{`Level ${selectedLevel + 1} • Najlepšie: ${levelStars[selectedLevel] || 0}/5 ★`}</div>
-        <div className="score-board">
-          Správne: <span className="score-hit">{hit}</span> | Chyby: <span className="score-miss">{miss}</span>
-        </div>
-        <div className="progress">Príklad {index + 1}/{TOTAL}</div>
-        <div className="prompt prompt-ratanie">
-          <div className="vertical-math">
-            <div className="math-row">
-              <span className="math-operator">&nbsp;</span>
-              <div className="math-number">
-                {String(current.a).padStart(2, ' ').split('').map((digit, i) => (
-                  <span key={`top-${i}`} className="digit-box">{digit === ' ' ? '\u00a0' : digit}</span>
-                ))}
+        <GameToolbar title="Rátanie" onBack={() => setSelectedLevel(null)} onRestart={() => startLevel(selectedLevel)} />
+        <GameStatus variant="written">
+          <div className="current-level">{`Level ${selectedLevel + 1} • Najlepšie: ${levelStars[selectedLevel] || 0}/5 ★`}</div>
+          <div className="score-board">
+            Správne: <span className="score-hit">{hit}</span> | Chyby: <span className="score-miss">{miss}</span>
+          </div>
+          <div className="progress">Príklad {index + 1}/{TOTAL}</div>
+          <div className="prompt prompt-ratanie">
+            <div className="vertical-math">
+              <div className="math-row">
+                <span className="math-operator">&nbsp;</span>
+                <div className="math-number">
+                  {String(current.a).padStart(2, ' ').split('').map((digit, i) => (
+                    <span key={`top-${i}`} className="digit-box">{digit === ' ' ? '\u00a0' : digit}</span>
+                  ))}
+                </div>
               </div>
-            </div>
-            <div className="math-row">
-              <span className="math-operator">{current.op}</span>
-              <div className="math-number">
-                {String(current.b).padStart(2, ' ').split('').map((digit, i) => (
-                  <span key={`bottom-${i}`} className="digit-box">{digit === ' ' ? '\u00a0' : digit}</span>
-                ))}
+              <div className="math-row">
+                <span className="math-operator">{current.op}</span>
+                <div className="math-number">
+                  {String(current.b).padStart(2, ' ').split('').map((digit, i) => (
+                    <span key={`bottom-${i}`} className="digit-box">{digit === ' ' ? '\u00a0' : digit}</span>
+                  ))}
+                </div>
               </div>
-            </div>
-            <div className="math-line" />
-            <div className="math-row">
-              <span className="math-operator">&nbsp;</span>
-              <div className="math-number math-answer">
-                {answerDigits.map((digit, i) => (
-                  <button
-                    key={`answer-${i}`}
-                    type="button"
-                    className={`digit-input ${activeDigit === i ? 'active' : ''}`}
-                    onClick={() => !locked && setActiveDigit(i)}
-                  >
-                    {digit || '\u00a0'}
-                  </button>
-                ))}
+              <div className="math-line" />
+              <div className="math-row">
+                <span className="math-operator">&nbsp;</span>
+                <div className="math-number math-answer">
+                  {answerDigits.map((digit, i) => (
+                    <button
+                      key={`answer-${i}`}
+                      type="button"
+                      className={`digit-input ${activeDigit === i ? 'active' : ''}`}
+                      onClick={() => !locked && setActiveDigit(i)}
+                    >
+                      {digit || '\u00a0'}
+                    </button>
+                  ))}
+                </div>
               </div>
             </div>
           </div>
-        </div>
+        </GameStatus>
         <div className="keyboard-grid">
           {[1, 2, 3, 4, 5, 6, 7, 8, 9].map(n => (
             <button key={n} className="btn-key" onClick={() => pressDigit(String(n))}>{n}</button>

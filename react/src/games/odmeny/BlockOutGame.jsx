@@ -4,7 +4,7 @@ import { BLOCK_OUT_LEVELS, getBlockCells, getOccupiedCells, isDirAllowedForBlock
 import { sounds } from './soundEffects';
 import { triggerFireworks } from '../../utils/gameUtils';
 import { getLevelStars, updateLevelBestStars, getLevelPlays, incrementLevelPlays, getBlockOutSavedState, saveBlockOutSavedState, clearBlockOutSavedState, getBlockOutSavedStates } from '../../utils/player';
-import { BlockOutHeader as HeaderComponent, GameBoard as GameBoardComponent, LevelSelect as LevelSelectComponent, MessageBanner as MessageBannerComponent, StatusBar as StatusBarComponent, VictoryModal as VictoryModalComponent } from './components';
+import { BlockOutHeader as HeaderComponent, GameBoard as GameBoardComponent, LevelSelect as LevelSelectComponent, StatusBar as StatusBarComponent, VictoryModal as VictoryModalComponent } from './components';
 import { DRAG_THRESHOLD, MAX_LEVEL_PLAYS } from './constants';
 import useBoardLayout from './hooks/useBoardLayout';
 import useViewportLock from './hooks/useViewportLock';
@@ -880,7 +880,6 @@ export default function BlockOutGame({
               }
             }}
             backTitle={rewardLevel !== null ? 'Späť' : 'Výber levelov'}
-            backIcon={rewardLevel !== null ? null : 'levels'}
             onUndo={undoMove}
             canUndo={history.length > 0}
             onRestart={resetCurrentLevel}
@@ -888,11 +887,9 @@ export default function BlockOutGame({
             onToggleMute={toggleMute}
           />
 
-          <StatusBarComponent moves={moves} />
+          <StatusBarComponent moves={moves} message={message} />
 
           <GameBoardComponent level={level} levelWalls={levelWalls} doors={doors} blocks={blocks} dragInfo={dragInfo} cellSize={cellSize} gap={gap} padding={padding} doorDepth={doorDepth} onPointerDown={handlePointerDown} />
-
-          <MessageBannerComponent message={message} />
 
           {gameState === 'win' && (
             <VictoryModalComponent

@@ -1,10 +1,9 @@
 .container {
   position: fixed;
-  inset: 0;
+  inset: var(--game-chrome-height, 80px) 0 0;
   width: 100vw;
-  height: 100vh;
-  height: 100dvh;
-  max-height: 100dvh;
+  height: calc(100dvh - var(--game-chrome-height, 80px));
+  max-height: calc(100dvh - var(--game-chrome-height, 80px));
   background: #f0f8ff;
   z-index: 1000;
   display: flex;

@@ -1,3 +1,4 @@
+import { GameToolbar } from './GameLayout';
 import { getStarCount } from '../utils/gameUtils';
 import { useEffect } from 'react';
 import AudioTalePlayer from './AudioTalePlayer';
@@ -12,6 +13,7 @@ export default function ResultScreen({ miss, wrongItems, onRestart, onResult, ta
 
   return (
     <div className="result-box">
+      <GameToolbar onRestart={onRestart} />
       <h2>Koniec hry!</h2>
       <div className="stars">
         {Array.from({ length: 5 }).map((_, index) => (

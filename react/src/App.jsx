@@ -1,3 +1,4 @@
+import GameLayout, { GameLayoutContext } from './atomic/GameLayout';
 import { Navigate, Route, Routes, useLocation, useNavigate } from 'react-router-dom';
 import { DOPLNOVACKY_DTNL_GROUPS, DOPLNOVACKY_B_GROUPS } from './data/tasks';
 import { NASOBENIE_5_GROUPS } from './data/nasobenie5Data';
@@ -9,20 +10,18 @@ import { VYBRANE_R_GROUPS } from './data/vybraneRSlova';
 import { VYBRANE_S_GROUPS } from './data/vybraneSSlova';
 import { VYBRANE_V_GROUPS } from './data/vybraneVSlova';
 import { VYBRANE_Z_GROUPS } from './data/vybraneZSlova';
-import { getBestStars, getCollectedSmileyIds, getLevelStars, getPlayerName, getTotalStars, unlockAllLevels } from './utils/player';
+import { getBestStars, getLevelStars, unlockAllLevels } from './utils/player';
 import MenuSection from './atomic/MenuSection';
 import useDevUnlock from './utils/useDevUnlock';
 import { YiGame, ObojakeGame, SlovaYiGame, CudzieGame, DoplnovackyMenu, DoplnovackyDtnlGame, DoplnovackyBGame } from './games/slovencina';
 import { VybraneBGame, VybraneMGame, VybranePGame, VybraneRGame, VybraneSGame, VybraneVGame, VybraneZGame, VybraneOpakovanieGame } from './games/vybraneSlova';
 import { RatanieGame, Nasobenie5Game, Delenie5Game, AdaptivneOpakovanieGame } from './games/matematika';
 import { BlockOutGame, BLOCK_OUT_LEVELS } from './games/odmeny';
-import { AudioTalePlayer, HomeIcon, PlayIcon, PauseIcon, UserIcon, SmileyIcon, PlayerProfileModal } from './atomic';
+import { AudioTalePlayer, PlayIcon, PauseIcon, SmileyIcon } from './atomic';
 import { AUDIO_TALES } from './data/audioTales';
-import { createContext, useContext, useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 
-export const TopActionsContext = createContext({
-  setRightAction: () => {},
-});
+export const TopActionsContext = GameLayoutContext;
 
 function renderStars(starsCount) {
   return Array.from({ length: 5 }).map((_, i) => (
@@ -33,10 +32,6 @@ function renderStars(starsCount) {
 function MenuPage() {
   const navigate = useNavigate();
   const location = useLocation();
-  const [showProfileModal, setShowProfileModal] = useState(false);
-  const [playerName, setPlayerName] = useState(() => getPlayerName());
-  const [collectedSmileysCount, setCollectedSmileysCount] = useState(() => getCollectedSmileyIds().length);
-  const [totalStarsCount, setTotalStarsCount] = useState(() => getTotalStars());
   const [menuStars, setMenuStars] = useState(() => ({
     yi: getBestStars('yi'),
     obojake: getBestStars('obojake'),
@@ -59,9 +54,6 @@ function MenuPage() {
   }));
 
   function refreshMenuStars() {
-    setPlayerName(getPlayerName());
-    setCollectedSmileysCount(getCollectedSmileyIds().length);
-    setTotalStarsCount(getTotalStars());
     setMenuStars({
       yi: getBestStars('yi'),
       obojake: getBestStars('obojake'),
@@ -153,33 +145,6 @@ function MenuPage() {
 
   return (
     <>
-      <div className="menu-header-bar">
-        <h1>Vyber si hru:</h1>
-        <button
-          type="button"
-          className="btn-header-profile"
-          onClick={() => setShowProfileModal(true)}
-          title={playerName || "Profil hráča"}
-          aria-label={playerName || "Profil hráča"}
-        >
-          <span className="header-profile-icon"><UserIcon size={18} /></span>
-          <span className="header-profile-label">{playerName || "Tvoj profil"}</span>
-          <span className="header-profile-badge header-profile-stars-badge">⭐ {totalStarsCount}</span>
-          <span className="header-profile-badge header-profile-smileys-badge">😊 {collectedSmileysCount}</span>
-        </button>
-      </div>
-
-      <PlayerProfileModal
-        isOpen={showProfileModal}
-        onClose={() => {
-          setShowProfileModal(false);
-          refreshMenuStars();
-        }}
-        onNameChange={(newName) => {
-          setPlayerName(newName);
-        }}
-      />
-
       <div className="menu-container">
         <MenuSection categoryId="matematika" title="Matematické hry">
             <div className="menu-card">
@@ -384,30 +349,6 @@ function MenuPage() {
   );
 }
 
-function GamePage({ children, backTo = '/', rightAction: propRightAction }) {
-  const navigate = useNavigate();
-  const [contextRightAction, setContextRightAction] = useState(null);
-
-  const rightAction = propRightAction || contextRightAction;
-
-  return (
-    <TopActionsContext.Provider value={{ setRightAction: setContextRightAction }}>
-      <div className="top-actions">
-        <button
-          className="btn-back"
-          onClick={() => navigate(backTo)}
-          title="Hlavné menu"
-          aria-label="Hlavné menu"
-        >
-          <HomeIcon size={24} />
-        </button>
-        {rightAction}
-      </div>
-      {children}
-    </TopActionsContext.Provider>
-  );
-}
-
 function isVybraneLetterUnlocked(letter) {
   if (letter === 'b') return true;
   const bDone = getLevelStars('vybraneB', VYBRANE_B_GROUPS.length).filter(s => s === 5).length === VYBRANE_B_GROUPS.length;
@@ -427,35 +368,37 @@ function isVybraneLetterUnlocked(letter) {
 
 export default function App() {
   return (
-    <div className="app-shell">
-      <div className="app-container">
-        <Routes>
-          <Route path="/" element={<MenuPage />} />
-          <Route path="/yi" element={<GamePage><YiGame /></GamePage>} />
-          <Route path="/obojake" element={<GamePage><ObojakeGame /></GamePage>} />
-          <Route path="/slova" element={<GamePage><SlovaYiGame /></GamePage>} />
-          <Route path="/doplnovacky" element={<GamePage><DoplnovackyMenu /></GamePage>} />
-          <Route path="/doplnovacky/dtnl" element={<GamePage backTo="/doplnovacky"><DoplnovackyDtnlGame /></GamePage>} />
-          <Route path="/doplnovacky/b" element={<GamePage backTo="/doplnovacky"><DoplnovackyBGame /></GamePage>} />
-          <Route path="/cudzie" element={<GamePage><CudzieGame /></GamePage>} />
-          <Route path="/vybrane-opakovanie" element={<GamePage><VybraneOpakovanieGame /></GamePage>} />
-          <Route path="/vybrane-b" element={<GamePage><VybraneBGame /></GamePage>} />
-          <Route path="/vybrane-m" element={isVybraneLetterUnlocked('m') ? <GamePage><VybraneMGame /></GamePage> : <Navigate to="/vybrane-b" replace />} />
-          <Route path="/vybrane-p" element={isVybraneLetterUnlocked('p') ? <GamePage><VybranePGame /></GamePage> : <Navigate to="/vybrane-b" replace />} />
-          <Route path="/vybrane-r" element={isVybraneLetterUnlocked('r') ? <GamePage><VybraneRGame /></GamePage> : <Navigate to="/vybrane-b" replace />} />
-          <Route path="/vybrane-s" element={isVybraneLetterUnlocked('s') ? <GamePage><VybraneSGame /></GamePage> : <Navigate to="/vybrane-b" replace />} />
-          <Route path="/vybrane-v" element={isVybraneLetterUnlocked('v') ? <GamePage><VybraneVGame /></GamePage> : <Navigate to="/vybrane-b" replace />} />
-          <Route path="/vybrane-z" element={isVybraneLetterUnlocked('z') ? <GamePage><VybraneZGame /></GamePage> : <Navigate to="/vybrane-b" replace />} />
-          <Route path="/ratanie" element={<GamePage><RatanieGame /></GamePage>} />
-          <Route path="/nasobenie-5" element={<GamePage><Nasobenie5Game /></GamePage>} />
-          <Route path="/delenie-5" element={<GamePage><Delenie5Game /></GamePage>} />
-          <Route path="/adaptivne-opakovanie" element={<GamePage><AdaptivneOpakovanieGame /></GamePage>} />
-          <Route path="/nasobenie-3" element={<Navigate to="/nasobenie-5" replace />} />
-          <Route path="/delenie-3" element={<Navigate to="/delenie-5" replace />} />
-          <Route path="/block-out" element={<GamePage><BlockOutGame /></GamePage>} />
-          <Route path="*" element={<Navigate to="/" replace />} />
-        </Routes>
+    <GameLayout>
+      <div className="app-shell">
+        <div className="app-container">
+          <Routes>
+            <Route path="/" element={<MenuPage />} />
+            <Route path="/yi" element={<YiGame />} />
+            <Route path="/obojake" element={<ObojakeGame />} />
+            <Route path="/slova" element={<SlovaYiGame />} />
+            <Route path="/doplnovacky" element={<DoplnovackyMenu />} />
+            <Route path="/doplnovacky/dtnl" element={<DoplnovackyDtnlGame />} />
+            <Route path="/doplnovacky/b" element={<DoplnovackyBGame />} />
+            <Route path="/cudzie" element={<CudzieGame />} />
+            <Route path="/vybrane-opakovanie" element={<VybraneOpakovanieGame />} />
+            <Route path="/vybrane-b" element={<VybraneBGame />} />
+            <Route path="/vybrane-m" element={isVybraneLetterUnlocked('m') ? <VybraneMGame /> : <Navigate to="/vybrane-b" replace />} />
+            <Route path="/vybrane-p" element={isVybraneLetterUnlocked('p') ? <VybranePGame /> : <Navigate to="/vybrane-b" replace />} />
+            <Route path="/vybrane-r" element={isVybraneLetterUnlocked('r') ? <VybraneRGame /> : <Navigate to="/vybrane-b" replace />} />
+            <Route path="/vybrane-s" element={isVybraneLetterUnlocked('s') ? <VybraneSGame /> : <Navigate to="/vybrane-b" replace />} />
+            <Route path="/vybrane-v" element={isVybraneLetterUnlocked('v') ? <VybraneVGame /> : <Navigate to="/vybrane-b" replace />} />
+            <Route path="/vybrane-z" element={isVybraneLetterUnlocked('z') ? <VybraneZGame /> : <Navigate to="/vybrane-b" replace />} />
+            <Route path="/ratanie" element={<RatanieGame />} />
+            <Route path="/nasobenie-5" element={<Nasobenie5Game />} />
+            <Route path="/delenie-5" element={<Delenie5Game />} />
+            <Route path="/adaptivne-opakovanie" element={<AdaptivneOpakovanieGame />} />
+            <Route path="/nasobenie-3" element={<Navigate to="/nasobenie-5" replace />} />
+            <Route path="/delenie-3" element={<Navigate to="/delenie-5" replace />} />
+            <Route path="/block-out" element={<BlockOutGame />} />
+            <Route path="*" element={<Navigate to="/" replace />} />
+          </Routes>
+        </div>
       </div>
-    </div>
+    </GameLayout>
   );
 }

@@ -1,3 +1,4 @@
+import { GameToolbar, GameStatus } from '../../atomic/GameLayout';
 import { useMemo, useRef, useState } from 'react';
 import { SLOVA_YI_GROUPS, SLOVA_YI_TASKS } from '../../data/tasks';
 import { getStarCount, getVybraneOptionId, shuffleArray, triggerFireworks } from '../../utils/gameUtils';
@@ -123,7 +124,7 @@ export default function SlovaYiGame() {
   if (selectedLevel === null) {
     return (
       <div>
-        <h1>Slová: Levely 1-8</h1>
+        <GameToolbar title="Slová: Levely 1-8" />
         <p className="level-menu-help">Na odomknutie ďalšieho levelu potrebuješ 5 hviezd v aktuálnom leveli.</p>
         <div className="levels-grid">
           {groups.map((_, level) => {
@@ -166,6 +167,7 @@ export default function SlovaYiGame() {
     const levelTaleUrl = AUDIO_TALES.slovaYiLevels[selectedLevel] || AUDIO_TALES.slovaYiLevels[0];
     return (
       <div className="result-box">
+        <GameToolbar onBack={() => setSelectedLevel(null)} onRestart={() => startLevel(selectedLevel)} />
         <h2>Koniec hry!</h2>
         <div className="stars">
           {Array.from({ length: 5 }).map((_, idx) => (
@@ -222,12 +224,14 @@ export default function SlovaYiGame() {
   return (
     <>
       <div className="game-ui">
-        <h1>Doplň správne i/y:</h1>
-        <div className="current-level">{`Level ${selectedLevel + 1} • Najlepšie: ${levelStars[selectedLevel] || 0}/5 ★`}</div>
-        <div className="score-board">
-          Správne: <span className="score-hit">{hit}</span> | Chyby: <span className="score-miss">{miss}</span>
-        </div>
-        <div className="prompt prompt-words">{displayWord}</div>
+        <GameToolbar title="Doplň správne i/y:" onBack={() => setSelectedLevel(null)} onRestart={() => startLevel(selectedLevel)} />
+        <GameStatus>
+          <div className="current-level">{`Level ${selectedLevel + 1} • Najlepšie: ${levelStars[selectedLevel] || 0}/5 ★`}</div>
+          <div className="score-board">
+            Správne: <span className="score-hit">{hit}</span> | Chyby: <span className="score-miss">{miss}</span>
+          </div>
+          <div className="prompt prompt-words">{displayWord}</div>
+        </GameStatus>
         <IyChoiceButtons
           task={currentTask}
           onCheck={check}

@@ -1,3 +1,4 @@
+import { GameToolbar, GameStatus } from '../../atomic/GameLayout';
 import { useContext, useEffect, useMemo, useRef, useState } from 'react';
 import { VYBRANE_M_GROUPS, VYBRANE_M_RULES, VYBRANE_M_CHYTAKY } from '../../data/vybraneMSlova';
 import { getStarCount, getVybraneOptionId, shuffleArray, triggerFireworks } from '../../utils/gameUtils';
@@ -215,7 +216,7 @@ export default function VybraneMGame() {
   if (selectedLevel === null) {
     return (
       <div>
-        <h1>Vybrané slová po M</h1>
+        <GameToolbar title="Vybrané slová po M" />
         <p className="level-menu-help">Vyber si úroveň a precvič si vybrané slová po M. Získaj 5★ na odomknutie ďalšej úrovne a odmeny.</p>
 
         {showRules && renderRulesPanel()}
@@ -271,6 +272,7 @@ export default function VybraneMGame() {
     const isRewardImplemented = rewardLevelIndex !== null && isBlockOutLevelImplemented(rewardLevelIndex);
     return (
       <div className="result-box">
+        <GameToolbar onBack={() => setSelectedLevel(null)} onRestart={() => startLevel(selectedLevel)} />
         <h2>Koniec hry!</h2>
         <div className="stars">
           {Array.from({ length: 5 }).map((_, idx) => (
@@ -334,45 +336,47 @@ export default function VybraneMGame() {
   return (
     <>
       <div className="game-ui">
-        <h1>Vybrané slová po M</h1>
-        <div className="current-level">
-          {`Level ${selectedLevel + 1} • Úloha ${index + 1}/${order.length}`}
-        </div>
-        <div className="score-board">
-          Správne: <span className="score-hit">{hit}</span> | Chyby: <span className="score-miss">{miss}</span>
-        </div>
-
-        <div className={`prompt ${isSentence ? 'prompt-sentence' : 'prompt-words'}`} style={isSentence ? {
-          fontSize: '28px',
-          letterSpacing: '1px',
-          minHeight: '80px',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          padding: '12px',
-          background: '#ffffff',
-          borderRadius: '16px',
-          border: '2px solid #b8d4e8',
-          margin: '16px 0'
-        } : {}}>
-          {displayWord}
-        </div>
-
-        {activeHint && (
-          <div className="hint-box" style={{
-            fontSize: '17px',
-            color: '#1a365d',
-            background: '#e2f1fc',
-            padding: '10px 14px',
-            borderRadius: '12px',
-            marginBottom: '14px',
-            fontWeight: 'bold',
-            border: '1px solid #90cdf4'
-          }}>
-            💡 {activeHint}
+        <GameToolbar title="Vybrané slová po M" onBack={() => setSelectedLevel(null)} onRestart={() => startLevel(selectedLevel)} />
+        <GameStatus>
+          <div className="current-level">
+            {`Level ${selectedLevel + 1} • Úloha ${index + 1}/${order.length}`}
           </div>
-        )}
+          <div className="score-board">
+            Správne: <span className="score-hit">{hit}</span> | Chyby: <span className="score-miss">{miss}</span>
+          </div>
 
+          <div className={`prompt ${isSentence ? 'prompt-sentence' : 'prompt-words'}`} style={isSentence ? {
+            fontSize: '28px',
+            letterSpacing: '1px',
+            minHeight: '80px',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            padding: '12px',
+            background: '#ffffff',
+            borderRadius: '16px',
+            border: '2px solid #b8d4e8',
+            margin: '16px 0'
+          } : {}}>
+            {displayWord}
+          </div>
+
+          {activeHint && (
+            <div className="hint-box" style={{
+              fontSize: '17px',
+              color: '#1a365d',
+              background: '#e2f1fc',
+              padding: '10px 14px',
+              borderRadius: '12px',
+              marginBottom: '14px',
+              fontWeight: 'bold',
+              border: '1px solid #90cdf4'
+            }}>
+              💡 {activeHint}
+            </div>
+          )}
+
+        </GameStatus>
         <IyChoiceButtons
           task={currentTask}
           onCheck={check}
