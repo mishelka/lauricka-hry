@@ -209,7 +209,7 @@ export default function VybraneOpakovanieGame() {
       {!resultVisible ? (
         <div className="game-ui">
           <GameToolbar title="Opakovanie vybraných slov" onRestart={() => startRound()} />
-          <GameStatus>
+          <GameStatus variant="words">
             <div className="current-level">
               {order.length > 0 ? `Otázka ${index + 1}/${order.length}` : 'Otázka 0/0'}
             </div>
@@ -260,6 +260,7 @@ export default function VybraneOpakovanieGame() {
 
           </GameStatus>
           <IyChoiceButtons
+            className="button-grid-2x2 word-answer-grid"
             task={currentTask}
             onCheck={check}
             disabledOptions={disabledOptions}

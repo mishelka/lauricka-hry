@@ -77,23 +77,11 @@
   color: #1e293b;
 }
 .game-status-compact { height: 56px; display: flex; justify-content: center; align-items: center; gap: 12px; }
-.game-status-math { height: 176px; padding: 10px 12px; }
-.game-status-written { height: 310px; }
 .game-status .current-level, .game-status .round-info, .game-status .score-live,
 .game-status .score-board, .game-status .best-stars, .game-status .progress { margin: 0 0 6px; font-size: 15px; }
 .game-status .prompt { margin: 8px 0 !important; padding: 8px !important; min-height: 52px !important; font-size: 30px; overflow-wrap: anywhere; }
 .game-status .prompt-sentence { font-size: 23px !important; }
 .game-status .hint-box, .game-status .hint-text { margin: 8px 0 0 !important; padding: 8px !important; font-size: 16px !important; }
-.game-status .math-horizontal-container { margin: 6px 0; }
-.game-status .math-feedback { min-height: 24px; margin: 4px 0; line-height: 20px; }
-.game-status-math .hint-text { margin: 4px 0 0 !important; padding: 0 !important; line-height: 20px; }
-.game-screen .keypad { margin-top: 8px; }
-.game-status .math-expr-text { font-size: 30px; }
-.game-status .math-input-box { min-width: 60px; height: 54px; font-size: 30px; }
-.game-status .prompt-ratanie { display: flex; justify-content: center; }
-.game-status .digit-box, .game-status .digit-input { width: 40px; height: 40px; font-size: 28px; }
-.game-status .digit-input { padding: 0; border-radius: 8px; }
-.game-status .math-row { height: 42px; }
 .game-status .level-progress-message { margin: 0 0 6px; font-size: 14px; }
 @media (max-width: 760px) {
   .game-chrome { padding-inline: 6px; }
@@ -116,8 +104,6 @@
   .header-menu-content[data-open="false"] { display: none; }
   .game-status { height: 320px; padding: 10px; }
   .game-status-compact { height: 56px; }
-  .game-status-math { height: 176px; padding: 10px 12px; }
-  .game-status-written { height: 300px; }
 }
 .game-status-info { height: 110px; }
 .game-status-blockout { height: 56px; display: flex; align-items: center; justify-content: center; gap: 12px; padding: 6px 12px; }
@@ -125,3 +111,15 @@
 .main-game-header .header-game-actions > button[title="Reštartovať level"] { background: #5f9ea0; }
 .main-game-header .header-game-actions > button[title="Krok späť"] { background: #3b82f6; }
 .main-game-header .header-game-actions > button[title$="zvuk"] { background: #8a2be2; }
+
+/* Reserve only the space used by a live word question and its hint. */
+.game-status-words { height: 176px; padding: 8px 12px; }
+.game-status-words .current-level, .game-status-words .score-board { margin: 0; font-size: 14px; line-height: 18px; }
+.game-status.game-status-words .prompt { margin: 4px 0 !important; padding: 6px !important; min-height: 40px !important; font-size: 28px; line-height: 1.2; }
+.game-status.game-status-words .prompt-sentence { font-size: 22px !important; }
+.game-status.game-status-words .hint-box { margin: 4px 0 0 !important; padding: 6px !important; font-size: 15px !important; line-height: 18px; }
+.button-grid-2x2.word-answer-grid { gap: 12px; padding: 0; }
+.word-answer-grid button { height: clamp(48px, 9vh, 76px); padding: 0; font-size: 28px; }
+@media (max-width: 600px) {
+  .game-status-words { height: 224px; }
+}

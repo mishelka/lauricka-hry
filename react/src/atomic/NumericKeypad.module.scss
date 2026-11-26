@@ -1,0 +1,40 @@
+.keypad {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: var(--math-key-gap, 8px);
+  width: min(100%, 400px);
+  margin: 0 auto;
+}
+
+.key {
+  width: 100%;
+  height: var(--math-key-height, 60px);
+  min-height: 44px;
+  padding: 0;
+  border: 0;
+  border-radius: 12px;
+  background: #4682b4;
+  color: white;
+  font: inherit;
+  font-size: clamp(24px, 4vh, 30px);
+  font-weight: 800;
+  line-height: 1;
+  touch-action: manipulation;
+  box-shadow: 0 3px 0 #284b6333;
+  transition: background-color .12s, transform .12s;
+
+  &:hover:not(:disabled) { background: #36739f; }
+  &:active:not(:disabled) { transform: translateY(2px); box-shadow: 0 1px 0 #284b6333; }
+  &:focus-visible { outline: 3px solid #f59e0b; outline-offset: 2px; }
+  &:disabled { opacity: .5; cursor: not-allowed; }
+}
+
+.erase {
+  background: #64748b;
+  &:hover:not(:disabled) { background: #475569; }
+}
+
+.confirm {
+  background: #249567;
+  &:hover:not(:disabled) { background: #18754f; }
+}

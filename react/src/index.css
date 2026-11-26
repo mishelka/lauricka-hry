@@ -627,70 +627,6 @@ button:disabled {
   animation: blink-cursor 1s step-start infinite;
 }
 
-.keyboard-grid {
-  display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 12px;
-}
-
-/* Numerická klávesnica (ako na fyzickej klávesnici / kalkulačke): 7 8 9 / 4 5 6 / 1 2 3 / ⌫ 0 OK */
-.keypad {
-  display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: clamp(6px, calc(var(--vh) * 1.2), 10px);
-  width: 100%;
-  max-width: clamp(240px, calc(var(--vh) * 40), 320px);
-  margin: clamp(8px, calc(var(--vh) * 2), 18px) auto 0;
-}
-
-.keypad-btn {
-  width: 100%;
-  height: clamp(44px, calc(var(--vh) * 8.5), 68px);
-  padding: 0;
-  font-size: clamp(22px, calc(var(--vh) * 4), 32px);
-  font-weight: 800;
-  border-radius: 14px;
-  background: #4682b4;
-  color: #ffffff;
-  box-shadow: 0 4px 0 rgba(0, 0, 0, 0.18), 0 4px 10px rgba(0, 0, 0, 0.08);
-  transition: transform 0.1s ease, filter 0.15s ease, box-shadow 0.1s ease;
-}
-
-.keypad-btn:hover:not(:disabled) {
-  filter: brightness(1.08);
-}
-
-.keypad-btn:active:not(:disabled) {
-  transform: translateY(2px);
-  box-shadow: 0 2px 0 rgba(0, 0, 0, 0.18), 0 2px 6px rgba(0, 0, 0, 0.08);
-}
-
-.keypad-btn:disabled {
-  opacity: 0.45;
-}
-
-.keypad-backspace {
-  background: #6c757d;
-  font-size: clamp(20px, calc(var(--vh) * 3.5), 28px);
-}
-
-.keypad-enter {
-  background: #22c55e;
-  font-size: clamp(17px, calc(var(--vh) * 3), 24px);
-}
-
-.btn-key {
-  background: #4682b4;
-}
-
-.btn-util {
-  background: #6c757d;
-}
-
-.btn-ok {
-  background: #28a745;
-}
-
 .btn-yi-tvrde { background-color: #ffc107; color: #333; }
 .btn-yi-makke { background-color: #4682b4; }
 
@@ -1175,25 +1111,6 @@ button:disabled {
     height: clamp(48px, calc(var(--vh) * 9), 58px);
     padding: 0 12px;
     font-size: clamp(26px, calc(var(--vh) * 6), 36px);
-  }
-
-  .keypad {
-    gap: clamp(6px, calc(var(--vh) * 1.2), 8px);
-    max-width: clamp(220px, calc(var(--vh) * 40), 280px);
-    margin-top: clamp(8px, calc(var(--vh) * 2), 14px);
-  }
-
-  .keypad-btn {
-    height: clamp(42px, calc(var(--vh) * 8.5), 58px);
-    font-size: clamp(20px, calc(var(--vh) * 4), 28px);
-  }
-
-  .keypad-backspace {
-    font-size: clamp(18px, calc(var(--vh) * 3.5), 24px);
-  }
-
-  .keypad-enter {
-    font-size: clamp(15px, calc(var(--vh) * 3), 20px);
   }
 
   .btn-icon-action {

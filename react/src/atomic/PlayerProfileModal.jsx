@@ -244,7 +244,7 @@ export default function PlayerProfileModal({ isOpen, onClose, onNameChange, init
 
                 <div className="stats-category-item">
                   <div className="stats-category-header">
-                    <span>🔢 Matematika (Rátanie, Násobenie, Delenie, Adaptívne opakovanie)</span>
+                    <span>🔢 Matematika (Rátanie, Adaptívne rátanie)</span>
                   </div>
                   <p className="stats-category-desc">
                     Hravé precvičovanie počítania a matematických operácií.
@@ -268,7 +268,7 @@ export default function PlayerProfileModal({ isOpen, onClose, onNameChange, init
                 </div>
                 <p className="smileys-hint">
                   💡 Hraj hru <strong>Opakovanie</strong> pred vybranými slovami a získaj za každé úspešné kolo nového smajlíka do zbierky!
-                  Ďalších smajlíkov získaš v hre <strong>Adaptívne opakovanie</strong> za zvládnutie celej násobilky.
+                  Ďalších smajlíkov získaš v hre <strong>Adaptívne rátanie</strong> za zvládnutie celej násobilky.
                 </p>
               </div>
 
@@ -311,7 +311,7 @@ export default function PlayerProfileModal({ isOpen, onClose, onNameChange, init
                   </span>
                 </div>
                 <p className="smileys-hint">
-                  💡 Hraj <strong>Adaptívne opakovanie</strong>. Keď zvládneš všetky príklady jednej násobilky, získaš smajlíka.
+                  💡 Hraj <strong>Adaptívne rátanie</strong>. Keď zvládneš všetky príklady jednej násobilky, získaš smajlíka.
                 </p>
               </div>
 

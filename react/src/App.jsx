@@ -1,8 +1,6 @@
 import GameLayout, { GameLayoutContext } from './atomic/GameLayout';
 import { Navigate, Route, Routes, useLocation, useNavigate } from 'react-router-dom';
 import { DOPLNOVACKY_DTNL_GROUPS, DOPLNOVACKY_B_GROUPS } from './data/tasks';
-import { NASOBENIE_5_GROUPS } from './data/nasobenie5Data';
-import { DELENIE_5_GROUPS } from './data/delenie5Data';
 import { VYBRANE_B_GROUPS } from './data/vybraneBSlova';
 import { VYBRANE_M_GROUPS } from './data/vybraneMSlova';
 import { VYBRANE_P_GROUPS } from './data/vybranePSlova';
@@ -39,8 +37,6 @@ function MenuPage() {
     doplnovackyBLevels: getLevelStars('doplnovacky_b', DOPLNOVACKY_B_GROUPS.length),
     cudzie: getBestStars('cudzie'),
     ratanieLevels: getLevelStars('ratanie', 10),
-    nasobenie5Levels: getLevelStars('nasobenie5', NASOBENIE_5_GROUPS.length),
-    delenie5Levels: getLevelStars('delenie5', DELENIE_5_GROUPS.length),
     slovaLevels: getLevelStars('slovaYi', 8),
     vybraneOpakovanie: getBestStars('vybraneOpakovanie'),
     vybraneBLevels: getLevelStars('vybraneB', VYBRANE_B_GROUPS.length),
@@ -61,8 +57,6 @@ function MenuPage() {
       doplnovackyBLevels: getLevelStars('doplnovacky_b', DOPLNOVACKY_B_GROUPS.length),
       cudzie: getBestStars('cudzie'),
       ratanieLevels: getLevelStars('ratanie', 10),
-      nasobenie5Levels: getLevelStars('nasobenie5', NASOBENIE_5_GROUPS.length),
-      delenie5Levels: getLevelStars('delenie5', DELENIE_5_GROUPS.length),
       slovaLevels: getLevelStars('slovaYi', 8),
       vybraneOpakovanie: getBestStars('vybraneOpakovanie'),
       vybraneBLevels: getLevelStars('vybraneB', VYBRANE_B_GROUPS.length),
@@ -117,8 +111,6 @@ function MenuPage() {
   const cudzieStars = menuStars.cudzie;
   const vybraneOpakovanieStars = menuStars.vybraneOpakovanie || 0;
   const ratanieFinished = useMemo(() => menuStars.ratanieLevels.filter(stars => stars === 5).length, [menuStars.ratanieLevels]);
-  const nasobenieFinished = useMemo(() => menuStars.nasobenie5Levels.filter(stars => stars === 5).length, [menuStars.nasobenie5Levels]);
-  const delenieFinished = useMemo(() => menuStars.delenie5Levels.filter(stars => stars === 5).length, [menuStars.delenie5Levels]);
   const slovaFinished = useMemo(() => menuStars.slovaLevels.filter(stars => stars === 5).length, [menuStars.slovaLevels]);
   const vybraneBFinished = useMemo(() => menuStars.vybraneBLevels.filter(stars => stars === 5).length, [menuStars.vybraneBLevels]);
   const vybraneMFinished = useMemo(() => menuStars.vybraneMLevels.filter(stars => stars === 5).length, [menuStars.vybraneMLevels]);
@@ -155,22 +147,8 @@ function MenuPage() {
             </div>
 
             <div className="menu-card">
-              <button className="btn-menu-nasobenie menu-card-btn" onClick={() => navigate('/nasobenie-5')}>
-                <span className="menu-title">Násobenie do 5</span>
-                <span className="menu-stars">{`${nasobenieFinished} z ${NASOBENIE_5_GROUPS.length}`}</span>
-              </button>
-            </div>
-
-            <div className="menu-card">
-              <button className="btn-menu-delenie menu-card-btn" onClick={() => navigate('/delenie-5')}>
-                <span className="menu-title">Delenie do 5</span>
-                <span className="menu-stars">{`${delenieFinished} z ${DELENIE_5_GROUPS.length}`}</span>
-              </button>
-            </div>
-
-            <div className="menu-card">
               <button className="btn-menu-adaptivne menu-card-btn" onClick={() => navigate('/adaptivne-opakovanie')}>
-                <span className="menu-title">Adaptívne opakovanie</span>
+                <span className="menu-title">Adaptívne rátanie</span>
                 <span className="menu-stars" aria-label="Smajlíky">
                   <SmileyIcon size={20} stroke="currentColor" />
                 </span>

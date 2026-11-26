@@ -1,3 +1,5 @@
+import NumericKeypad from '../../atomic/NumericKeypad';
+import MathGameLayout from '../../atomic/MathGameLayout';
 import { GameToolbar, GameStatus } from '../../atomic/GameLayout';
 import { useRef, useState } from 'react';
 import { getStarCount, triggerFireworks } from '../../utils/gameUtils';
@@ -303,57 +305,54 @@ export default function RatanieGame() {
     <>
       <div className="game-ui">
         <GameToolbar title="Rátanie" onBack={() => setSelectedLevel(null)} onRestart={() => startLevel(selectedLevel)} />
-        <GameStatus variant="written">
-          <div className="current-level">{`Level ${selectedLevel + 1} • Najlepšie: ${levelStars[selectedLevel] || 0}/5 ★`}</div>
-          <div className="score-board">
-            Správne: <span className="score-hit">{hit}</span> | Chyby: <span className="score-miss">{miss}</span>
-          </div>
-          <div className="progress">Príklad {index + 1}/{TOTAL}</div>
-          <div className="prompt prompt-ratanie">
-            <div className="vertical-math">
-              <div className="math-row">
-                <span className="math-operator">&nbsp;</span>
-                <div className="math-number">
-                  {String(current.a).padStart(2, ' ').split('').map((digit, i) => (
-                    <span key={`top-${i}`} className="digit-box">{digit === ' ' ? '\u00a0' : digit}</span>
-                  ))}
+        <MathGameLayout variant="written">
+          <GameStatus variant="written" inline>
+            <div className="current-level">{`Level ${selectedLevel + 1} • Príklad ${index + 1}/${TOTAL}`}</div>
+            <div className="score-board">
+              Správne: <span className="score-hit">{hit}</span> | Chyby: <span className="score-miss">{miss}</span> • <span title="Najlepšie skóre">★ {levelStars[selectedLevel] || 0}/5</span>
+            </div>
+            <div className="prompt prompt-ratanie">
+              <div className="vertical-math">
+                <div className="math-row">
+                  <span className="math-operator">&nbsp;</span>
+                  <div className="math-number">
+                    {String(current.a).padStart(2, ' ').split('').map((digit, i) => (
+                      <span key={`top-${i}`} className="digit-box">{digit === ' ' ? '\u00a0' : digit}</span>
+                    ))}
+                  </div>
                 </div>
-              </div>
-              <div className="math-row">
-                <span className="math-operator">{current.op}</span>
-                <div className="math-number">
-                  {String(current.b).padStart(2, ' ').split('').map((digit, i) => (
-                    <span key={`bottom-${i}`} className="digit-box">{digit === ' ' ? '\u00a0' : digit}</span>
-                  ))}
+                <div className="math-row">
+                  <span className="math-operator">{current.op}</span>
+                  <div className="math-number">
+                    {String(current.b).padStart(2, ' ').split('').map((digit, i) => (
+                      <span key={`bottom-${i}`} className="digit-box">{digit === ' ' ? '\u00a0' : digit}</span>
+                    ))}
+                  </div>
                 </div>
-              </div>
-              <div className="math-line" />
-              <div className="math-row">
-                <span className="math-operator">&nbsp;</span>
-                <div className="math-number math-answer">
-                  {answerDigits.map((digit, i) => (
-                    <button
-                      key={`answer-${i}`}
-                      type="button"
-                      className={`digit-input ${activeDigit === i ? 'active' : ''}`}
-                      onClick={() => !locked && setActiveDigit(i)}
-                    >
-                      {digit || '\u00a0'}
-                    </button>
-                  ))}
+                <div className="math-line" />
+                <div className="math-row">
+                  <span className="math-operator">&nbsp;</span>
+                  <div className="math-number math-answer">
+                    {answerDigits.map((digit, i) => (
+                      <button
+                        key={`answer-${i}`}
+                        type="button"
+                        className={`digit-input ${activeDigit === i ? 'active' : ''}`}
+                        onClick={() => !locked && setActiveDigit(i)}
+                      >
+                        {digit || '\u00a0'}
+                      </button>
+                    ))}
+                  </div>
                 </div>
               </div>
             </div>
-          </div>
-        </GameStatus>
-        <div className="keyboard-grid">
-          {[1, 2, 3, 4, 5, 6, 7, 8, 9].map(n => (
-            <button key={n} className="btn-key" onClick={() => pressDigit(String(n))}>{n}</button>
-          ))}
-          <button className="btn-key btn-util" onClick={backspace}>⌦</button>
-          <button className="btn-key" onClick={() => pressDigit('0')}>0</button>
-          <button className="btn-key btn-ok" onClick={submit}>OK</button>
-        </div>
+          </GameStatus>
+          <NumericKeypad
+            onDigit={pressDigit} onBackspace={backspace} onSubmit={submit}
+            disabled={locked} canSubmit={answerDigits.some(digit => digit !== '')} canBackspace={answerDigits.some(digit => digit !== '')}
+          />
+        </MathGameLayout>
       </div>
       <div className="fireworks-overlay" ref={fireworksRef} />
     </>

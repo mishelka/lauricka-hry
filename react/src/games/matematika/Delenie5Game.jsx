@@ -1,3 +1,5 @@
+import NumericKeypad from '../../atomic/NumericKeypad';
+import MathGameLayout from '../../atomic/MathGameLayout';
 import { GameToolbar, GameStatus } from '../../atomic/GameLayout';
 import { useContext, useEffect, useMemo, useRef, useState } from 'react';
 import { DELENIE_5_GROUPS, DELENIE_5_RULES } from '../../data/delenie5Data';
@@ -157,27 +159,6 @@ export default function Delenie5Game() {
     }, 1000);
   }
 
-  // Keyboard navigation
-  useEffect(() => {
-    if (selectedLevel === null || resultVisible) return;
-
-    function handleKeyDown(e) {
-      if (e.key >= '0' && e.key <= '9') {
-        e.preventDefault();
-        pressDigit(e.key);
-      } else if (e.key === 'Backspace' || e.key === 'Delete') {
-        e.preventDefault();
-        backspace();
-      } else if (e.key === 'Enter') {
-        e.preventDefault();
-        submitAnswer();
-      }
-    }
-
-    window.addEventListener('keydown', handleKeyDown);
-    return () => window.removeEventListener('keydown', handleKeyDown);
-  });
-
   if (playingRewardLevel !== null) {
     return (
       <BlockOutGame
@@ -324,69 +305,36 @@ export default function Delenie5Game() {
 
       <GameToolbar title="Delenie do 5" onBack={() => setSelectedLevel(null)} onRestart={() => startLevel(selectedLevel)} />
       <div className="card">
-        <GameStatus variant="math">
-          <div className="round-info">
-            Level {selectedLevel + 1} • Úloha {index + 1}/{examples.length}
-          </div>
-          <div className="score-live">
-            Správne: <span className="score-hit">{hit}</span> | Chyby: <span className="score-miss">{miss}</span>
-          </div>
-
-          <div className="math-horizontal-container">
-            <div className="math-expr-text">
-              {current.text} =
+        <MathGameLayout variant="math">
+          <GameStatus variant="math" inline>
+            <div className="round-info">
+              Level {selectedLevel + 1} • Úloha {index + 1}/{examples.length}
             </div>
-            <div className={`math-input-box ${status}`}>
-              {inputDigits === '' ? <span className="math-cursor">|</span> : inputDigits}
+            <div className="score-live">
+              Správne: <span className="score-hit">{hit}</span> | Chyby: <span className="score-miss">{miss}</span>
             </div>
-          </div>
 
-          {activeHint && (
-            <div className="hint-text" style={{ marginTop: '10px' }}>
-              💡 {activeHint}
+            <div className="math-horizontal-container">
+              <div className="math-expr-text">
+                {current.text} =
+              </div>
+              <div className={`math-input-box ${status}`}>
+                {inputDigits === '' ? <span className="math-cursor">|</span> : inputDigits}
+              </div>
             </div>
-          )}
 
-        </GameStatus>
-        <div className="keypad">
-          {[7, 8, 9, 4, 5, 6, 1, 2, 3].map(digit => (
-            <button
-              key={digit}
-              type="button"
-              className="keypad-btn"
-              onClick={() => pressDigit(String(digit))}
-              disabled={status === 'correct'}
-            >
-              {digit}
-            </button>
-          ))}
-          <button
-            type="button"
-            className="keypad-btn keypad-backspace"
-            onClick={backspace}
-            disabled={status === 'correct' || inputDigits === ''}
-            title="Zmazať"
-          >
-            ⌫
-          </button>
-          <button
-            type="button"
-            className="keypad-btn"
-            onClick={() => pressDigit('0')}
-            disabled={status === 'correct'}
-          >
-            0
-          </button>
-          <button
-            type="button"
-            className="keypad-btn keypad-enter"
-            onClick={submitAnswer}
-            disabled={status === 'correct' || inputDigits === ''}
-            title="Potvrdiť"
-          >
-            OK
-          </button>
-        </div>
+            {activeHint && (
+              <div className="hint-text" style={{ marginTop: '10px' }}>
+                💡 {activeHint}
+              </div>
+            )}
+
+          </GameStatus>
+          <NumericKeypad
+            onDigit={pressDigit} onBackspace={backspace} onSubmit={submitAnswer}
+            disabled={status === 'correct'} canSubmit={inputDigits !== ''} canBackspace={inputDigits !== ''}
+          />
+        </MathGameLayout>
       </div>
     </div>
   );

@@ -1,0 +1,60 @@
+.math-game-layout {
+  --math-viewport-height: 100vh;
+  --math-status-height: 156px;
+  --math-key-gap: 8px;
+  --math-key-height: clamp(44px, calc((var(--math-viewport-height) - var(--game-chrome-height, 80px) - var(--math-status-height) - 64px) / 4 - 6px), 64px);
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 12px;
+  width: 100%;
+}
+@supports (height: 100dvh) {
+  .math-game-layout { --math-viewport-height: 100dvh; }
+}
+.math-game-layout[data-variant="written"] { --math-status-height: 200px; }
+.math-game-layout > .game-status {
+  width: 100%;
+  height: var(--math-status-height);
+  margin: 0;
+  padding: 8px 12px;
+}
+.math-game-layout .game-status .current-level, .math-game-layout .game-status .round-info,
+.math-game-layout .game-status .score-board, .math-game-layout .game-status .score-live {
+  margin: 0;
+  font-size: 14px;
+  line-height: 18px;
+}
+.math-game-layout .game-status .math-horizontal-container { min-height: 46px; margin: 4px 0; gap: 10px; }
+.math-game-layout .game-status .math-expr-text { font-size: 30px; letter-spacing: 1px; }
+.math-game-layout .game-status .math-input-box { height: 46px; min-width: 60px; padding: 0 10px; font-size: 30px; }
+.math-game-layout .game-status .math-feedback { min-height: 36px; margin: 4px 0 0; line-height: 18px; font-size: 15px; }
+.math-game-layout .game-status .hint-text { margin: 4px 0 0 !important; padding: 0 !important; line-height: 18px; font-size: 15px !important; }
+.math-game-layout .game-status .prompt-ratanie { margin: 4px 0 0 !important; padding: 0 !important; min-height: 0 !important; }
+.math-game-layout .game-status .vertical-math { gap: 3px; margin: 0; }
+.math-game-layout .game-status .math-row { height: 38px; grid-template-columns: 30px auto; column-gap: 6px; }
+.math-game-layout .game-status .math-number { grid-template-columns: repeat(2, 36px); gap: 6px; }
+.math-game-layout .game-status .digit-box, .math-game-layout .game-status .digit-input { width: 36px; height: 36px; font-size: 26px; }
+.math-game-layout .game-status .math-operator { font-size: 30px; }
+.math-game-layout .game-status .math-line { height: 3px; margin-left: 36px; }
+.math-game-layout .game-status .math-answer { margin-top: 0; }
+
+@media (max-height: 600px) {
+  .math-game-layout { --math-status-height: 148px; --math-key-gap: 6px; gap: 8px; }
+  .math-game-layout[data-variant="written"] { --math-status-height: 168px; }
+  .math-game-layout > .game-status { padding: 6px 10px; }
+  .math-game-layout .game-status .current-level, .math-game-layout .game-status .round-info,
+  .math-game-layout .game-status .score-board, .math-game-layout .game-status .score-live { font-size: 13px; line-height: 16px; }
+  .math-game-layout .game-status .math-row { height: 32px; }
+  .math-game-layout .game-status .digit-box, .math-game-layout .game-status .digit-input { width: 32px; height: 32px; font-size: 24px; }
+  .math-game-layout .game-status .math-number { grid-template-columns: repeat(2, 32px); }
+}
+
+/* A short landscape screen has room beside the question, rather than below it. */
+@media (max-height: 500px) and (min-aspect-ratio: 4/3) {
+  .math-game-layout {
+    --math-key-height: clamp(44px, calc((var(--math-viewport-height) - var(--game-chrome-height, 80px) - 64px) / 4 - 5px), 64px);
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    align-items: start;
+    gap: 16px;
+  }
+}

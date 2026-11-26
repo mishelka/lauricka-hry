@@ -337,7 +337,7 @@ export default function VybraneMGame() {
     <>
       <div className="game-ui">
         <GameToolbar title="Vybrané slová po M" onBack={() => setSelectedLevel(null)} onRestart={() => startLevel(selectedLevel)} />
-        <GameStatus>
+        <GameStatus variant="words">
           <div className="current-level">
             {`Level ${selectedLevel + 1} • Úloha ${index + 1}/${order.length}`}
           </div>
@@ -378,6 +378,7 @@ export default function VybraneMGame() {
 
         </GameStatus>
         <IyChoiceButtons
+            className="button-grid-2x2 word-answer-grid"
           task={currentTask}
           onCheck={check}
           disabledOptions={disabledOptions}

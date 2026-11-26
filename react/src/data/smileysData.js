@@ -37,7 +37,7 @@ export const SMILEYS_CATALOG = [
   { id: 'sm_bear', emoji: '🧸', name: 'Plyšový macík', category: 'Zábava', desc: 'Prítulný plyšák pre dobrú náladu.' }
 ];
 
-// Smajlíky za zvládnutie celej násobilky v hre Adaptívne opakovanie.
+// Smajlíky za zvládnutie celej násobilky v hre Adaptívne rátanie.
 // Neudeľujú sa náhodne – každý je pevne priradený k násobilke a operácii.
 export const NASOBILKA_SMILEYS = [
   { id: 'nas_2_multiply', table: 2, op: 'multiply', emoji: '🐥', name: 'Kuriatko dvojka', category: 'Násobilka', desc: 'Zvládla si celé násobenie dvojkou!' },
@@ -50,7 +50,7 @@ export const NASOBILKA_SMILEYS = [
   { id: 'nas_5_divide', table: 5, op: 'divide', emoji: '🏅', name: 'Medaila päťka', category: 'Násobilka', desc: 'Zvládla si celé delenie päťkou!' }
 ].map(item => ({
   ...item,
-  unlockHint: `Získaš ho, keď v hre Adaptívne opakovanie zvládneš všetky príklady na ${
+  unlockHint: `Získaš ho, keď v hre Adaptívne rátanie zvládneš všetky príklady na ${
     item.op === 'multiply' ? 'násobenie' : 'delenie'
   } z násobilky ${item.table}.`
 }));

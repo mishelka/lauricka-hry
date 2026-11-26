@@ -1,3 +1,5 @@
+import NumericKeypad from '../../atomic/NumericKeypad';
+import MathGameLayout from '../../atomic/MathGameLayout';
 import { GameToolbar, GameStatus } from '../../atomic/GameLayout';
 import { useContext, useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
@@ -57,8 +59,8 @@ export default function AdaptivneOpakovanieGame() {
         type="button"
         className={`btn-top-action btn-help${showRules ? ' active' : ''}`}
         onClick={() => setShowRules(prev => !prev)}
-        title={showRules ? 'Skryť pravidlá' : 'Pravidlá adaptívneho opakovania'}
-        aria-label="Pravidlá adaptívneho opakovania"
+        title={showRules ? 'Skryť pravidlá' : 'Pravidlá adaptívneho rátania'}
+        aria-label="Pravidlá adaptívneho rátania"
       >
         <HelpIcon size={24} />
       </button>
@@ -171,30 +173,15 @@ export default function AdaptivneOpakovanieGame() {
   }
 
   useEffect(() => {
-    if (resultVisible || !current || showProfileModal) return;
-
-    function handleKeyDown(event) {
-      if (pendingRewards.length > 0) {
-        if (event.key === 'Enter') {
-          event.preventDefault();
-          continueAfterReward();
-        }
-        return;
-      }
-      if (event.key >= '0' && event.key <= '9') {
+    if (pendingRewards.length === 0 || showProfileModal) return;
+    function handleContinue(event) {
+      if (event.key === 'Enter' && !document.querySelector('.profile-modal-backdrop')) {
         event.preventDefault();
-        pressDigit(event.key);
-      } else if (event.key === 'Backspace' || event.key === 'Delete') {
-        event.preventDefault();
-        backspace();
-      } else if (event.key === 'Enter') {
-        event.preventDefault();
-        submitAnswer();
+        continueAfterReward();
       }
     }
-
-    window.addEventListener('keydown', handleKeyDown);
-    return () => window.removeEventListener('keydown', handleKeyDown);
+    window.addEventListener('keydown', handleContinue);
+    return () => window.removeEventListener('keydown', handleContinue);
   });
 
   const profileModal = (
@@ -291,12 +278,12 @@ export default function AdaptivneOpakovanieGame() {
         </div>
       )}
 
-      <GameToolbar title="Adaptívne opakovanie" />
+      <GameToolbar title="Adaptívne rátanie" />
 
       {showRules && (
         <div className="rules-panel">
           <h3>
-            <span>Adaptívne opakovanie</span>
+            <span>Adaptívne rátanie</span>
             <button type="button" className="btn-rules-close" onClick={() => setShowRules(false)} title="Zavrieť pravidlá">
               ✕ Zavrieť
             </button>
@@ -309,61 +296,28 @@ export default function AdaptivneOpakovanieGame() {
 
       {current && (
         <div className="card">
-          <GameStatus variant="math">
-            <div className="current-level">Nekonečný mód • Úloha {index + 1}/{examples.length}</div>
-            <div className="score-board">Správne: {hit} | Chyby: {miss} • Zvládnuté: {masteredCount}</div>
-            <div className="math-horizontal-container">
-              <div className="math-expr-text">{current.text} =</div>
-              <div className={`math-input-box ${status}`}>
-                {inputDigits === '' ? <span className="math-cursor">|</span> : inputDigits}
+          <MathGameLayout variant="math">
+            <GameStatus variant="math" inline>
+              <div className="current-level">Nekonečný mód • Úloha {index + 1}/{examples.length}</div>
+              <div className="score-board">Správne: {hit} | Chyby: {miss} • Zvládnuté: {masteredCount}</div>
+              <div className="math-horizontal-container">
+                <div className="math-expr-text">{current.text} =</div>
+                <div className={`math-input-box ${status}`}>
+                  {inputDigits === '' ? <span className="math-cursor">|</span> : inputDigits}
+                </div>
               </div>
-            </div>
 
-            <div className={`math-feedback ${feedback ? feedback.type : ''}`} aria-live="polite">
-              {feedback?.type === 'correct' && <span>✅ {feedback.text}</span>}
-              {feedback?.type === 'wrong' && <span>💡 {feedback.text}</span>}
-            </div>
+              <div className={`math-feedback ${feedback ? feedback.type : ''}`} aria-live="polite">
+                {feedback?.type === 'correct' && <span>✅ {feedback.text}</span>}
+                {feedback?.type === 'wrong' && <span>💡 {feedback.text}</span>}
+              </div>
 
-          </GameStatus>
-          <div className="keypad">
-            {[7, 8, 9, 4, 5, 6, 1, 2, 3].map(digit => (
-              <button
-                key={digit}
-                type="button"
-                className="keypad-btn"
-                onClick={() => pressDigit(String(digit))}
-                disabled={status === 'correct'}
-              >
-                {digit}
-              </button>
-            ))}
-            <button
-              type="button"
-              className="keypad-btn keypad-backspace"
-              onClick={backspace}
-              disabled={status === 'correct' || inputDigits === ''}
-              title="Zmazať"
-            >
-              ⌫
-            </button>
-            <button
-              type="button"
-              className="keypad-btn"
-              onClick={() => pressDigit('0')}
-              disabled={status === 'correct'}
-            >
-              0
-            </button>
-            <button
-              type="button"
-              className="keypad-btn keypad-enter"
-              onClick={submitAnswer}
-              disabled={status === 'correct' || inputDigits === ''}
-              title="Potvrdiť"
-            >
-              OK
-            </button>
-          </div>
+            </GameStatus>
+            <NumericKeypad
+              onDigit={pressDigit} onBackspace={backspace} onSubmit={submitAnswer}
+              disabled={status === 'correct' || pendingRewards.length > 0 || showProfileModal} canSubmit={inputDigits !== ''} canBackspace={inputDigits !== ''}
+            />
+          </MathGameLayout>
         </div>
       )}
     </div>

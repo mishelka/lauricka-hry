@@ -13,7 +13,7 @@ const TITLES = {
   '/slova': 'Slová', '/cudzie': 'Cudzie slová', '/doplnovacky': 'Doplňovačky',
   '/doplnovacky/dtnl': 'Doplňovačky dtnl', '/doplnovacky/b': 'Doplňovačky B',
   '/ratanie': 'Rátanie', '/nasobenie-5': 'Násobenie do 5', '/delenie-5': 'Delenie do 5',
-  '/adaptivne-opakovanie': 'Adaptívne opakovanie', '/vybrane-opakovanie': 'Opakovanie vybraných slov',
+  '/adaptivne-opakovanie': 'Adaptívne rátanie', '/vybrane-opakovanie': 'Opakovanie vybraných slov',
   '/block-out': 'Block Out!'
 };
 
@@ -115,7 +115,8 @@ export function GameToolbar({ title, onBack, backTitle = 'Späť na výber úrov
   </>;
 }
 
-export function GameStatus({ children, variant = 'quiz' }) {
+export function GameStatus({ children, variant = 'quiz', inline = false }) {
   const { statusSlot } = useContext(GameLayoutContext);
-  return statusSlot ? createPortal(<section className={`game-status game-status-${variant}`} aria-label="Stav hry">{children}</section>, statusSlot) : null;
+  const panel = <section className={`game-status game-status-${variant}`} aria-label="Stav hry">{children}</section>;
+  return inline ? panel : statusSlot ? createPortal(panel, statusSlot) : null;
 }
