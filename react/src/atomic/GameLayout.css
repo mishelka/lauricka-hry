@@ -77,15 +77,17 @@
   color: #1e293b;
 }
 .game-status-compact { height: 56px; display: flex; justify-content: center; align-items: center; gap: 12px; }
-.game-status-math { height: 210px; }
+.game-status-math { height: 176px; padding: 10px 12px; }
 .game-status-written { height: 310px; }
 .game-status .current-level, .game-status .round-info, .game-status .score-live,
 .game-status .score-board, .game-status .best-stars, .game-status .progress { margin: 0 0 6px; font-size: 15px; }
 .game-status .prompt { margin: 8px 0 !important; padding: 8px !important; min-height: 52px !important; font-size: 30px; overflow-wrap: anywhere; }
 .game-status .prompt-sentence { font-size: 23px !important; }
 .game-status .hint-box, .game-status .hint-text { margin: 8px 0 0 !important; padding: 8px !important; font-size: 16px !important; }
-.game-status .math-horizontal-container { margin: 12px 0; }
-.game-status .math-feedback { min-height: 28px; margin: 6px 0; }
+.game-status .math-horizontal-container { margin: 6px 0; }
+.game-status .math-feedback { min-height: 24px; margin: 4px 0; line-height: 20px; }
+.game-status-math .hint-text { margin: 4px 0 0 !important; padding: 0 !important; line-height: 20px; }
+.game-screen .keypad { margin-top: 8px; }
 .game-status .math-expr-text { font-size: 30px; }
 .game-status .math-input-box { min-width: 60px; height: 54px; font-size: 30px; }
 .game-status .prompt-ratanie { display: flex; justify-content: center; }
@@ -115,7 +117,7 @@
   .header-menu-content[data-open="false"] { display: none; }
   .game-status { height: 320px; padding: 10px; }
   .game-status-compact { height: 56px; }
-  .game-status-math { height: 210px; }
+  .game-status-math { height: 176px; padding: 10px 12px; }
   .game-status-written { height: 300px; }
 }
 .game-status-info { height: 110px; }
