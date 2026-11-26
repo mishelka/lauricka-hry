@@ -449,7 +449,11 @@ function isVybraneLetterUnlocked(letter) {
 }
 
 export default function App() {
-  useState(() => unlockAllLevelsOnce('vybraneM', VYBRANE_M_GROUPS.length, 'vybraneM_all_2026-11'));
+  // Temporary testing unlock: B is required to enter M. Remove after testing.
+  useState(() => {
+    unlockAllLevelsOnce('vybraneB', VYBRANE_B_GROUPS.length, 'vybraneM_test_prerequisite_B_2026-11-26');
+    unlockAllLevelsOnce('vybraneM', VYBRANE_M_GROUPS.length, 'vybraneM_test_all_2026-11-26');
+  });
 
   return (
     <div className="app-shell">
