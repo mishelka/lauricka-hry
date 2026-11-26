@@ -45,75 +45,6 @@ h1 {
   padding: 0 4px;
 }
 
-.menu-container {
-  display: flex;
-  flex-direction: column;
-  gap: 20px;
-  width: 100%;
-  padding: 0 10px;
-}
-
-.menu-section {
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-  width: 100%;
-}
-
-.menu-cards {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
-  gap: 14px;
-  width: 100%;
-  align-items: stretch;
-}
-
-.menu-section[hidden],
-.menu-cards[hidden] {
-  display: none;
-}
-
-.menu-section-heading {
-  margin: 0;
-  font: inherit;
-}
-
-.menu-divider.menu-category-toggle {
-  min-height: 44px;
-  padding: 8px 0;
-  background: transparent;
-  border-radius: 8px;
-  font-family: inherit;
-}
-
-.menu-category-toggle:hover {
-  background: #e2eef9;
-  color: #334e68;
-}
-
-.menu-category-toggle:focus-visible {
-  outline: 3px solid #3b82f6;
-  outline-offset: 3px;
-}
-
-.menu-category-label {
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-}
-
-.menu-category-chevron {
-  flex-shrink: 0;
-}
-
-.menu-card {
-  width: 100%;
-  min-width: 0;
-  display: flex;
-  align-items: stretch;
-  gap: 8px;
-}
-
 .button-container {
   display: flex;
   flex-direction: column;
@@ -122,36 +53,6 @@ h1 {
   max-width: 500px;
   margin: 0 auto;
   width: 100%;
-}
-
-.menu-row {
-  display: flex;
-  align-items: stretch;
-  gap: 8px;
-}
-
-.menu-row > button:first-child {
-  flex: 1;
-}
-
-.menu-divider {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  margin: 1.25rem 0 2px 0;
-  color: #5f6f80;
-  font-size: 15px;
-  font-weight: bold;
-  text-transform: uppercase;
-  letter-spacing: 0.06em;
-}
-
-.menu-divider::before,
-.menu-divider::after {
-  content: '';
-  height: 1px;
-  flex: 1;
-  background: #c7d4e1;
 }
 
 button {
@@ -223,75 +124,8 @@ button:disabled {
   text-align: left;
 }
 
-.menu-card-btn {
-  flex: 1;
-  display: flex;
-  flex-direction: row;
-  align-items: center;
-  justify-content: space-between;
-  gap: 10px 14px;
-  padding: 20px 22px;
-  min-height: 84px;
-  border-radius: 18px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
-  transition: transform 0.15s ease, box-shadow 0.15s ease, filter 0.15s ease;
-}
-
-.menu-card-btn:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.12);
-  filter: brightness(1.03);
-}
-
-.menu-card-btn:active {
-  transform: scale(0.98);
-}
-
-.menu-card-btn.menu-card-locked,
-.menu-card-btn:disabled {
-  background-color: #94a3b8 !important;
-  color: #f1f5f9;
-  cursor: not-allowed;
-  opacity: 0.85;
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
-  transform: none !important;
-  filter: none !important;
-}
-
-.menu-card-btn.menu-card-locked .menu-stars,
-.menu-card-btn:disabled .menu-stars {
-  font-size: 15px;
-  font-weight: 600;
-  opacity: 0.95;
-}
-
-.menu-title,
-.menu-stars {
-  display: inline-block;
-  vertical-align: middle;
-}
-
-.menu-title {
-  flex: 1;
-  font-size: 20px;
-  font-weight: bold;
-  letter-spacing: -0.01em;
-  text-align: left;
-  line-height: 1.25;
-}
-
-.menu-stars {
-  margin-left: 8px;
-  font-size: 18px;
-  opacity: 0.95;
-  text-align: right;
-  white-space: nowrap;
-}
-
-.menu-stars svg {
-  display: inline-block;
-  vertical-align: middle;
-}
+.star.gold { color: #FFD700; }
+.star.grey { color: #ccc; }
 
 .btn-back,
 .btn-top-action {
@@ -431,18 +265,6 @@ button:disabled {
   stroke: currentColor;
   color: inherit;
   flex-shrink: 0;
-}
-
-.menu-play-btn {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: auto;
-  min-width: 58px;
-  padding: 0 14px;
-  font-size: 28px;
-  border-radius: 16px;
-  background-color: #1f4e79;
 }
 
 .score-board {
@@ -1018,47 +840,6 @@ button:disabled {
   button {
     font-size: 24px;
     padding: 24px;
-  }
-
-  .menu-cards {
-    grid-template-columns: 1fr;
-    gap: 10px;
-  }
-
-  .menu-card {
-    width: 100%;
-    min-width: 0;
-  }
-
-  .menu-card-btn {
-    padding: 16px 18px;
-    min-height: 74px;
-    gap: 8px 10px;
-  }
-
-  .menu-title {
-    font-size: 18px;
-  }
-
-  .menu-stars {
-    font-size: 16px;
-    margin-left: 0;
-  }
-
-  .menu-row {
-    align-items: center;
-  }
-
-  .menu-play-btn {
-    min-width: 50px;
-    font-size: 22px;
-    padding: 0 10px;
-    border-radius: 16px;
-  }
-
-  .menu-divider {
-    margin: 4px 0 0 0;
-    font-size: 13px;
   }
 
   .levels-grid {
@@ -2197,4 +1978,8 @@ button:disabled {
   .smiley-detail-info p {
     font-size: 13px;
   }
+}
+
+.level-btn {
+  height: 100%;
 }

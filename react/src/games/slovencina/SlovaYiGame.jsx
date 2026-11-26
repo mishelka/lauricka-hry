@@ -146,8 +146,10 @@ export default function SlovaYiGame() {
                   disabled={!unlocked}
                   onClick={() => startLevel(level)}
                 >
-                  {`Level ${level + 1}`}
-                  <small>{renderStars(best)}</small>
+                  <div style={{display: 'flex', flexDirection: 'row', justifyContent: 'center', gap: '0.5rem', paddingBottom: '0.125rem'}}>
+                    <div>{`Level ${level + 1}`}</div>
+                    <small>{renderStars(best)}</small>
+                  </div>
                   {!unlocked && <small>{`Najprv získaj 5★ v leveli ${level}`}</small>}
                 </button>
                 {best === MAX_STARS && (

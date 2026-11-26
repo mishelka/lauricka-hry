@@ -227,9 +227,11 @@ export default function RatanieGame() {
                   disabled={!unlocked}
                   onClick={() => startLevel(level)}
                 >
-                  {`Level ${level + 1}`}
+                  <div style={{display: 'flex', flexDirection: 'row', justifyContent: 'center', gap: '0.5rem', paddingBottom: '0.125rem'}}>
+                    <div>{`Level ${level + 1}`}</div>
+                    <small>{renderStars(best)}</small>
+                  </div>
                   <small>{`${config.mode === 'add' ? 'Sčítanie' : (config.mode === 'sub' ? 'Odčítanie' : 'Sčítanie a odčítanie')} • 1-${config.max}`}</small>
-                  <small>{renderStars(best)}</small>
                   {!unlocked && <small>{`Najprv získaj 5★ v leveli ${level}`}</small>}
                 </button>
                 {best === MAX_STARS && (

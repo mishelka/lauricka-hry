@@ -280,7 +280,7 @@ export default function WordFillGame({ title, gameId, levelGroups, sourceWords }
                   onClick={() => startLevel(level)}
                   disabled={!unlocked}
                 >
-                  <span className="level-number">{`Level ${level + 1}`}</span>
+                  <span className="level-number">{`Level ${level + 1}`}&nbsp;</span>
                   <span className="level-stars">{renderStars(best)}</span>
                   {!unlocked && <small>Najprv získaj 5★ v predchádzajúcom leveli</small>}
                 </button>

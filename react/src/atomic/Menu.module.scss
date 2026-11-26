@@ -1,0 +1,221 @@
+.container {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  width: 100%;
+  padding: 0 10px;
+}
+
+.section {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  width: 100%;
+  background-color: white;
+  border-radius: 1rem;
+  padding: 1rem;
+
+  &[hidden] {display: none;}
+
+  .heading {
+    margin: 0;
+    font: inherit;
+
+    .divider {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      margin: 2px 0;
+      color: #5f6f80;
+      font-size: 14px;
+      font-weight: bold;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+
+      min-height: 44px;
+      padding: 8px 0;
+      background: transparent;
+      border-radius: 8px;
+      font-family: inherit;
+
+      &:hover {
+        background: #e2eef9;
+        color: #334e68;
+      }
+      &:focus-visible {
+        outline: 3px solid #3b82f6;
+        outline-offset: 3px;
+      }
+
+      span {
+        padding: 0 10px;
+        &.label {
+          display: inline-flex;
+          align-items: center;
+          gap: 8px;
+        }
+
+        .categoryChevron {
+          flex-shrink: 0;
+          width: 18px;
+          height: 18px;
+          fill: none;
+          stroke-width: 2.5;
+          stroke-linecap: round;
+          stroke-linejoin: round;
+          transform: rotate(0deg);
+          transition: transform 0.2s ease-in-out;
+
+          &.rotated {
+            transform: rotate(180deg);
+          }
+        }
+      }
+
+      &::before, &::after {
+        content: '';
+        height: 1px;
+        flex: 1;
+        background: #c7d4e1;
+      }
+
+      @media (max-width: 480px) {
+        margin: 4px 0 0 0;
+        font-size: 13px;
+      }
+    }
+
+    @media (max-width: 480px) {
+      .divider {
+        margin: -2px 0;
+        font-size: 12px;
+      }
+    }
+  }
+}
+
+.menuCardsWrapper {
+  overflow: hidden;
+  height: 0;
+  transition: height 0.2s ease;
+}
+
+.menuCards {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+  gap: 14px;
+  width: 100%;
+  align-items: stretch;
+  overflow: hidden;
+
+  @media (max-width: 480px) {
+    grid-template-columns: 1fr;
+    gap: 10px;
+  }
+}
+
+.menuItem {
+  width: 100%;
+  min-width: 0;
+  display: flex;
+  align-items: stretch;
+  gap: 8px;
+
+  .title, .stars { display: inline-block; vertical-align: middle; }
+  .title {
+    flex: 1;
+    font-size: 20px;
+    font-weight: bold;
+    letter-spacing: -0.01em;
+    text-align: left;
+    line-height: 1.25;
+
+    @media (max-width: 480px) { font-size: 18px; }
+  }
+  .stars {
+    margin-left: 8px;
+    font-size: 18px;
+    opacity: 0.95;
+    text-align: right;
+    white-space: nowrap;
+
+    svg {
+      display: inline-block;
+      vertical-align: middle;
+    }
+
+    @media (max-width: 480px) {
+      font-size: 16px;
+      margin-left: 0;
+      text-align: left;
+    }
+  }
+
+  .btn {
+    flex: 1;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px 14px;
+    padding: 20px 22px;
+    min-height: 84px;
+    border-radius: 18px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+    transition: transform 0.15s ease, box-shadow 0.15s ease, filter 0.15s ease;
+
+    &:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 16px rgba(0, 0, 0, 0.12);
+      filter: brightness(1.03);
+    }
+    &:active { transform: scale(0.98); }
+
+    &.menuCardLocked, &:disabled {
+      background-color: #94a3b8 !important;
+      color: #f1f5f9;
+      cursor: not-allowed;
+      opacity: 0.85;
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
+      transform: none !important;
+      filter: none !important;
+
+      .stars {
+        font-size: 15px;
+        font-weight: 600;
+        opacity: 0.95;
+      }
+    }
+
+    @media (max-width: 480px) {
+      padding: 16px 18px;
+      min-height: 74px;
+      gap: 8px 10px;
+    }
+  }
+
+  .playBtn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: auto;
+    min-width: 58px;
+    padding: 0 14px;
+    font-size: 28px;
+    border-radius: 16px;
+    background-color: #1f4e79;
+
+    &:focus {
+      outline: 2px solid #fff;
+      outline-offset: 2px;
+    }
+
+    @media (max-width: 480px) {
+      min-width: 50px;
+      font-size: 22px;
+      padding: 0 10px;
+      border-radius: 16px;
+    }
+  }
+}
