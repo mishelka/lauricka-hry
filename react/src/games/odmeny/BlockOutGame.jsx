@@ -73,7 +73,6 @@ export default function BlockOutGame({
   const [dragInfo, setDragInfo] = useState(null); // { blockId, offsetX, offsetY, activeDir }
   const [moves, setMoves] = useState(0);
   const [history, setHistory] = useState([]);
-  const [muted, setMuted] = useState(false);
   const [message, setMessage] = useState('');
   
   const fireworksRef = useRef(null);
@@ -226,12 +225,6 @@ export default function BlockOutGame({
     clearBlockOutSavedState(currentLevelIndex);
     setSavedStates(getBlockOutSavedStates());
     startLevel(currentLevelIndex, { forceReset: true, countPlay: false });
-  };
-
-  const toggleMute = () => {
-    const nextMuted = !muted;
-    setMuted(nextMuted);
-    sounds.setMuted(nextMuted);
   };
 
   const findDoorAt = useCallback((side, index) => {
@@ -854,7 +847,7 @@ export default function BlockOutGame({
 
       {gameState === 'levels' && (
         <>
-          <HeaderComponent title="🧩 Block Out! - Výber levelu" onBack={handleExit} backTitle="Späť do menu" muted={muted} onToggleMute={toggleMute} />
+          <HeaderComponent title="🧩 Block Out! - Výber levelu" onBack={handleExit} backTitle="Späť do menu" />
           <LevelSelectComponent
             levels={BLOCK_OUT_LEVELS}
             levelStars={levelStars}
@@ -883,8 +876,6 @@ export default function BlockOutGame({
             onUndo={undoMove}
             canUndo={history.length > 0}
             onRestart={resetCurrentLevel}
-            muted={muted}
-            onToggleMute={toggleMute}
           />
 
           <StatusBarComponent moves={moves} message={message} />

@@ -1,3 +1,4 @@
+import { learningSounds } from '../../utils/learningSounds';
 import { GameToolbar, GameStatus } from '../../atomic/GameLayout';
 import { useMemo, useRef, useState } from 'react';
 import { SLOVA_YI_GROUPS, SLOVA_YI_TASKS } from '../../data/tasks';
@@ -70,6 +71,7 @@ export default function SlovaYiGame() {
   }
 
   function finishLevel(finalMiss, wrongSet) {
+    learningSounds.complete();
     const stars = getStarCount(finalMiss);
     const previous = levelStars[selectedLevel] || 0;
     const best = Math.max(previous, stars);
@@ -85,6 +87,7 @@ export default function SlovaYiGame() {
 
     const correctOptionId = getVybraneOptionId(task);
     if (optionId === correctOptionId) {
+      learningSounds.correct();
       setFeedbackMap(prev => ({ ...prev, [optionId]: 'correct' }));
       setDisabledOptions(new Set(['makke', 'makke-dlhe', 'tvrde', 'tvrde-dlhe']));
       if (mistakesOnCurrent === 0) setHit(prev => prev + 1);
@@ -103,6 +106,7 @@ export default function SlovaYiGame() {
       return;
     }
 
+    learningSounds.incorrect();
     setFeedbackMap(prev => ({ ...prev, [optionId]: 'wrong' }));
     setDisabledOptions(prev => {
       const next = new Set(prev);
@@ -225,7 +229,7 @@ export default function SlovaYiGame() {
     <>
       <div className="game-ui">
         <GameToolbar title="Doplň správne i/y:" onBack={() => setSelectedLevel(null)} onRestart={() => startLevel(selectedLevel)} />
-        <GameStatus>
+        <GameStatus variant="spelling">
           <div className="current-level">{`Level ${selectedLevel + 1} • Najlepšie: ${levelStars[selectedLevel] || 0}/5 ★`}</div>
           <div className="score-board">
             Správne: <span className="score-hit">{hit}</span> | Chyby: <span className="score-miss">{miss}</span>
@@ -233,6 +237,7 @@ export default function SlovaYiGame() {
           <div className="prompt prompt-words">{displayWord}</div>
         </GameStatus>
         <IyChoiceButtons
+          className="button-grid-2x2 word-answer-grid"
           task={currentTask}
           onCheck={check}
           disabledOptions={disabledOptions}

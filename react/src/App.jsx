@@ -1,4 +1,5 @@
 import GameLayout, { GameLayoutContext } from './atomic/GameLayout';
+import SoundPreview from './atomic/SoundPreview';
 import { Navigate, Route, Routes, useLocation, useNavigate } from 'react-router-dom';
 import { DOPLNOVACKY_DTNL_GROUPS, DOPLNOVACKY_B_GROUPS } from './data/tasks';
 import { VYBRANE_B_GROUPS } from './data/vybraneBSlova';
@@ -351,6 +352,7 @@ export default function App() {
         <div className="app-container">
           <Routes>
             <Route path="/" element={<MenuPage />} />
+            <Route path="/zvuky" element={<SoundPreview />} />
             <Route path="/yi" element={<YiGame />} />
             <Route path="/obojake" element={<ObojakeGame />} />
             <Route path="/slova" element={<SlovaYiGame />} />

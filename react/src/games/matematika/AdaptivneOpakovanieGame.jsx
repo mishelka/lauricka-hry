@@ -1,3 +1,4 @@
+import { learningSounds } from '../../utils/learningSounds';
 import NumericKeypad from '../../atomic/NumericKeypad';
 import MathGameLayout from '../../atomic/MathGameLayout';
 import { GameToolbar, GameStatus } from '../../atomic/GameLayout';
@@ -108,6 +109,7 @@ export default function AdaptivneOpakovanieGame() {
   }
 
   function finishRound(finalMiss) {
+    learningSounds.complete();
     const stars = getStarCount(finalMiss);
     updateBestStars(GAME_ID, stars);
     setRoundStars(stars);
@@ -140,6 +142,7 @@ export default function AdaptivneOpakovanieGame() {
     if (status === 'correct' || resultVisible || !current || inputDigits === '') return;
 
     if (Number(inputDigits) === current.result) {
+      learningSounds.correct();
       setStatus('correct');
       setFeedback({ type: 'correct', text: 'Správne' });
       const isFirstAttempt = mistakesOnCurrent === 0;
@@ -162,6 +165,7 @@ export default function AdaptivneOpakovanieGame() {
 
     setStatus('wrong');
     setMiss(previous => previous + 1);
+    learningSounds.incorrect();
     setMistakesOnCurrent(previous => previous + 1);
     recordAnswer(false);
     setFeedback({ type: 'wrong', text: current.hint || `${current.text} = ${current.result}` });

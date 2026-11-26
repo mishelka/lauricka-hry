@@ -1,3 +1,4 @@
+import { learningSounds } from '../../utils/learningSounds';
 import { GameToolbar, GameStatus } from '../../atomic/GameLayout';
 import { useContext, useEffect, useMemo, useRef, useState } from 'react';
 import { VYBRANE_R_GROUPS, VYBRANE_R_RULES, VYBRANE_R_CHYTAKY } from '../../data/vybraneRSlova';
@@ -99,6 +100,7 @@ export default function VybraneRGame() {
   }
 
   function finishLevel(finalMiss, wrongSet) {
+    learningSounds.complete();
     const stars = getStarCount(finalMiss);
     const previous = levelStars[selectedLevel] || 0;
     const best = Math.max(previous, stars);
@@ -114,6 +116,7 @@ export default function VybraneRGame() {
 
     const correctOptionId = getVybraneOptionId(task);
     if (optionId === correctOptionId) {
+      learningSounds.correct();
       setFeedbackMap(prev => ({ ...prev, [optionId]: 'correct' }));
       setDisabledOptions(new Set(['makke', 'makke-dlhe', 'tvrde', 'tvrde-dlhe']));
       if (mistakesOnCurrent === 0) setHit(prev => prev + 1);
@@ -133,6 +136,7 @@ export default function VybraneRGame() {
       return;
     }
 
+    learningSounds.incorrect();
     setFeedbackMap(prev => ({ ...prev, [optionId]: 'wrong' }));
     setDisabledOptions(prev => {
       const next = new Set(prev);

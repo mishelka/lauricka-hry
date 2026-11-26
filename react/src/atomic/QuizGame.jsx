@@ -1,3 +1,4 @@
+import { learningSounds } from '../utils/learningSounds';
 import { GameToolbar, GameStatus } from './GameLayout';
 import { useMemo, useRef, useState } from 'react';
 import ResultScreen from './ResultScreen';
@@ -54,6 +55,7 @@ export default function QuizGame({
   }
 
   function gotoNextTask() {
+    if (index + 1 >= order.length) learningSounds.complete();
     setIndex(prev => prev + 1);
     setFeedbackMap({});
     setDisabledOptions(new Set());
@@ -68,6 +70,7 @@ export default function QuizGame({
     setBlocked(true);
     const isCorrect = optionId === getCorrectOption(currentTask);
     if (isCorrect) {
+      learningSounds.correct();
       setFeedbackMap(prev => ({ ...prev, [optionId]: 'correct' }));
       if (mistakesOnCurrent === 0) {
         setHit(prev => prev + 1);
@@ -85,6 +88,7 @@ export default function QuizGame({
       return;
     }
 
+    learningSounds.incorrect();
     setMistakesOnCurrent(prev => prev + 1);
     setMiss(prev => prev + 1);
     setFeedbackMap(prev => ({ ...prev, [optionId]: 'wrong' }));
@@ -117,7 +121,7 @@ export default function QuizGame({
     <>
       <div className="game-ui">
         <GameToolbar title={title} onRestart={restart} />
-        <GameStatus>
+        <GameStatus variant="quiz">
           <div className="score-board">
             Správne: <span className="score-hit">{hit}</span> | Chyby: <span className="score-miss">{miss}</span>
           </div>
@@ -126,7 +130,7 @@ export default function QuizGame({
           <div className={`prompt ${promptClassName}`.trim()}>{prompt}</div>
 
         </GameStatus>
-        <div className="button-container">
+        <div className="button-container quiz-answer-list" style={{ '--answer-count': options.length }}>
           {options.map(option => {
             const marker = feedbackMap[option.id];
             const icon = marker === 'correct' ? '✅' : '❌';

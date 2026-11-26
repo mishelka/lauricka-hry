@@ -1,3 +1,4 @@
+import { learningSounds } from '../../utils/learningSounds';
 import NumericKeypad from '../../atomic/NumericKeypad';
 import MathGameLayout from '../../atomic/MathGameLayout';
 import { GameToolbar, GameStatus } from '../../atomic/GameLayout';
@@ -92,6 +93,7 @@ export default function Delenie5Game() {
   }
 
   function finishLevel(finalMiss, wrongSet) {
+    learningSounds.complete();
     const stars = getStarCount(finalMiss);
     const previous = levelStars[selectedLevel] || 0;
     const best = Math.max(previous, stars);
@@ -132,6 +134,7 @@ export default function Delenie5Game() {
 
     const value = Number(inputDigits);
     if (value === current.result) {
+      learningSounds.correct();
       setStatus('correct');
       if (current.hint) setActiveHint(current.hint);
       const isFirstAttempt = mistakesOnCurrent === 0;
@@ -147,6 +150,7 @@ export default function Delenie5Game() {
     setStatus('wrong');
     const newMiss = miss + 1;
     setMiss(newMiss);
+    learningSounds.incorrect();
     setMistakesOnCurrent(prev => prev + 1);
     if (current.hint) setActiveHint(current.hint);
     const nextWrong = new Set(wrongItems);

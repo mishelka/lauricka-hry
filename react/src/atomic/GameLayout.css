@@ -1,4 +1,5 @@
 .app-shell .app-container { padding-top: 0; }
+html { scroll-padding-top: calc(var(--game-chrome-height, 0px) + 8px); }
 .game-chrome {
   position: fixed;
   inset: 0 0 auto;
@@ -29,7 +30,8 @@
 .header-title-slot { min-width: 0; }
 .header-navigation { grid-column: 1; grid-row: 1; }
 .header-title-slot { grid-column: 2; grid-row: 1; }
-.header-action-slot { grid-column: 3; grid-row: 1; justify-self: end; margin-right: 52px; }
+.header-action-slot { grid-column: 3; grid-row: 1; justify-self: end; margin-right: 104px; }
+.header-sound { grid-column: 3; grid-row: 1; justify-self: end; margin-right: 52px !important; }
 .header-profile { grid-column: 3; grid-row: 1; justify-self: end; }
 .header-title-slot h1 {
   margin: 0;
@@ -63,12 +65,13 @@
 }
 .main-game-header .header-home, .main-game-header .header-back { background: #111827; }
 .main-game-header .header-profile { background: #7c3aed; }
+.main-game-header .header-sound { background: #8a2be2; }
 .main-game-header button:disabled { opacity: .4; cursor: not-allowed; }
 .main-game-header button:focus-visible { outline: 3px solid #f59e0b; outline-offset: 3px; }
 .main-game-header svg { width: 23px; height: 23px; flex-shrink: 0; }
 .game-status-slot:empty { display: none; }
 .game-status {
-  height: 300px;
+  height: 160px;
   overflow: visible;
   margin-top: 8px;
   padding: 12px 16px;
@@ -85,10 +88,11 @@
 .game-status .level-progress-message { margin: 0 0 6px; font-size: 14px; }
 @media (max-width: 760px) {
   .game-chrome { padding-inline: 6px; }
-  .main-game-header { grid-template-columns: auto minmax(0, 1fr) auto auto; gap: 6px; padding: 8px; border-radius: 16px; }
+  .main-game-header { grid-template-columns: auto minmax(0, 1fr) auto auto auto; gap: 6px; padding: 8px; border-radius: 16px; }
   .header-navigation { grid-column: 1; grid-row: 1; gap: 4px; }
   .header-title-slot { grid-column: 2; grid-row: 1; }
-  .header-profile { grid-column: 4; grid-row: 1; }
+  .header-sound { grid-column: 4; grid-row: 1; margin-right: 0 !important; }
+  .header-profile { grid-column: 5; grid-row: 1; }
   .header-action-slot { grid-column: 3; grid-row: 1; margin-right: 0; }
   .main-game-header .header-menu-toggle { display: inline-flex; }
   .header-menu-content {
@@ -102,10 +106,17 @@
     z-index: 2;
   }
   .header-menu-content[data-open="false"] { display: none; }
-  .game-status { height: 320px; padding: 10px; }
+  .game-status { height: 160px; padding: 10px; }
   .game-status-compact { height: 56px; }
 }
-.game-status-info { height: 110px; }
+@media (max-width: 380px) {
+  .main-game-header button { width: 36px; min-width: 36px; height: 40px; min-height: 40px; }
+  .header-title-slot h1 { font-size: 14px; }
+  .main-game-header svg { width: 20px; height: 20px; }
+}
+.game-status-info { height: 76px; display: flex; flex-direction: column; justify-content: center; padding: 8px 12px; }
+.game-status-info .level-menu-help { margin: 0 0 4px; font-size: 14px; line-height: 18px; }
+.game-status-info .score-board { margin: 0; font-size: 14px; line-height: 18px; }
 .game-status-blockout { height: 56px; display: flex; align-items: center; justify-content: center; gap: 12px; padding: 6px 12px; }
 .blockout-status-message { min-height: 20px; font-size: 13px; line-height: 20px; }
 .main-game-header .header-game-actions > button[title="Reštartovať level"] { background: #5f9ea0; }
@@ -130,4 +141,27 @@
 .word-answer-grid button { height: clamp(48px, 9vh, 76px); padding: 0; font-size: 28px; }
 @media (max-width: 600px) {
   .game-status-words { height: 224px; }
+}
+
+.game-status-quiz, .game-status-spelling { display: flex; flex-direction: column; justify-content: center; height: 144px; padding: 12px; }
+.game-status-spelling { height: 160px; }
+.game-status-quiz > *, .game-status-spelling > * { flex-shrink: 0; }
+.game-status-quiz .score-board, .game-status-quiz .best-stars,
+.game-status-spelling .score-board, .game-status-spelling .current-level { margin: 0; font-size: 14px; line-height: 18px; }
+.game-status.game-status-quiz .prompt, .game-status.game-status-spelling .prompt { margin: 6px 0 0 !important; padding: 4px !important; min-height: 40px !important; line-height: 1.2; }
+.game-status.game-status-quiz .prompt { font-size: 36px; }
+.game-status.game-status-spelling .prompt { font-size: 26px; letter-spacing: 3px; }
+.button-container.quiz-answer-list { gap: 10px; padding: 0; max-width: 520px; margin: 0 auto; }
+.quiz-answer-list button { height: clamp(44px, 9vh, 64px); padding: 4px 12px; font-size: clamp(18px, 3.5vh, 24px); }
+.quiz-answer-list .icon { font-size: 28px; right: 14px; }
+@media (max-height: 500px) and (min-aspect-ratio: 4/3) {
+  .button-container.quiz-answer-list { display: grid; grid-template-columns: repeat(var(--answer-count), minmax(0, 1fr)); max-width: 860px; }
+}
+@media (max-height: 500px) and (min-aspect-ratio: 4/3) {
+  .button-grid-2x2.word-answer-grid { grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 8px; }
+  .game-status-words { height: 172px; padding: 10px 12px; }
+  .game-status-words .current-level, .game-status-words .score-board { font-size: 13px; line-height: 16px; }
+  .game-status.game-status-words .prompt { font-size: 24px; min-height: 36px !important; padding: 4px !important; }
+  .game-status.game-status-words .prompt-sentence { font-size: 20px !important; }
+  .game-status.game-status-words .hint-box { font-size: 14px !important; line-height: 16px; padding: 4px !important; }
 }

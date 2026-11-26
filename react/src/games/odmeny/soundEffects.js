@@ -1,4 +1,4 @@
-class SoundEffects {
+export class SoundEffects {
   constructor() {
     this.ctx = null;
     this.muted = false;

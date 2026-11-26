@@ -1,3 +1,4 @@
+import { learningSounds } from '../../utils/learningSounds';
 import NumericKeypad from '../../atomic/NumericKeypad';
 import MathGameLayout from '../../atomic/MathGameLayout';
 import { GameToolbar, GameStatus } from '../../atomic/GameLayout';
@@ -118,6 +119,7 @@ export default function RatanieGame() {
   }
 
   function finishLevel(finalMiss, wrongSet) {
+    learningSounds.complete();
     const stars = getStarCount(finalMiss);
     const previous = levelStars[selectedLevel] || 0;
     const best = Math.max(previous, stars);
@@ -180,6 +182,7 @@ export default function RatanieGame() {
     const value = Number(valueText);
 
     if (value === current.result) {
+      learningSounds.correct();
       setLocked(true);
       if (mistakesOnCurrent === 0) setHit(prev => prev + 1);
       triggerFireworks(fireworksRef.current);
@@ -187,6 +190,7 @@ export default function RatanieGame() {
       return;
     }
 
+    learningSounds.incorrect();
     setMistakesOnCurrent(prev => prev + 1);
     setMiss(prev => prev + 1);
     setWrongItems(prev => {

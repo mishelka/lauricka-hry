@@ -1,3 +1,4 @@
+import { learningSounds } from '../utils/learningSounds';
 import { GameToolbar, GameStatus } from './GameLayout';
 import { useMemo, useRef, useState } from 'react';
 import { getStarCount, shuffleArray, triggerFireworks } from '../utils/gameUtils';
@@ -171,6 +172,9 @@ export default function WordFillGame({ title, gameId, levelGroups, sourceWords }
       }
     });
 
+    if (mistakesCount === 0) learningSounds.correct();
+    else learningSounds.incorrect();
+    learningSounds.complete(.55);
     setWrongWords(wrong);
     setSubmitted(true);
 
@@ -304,7 +308,7 @@ export default function WordFillGame({ title, gameId, levelGroups, sourceWords }
       {!submitted ? (
         <GameStatus variant="info">
             <p className="level-menu-help">
-              Doplň správne písmená do všetkých 10 slov a stlač <strong>Skontrolovať</strong>:
+              Doplň písmená a stlač <strong>Skontrolovať</strong>.
             </p>
             <div className="score-board">
               Doplnené: <span className="score-hit">{filledCount}</span> / {words.length}

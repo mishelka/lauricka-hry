@@ -3,6 +3,7 @@ import { createPortal } from 'react-dom';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { BackIcon, HomeIcon, UserIcon, RestartIcon } from './Icons';
 import PlayerProfileModal from './PlayerProfileModal';
+import SoundToggle from './SoundToggle';
 import { getPlayerName } from '../utils/player';
 import './GameLayout.css';
 
@@ -94,6 +95,7 @@ export default function GameLayout({ children }) {
               <div className="header-default-actions">{rightAction}</div>
             </div>
           </div>
+          <SoundToggle />
           <button type="button" className="header-icon-button header-profile" onClick={() => setProfileOpen(true)} title={getPlayerName() || 'Profil hráča'} aria-label="Profil hráča"><UserIcon /></button>
         </header>
         <div className="game-status-slot" ref={setStatusSlot} />
