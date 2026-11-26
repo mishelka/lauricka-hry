@@ -141,7 +141,7 @@ function MenuPage() {
         <MenuSection categoryId="matematika" title="Matematické hry">
             <div className="menu-card">
               <button className="btn-menu-ratanie menu-card-btn" onClick={() => navigate('/ratanie')}>
-                <span className="menu-title">Rátanie</span>
+                <span className="menu-title">Rátanie + a -</span>
                 <span className="menu-stars">{`${ratanieFinished} z 10`}</span>
               </button>
             </div>
