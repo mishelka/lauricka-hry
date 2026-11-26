@@ -2,7 +2,7 @@
 .game-chrome {
   position: fixed;
   inset: 0 0 auto;
-  z-index: 1200;
+  z-index: var(--layer-game-header);
   padding: max(8px, env(safe-area-inset-top)) 10px 8px;
   background: #f0f8ff;
 }
@@ -95,7 +95,6 @@
 .game-status .digit-input { padding: 0; border-radius: 8px; }
 .game-status .math-row { height: 42px; }
 .game-status .level-progress-message { margin: 0 0 6px; font-size: 14px; }
-.profile-modal-backdrop, .reward-overlay-backdrop { z-index: 1500; }
 @media (max-width: 760px) {
   .game-chrome { padding-inline: 6px; }
   .main-game-header { grid-template-columns: auto minmax(0, 1fr) auto auto; gap: 6px; padding: 8px; border-radius: 16px; }

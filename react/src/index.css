@@ -3,6 +3,9 @@
 /* Jednotka výšky obrazovky – dvh (ak ju prehliadač pozná) počíta so skutočne viditeľnou plochou aj na mobile */
 :root {
   --vh: 1vh;
+  --layer-game-header: 1200;
+  --layer-game-reward: 1500;
+  --layer-player-profile: 2000;
 }
 
 @supports (height: 1dvh) {
@@ -1428,7 +1431,7 @@ button:disabled {
   display: flex;
   align-items: center;
   justify-content: center;
-  z-index: 1000;
+  z-index: var(--layer-player-profile);
   padding: 16px;
   animation: fadeIn 0.2s ease-out;
 }
@@ -2141,7 +2144,7 @@ button:disabled {
   display: flex;
   align-items: center;
   justify-content: center;
-  z-index: 900;
+  z-index: var(--layer-game-reward);
   padding: 16px;
   animation: fadeIn 0.2s ease-out;
 }

@@ -1,4 +1,5 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
+import { createPortal } from 'react-dom';
 import { getAdaptiveProgress, getCollectedSmileyIds, getPlayerName, getPlayerStats, getSmileyCollection, setPlayerName } from '../utils/player';
 import { getNasobilkaOverview } from '../utils/nasobilkaRewards';
 import { MASTERY_STREAK } from '../utils/adaptiveRepetition';
@@ -91,7 +92,7 @@ export default function PlayerProfileModal({ isOpen, onClose, onNameChange, init
     setNameInput(playerName);
   };
 
-  return (
+  return createPortal(
     <div className="profile-modal-backdrop" ref={dialogRef} onClick={onClose} onKeyDown={handleDialogKeyDown} role="dialog" aria-modal="true" aria-label="Profil hráča" data-scrollable>
       <div className="profile-modal-card" onClick={e => e.stopPropagation()}>
         <div className="profile-modal-header">
@@ -423,6 +424,7 @@ export default function PlayerProfileModal({ isOpen, onClose, onNameChange, init
           </div>
         )}
       </div>
-    </div>
+    </div>,
+    document.body
   );
 }
