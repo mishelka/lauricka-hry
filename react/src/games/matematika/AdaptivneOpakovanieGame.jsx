@@ -1,3 +1,4 @@
+import AnswerProgress from '../../atomic/AnswerProgress';
 import { learningSounds } from '../../utils/learningSounds';
 import NumericKeypad from '../../atomic/NumericKeypad';
 import MathGameLayout from '../../atomic/MathGameLayout';
@@ -302,8 +303,14 @@ export default function AdaptivneOpakovanieGame() {
         <div className="card">
           <MathGameLayout variant="math">
             <GameStatus variant="math" inline>
-              <div className="current-level">Nekonečný mód • Úloha {index + 1}/{examples.length}</div>
-              <div className="score-board">Správne: {hit} | Chyby: {miss} • Zvládnuté: {masteredCount}</div>
+              <div className="current-level">Nekonečný mód • Zvládnuté: {masteredCount}</div>
+              <div className="score-board">
+                Správne: <span className="score-hit">{hit}</span> | Chyby: <span className="score-miss">{miss}</span>
+                <AnswerProgress
+                  answered={index + (mistakesOnCurrent > 0 || status === 'correct' ? 1 : 0)}
+                  total={examples.length}
+                />
+              </div>
               <div className="math-horizontal-container">
                 <div className="math-expr-text">{current.text} =</div>
                 <div className={`math-input-box ${status}`}>

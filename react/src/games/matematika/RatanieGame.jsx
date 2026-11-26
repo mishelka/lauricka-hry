@@ -1,3 +1,4 @@
+import AnswerProgress from '../../atomic/AnswerProgress';
 import { learningSounds } from '../../utils/learningSounds';
 import NumericKeypad from '../../atomic/NumericKeypad';
 import MathGameLayout from '../../atomic/MathGameLayout';
@@ -313,9 +314,13 @@ export default function RatanieGame() {
         <GameToolbar title="Rátanie" onBack={() => setSelectedLevel(null)} onRestart={() => startLevel(selectedLevel)} />
         <MathGameLayout variant="written">
           <GameStatus variant="written" inline>
-            <div className="current-level">{`Level ${selectedLevel + 1} • Príklad ${index + 1}/${TOTAL}`}</div>
+            <div className="current-level">{`Level ${selectedLevel + 1} • Najlepšie: ${levelStars[selectedLevel] || 0}/5 ★`}</div>
             <div className="score-board">
-              Správne: <span className="score-hit">{hit}</span> | Chyby: <span className="score-miss">{miss}</span> • <span title="Najlepšie skóre">★ {levelStars[selectedLevel] || 0}/5</span>
+              Správne: <span className="score-hit">{hit}</span> | Chyby: <span className="score-miss">{miss}</span>
+              <AnswerProgress
+                answered={index + (mistakesOnCurrent > 0 || locked ? 1 : 0)}
+                total={examples.length}
+              />
             </div>
             <div className="prompt prompt-ratanie">
               <div className="vertical-math">

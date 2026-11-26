@@ -1,3 +1,4 @@
+import AnswerProgress from '../../atomic/AnswerProgress';
 import { learningSounds } from '../../utils/learningSounds';
 import NumericKeypad from '../../atomic/NumericKeypad';
 import MathGameLayout from '../../atomic/MathGameLayout';
@@ -316,6 +317,10 @@ export default function Delenie5Game() {
             </div>
             <div className="score-live">
               Správne: <span className="score-hit">{hit}</span> | Chyby: <span className="score-miss">{miss}</span>
+              <AnswerProgress
+                answered={index + (mistakesOnCurrent > 0 || status === 'correct' ? 1 : 0)}
+                total={examples.length}
+              />
             </div>
 
             <div className="math-horizontal-container">

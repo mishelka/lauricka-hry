@@ -1,3 +1,4 @@
+import AnswerProgress from '../../atomic/AnswerProgress';
 import { learningSounds } from '../../utils/learningSounds';
 import { GameToolbar, GameStatus } from '../../atomic/GameLayout';
 import { useMemo, useRef, useState } from 'react';
@@ -235,6 +236,10 @@ export default function SlovaYiGame() {
           <div className="current-level">{`Level ${selectedLevel + 1} • Najlepšie: ${levelStars[selectedLevel] || 0}/5 ★`}</div>
           <div className="score-board">
             Správne: <span className="score-hit">{hit}</span> | Chyby: <span className="score-miss">{miss}</span>
+            <AnswerProgress
+              answered={index + (mistakesOnCurrent > 0 || Object.values(feedbackMap).includes('correct') ? 1 : 0)}
+              total={order.length}
+            />
           </div>
           <div className="prompt prompt-words">{displayWord}</div>
         </GameStatus>

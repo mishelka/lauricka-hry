@@ -1,3 +1,4 @@
+import AnswerProgress from '../../atomic/AnswerProgress';
 import { learningSounds } from '../../utils/learningSounds';
 import { GameToolbar, GameStatus } from '../../atomic/GameLayout';
 import { useContext, useEffect, useMemo, useRef, useState } from 'react';
@@ -219,6 +220,10 @@ export default function VybraneOpakovanieGame() {
             </div>
             <div className="score-board">
               Správne: <span className="score-hit">{hit}</span> | Chyby: <span className="score-miss">{miss}</span>
+              <AnswerProgress
+                answered={index + (mistakesOnCurrent > 0 || Object.values(feedbackMap).includes('correct') ? 1 : 0)}
+                total={order.length}
+              />
             </div>
 
             <div
