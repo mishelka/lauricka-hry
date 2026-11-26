@@ -65,6 +65,44 @@ h1 {
   align-items: stretch;
 }
 
+.menu-section[hidden],
+.menu-cards[hidden] {
+  display: none;
+}
+
+.menu-section-heading {
+  margin: 0;
+  font: inherit;
+}
+
+.menu-divider.menu-category-toggle {
+  min-height: 44px;
+  padding: 8px 0;
+  background: transparent;
+  border-radius: 8px;
+  font-family: inherit;
+}
+
+.menu-category-toggle:hover {
+  background: #e2eef9;
+  color: #334e68;
+}
+
+.menu-category-toggle:focus-visible {
+  outline: 3px solid #3b82f6;
+  outline-offset: 3px;
+}
+
+.menu-category-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.menu-category-chevron {
+  flex-shrink: 0;
+}
+
 .menu-card {
   width: 100%;
   min-width: 0;

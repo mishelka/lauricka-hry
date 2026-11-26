@@ -9,7 +9,8 @@ import { VYBRANE_R_GROUPS } from './data/vybraneRSlova';
 import { VYBRANE_S_GROUPS } from './data/vybraneSSlova';
 import { VYBRANE_V_GROUPS } from './data/vybraneVSlova';
 import { VYBRANE_Z_GROUPS } from './data/vybraneZSlova';
-import { getBestStars, getCollectedSmileyIds, getLevelStars, getPlayerName, getTotalStars, unlockAllLevels, unlockAllLevelsOnce } from './utils/player';
+import { getBestStars, getCollectedSmileyIds, getLevelStars, getPlayerName, getTotalStars, unlockAllLevels } from './utils/player';
+import MenuSection from './atomic/MenuSection';
 import useDevUnlock from './utils/useDevUnlock';
 import { YiGame, ObojakeGame, SlovaYiGame, CudzieGame, DoplnovackyMenu, DoplnovackyDtnlGame, DoplnovackyBGame } from './games/slovencina';
 import { VybraneBGame, VybraneMGame, VybranePGame, VybraneRGame, VybraneSGame, VybraneVGame, VybraneZGame, VybraneOpakovanieGame } from './games/vybraneSlova';
@@ -180,12 +181,7 @@ function MenuPage() {
       />
 
       <div className="menu-container">
-        <div className="menu-section">
-          <div className="menu-divider" role="separator" aria-label="Oddelovač kategórií">
-            <span>Matematické hry</span>
-          </div>
-
-          <div className="menu-cards">
+        <MenuSection categoryId="matematika" title="Matematické hry">
             <div className="menu-card">
               <button className="btn-menu-ratanie menu-card-btn" onClick={() => navigate('/ratanie')}>
                 <span className="menu-title">Rátanie</span>
@@ -215,15 +211,9 @@ function MenuPage() {
                 </span>
               </button>
             </div>
-          </div>
-        </div>
+        </MenuSection>
 
-        <div className="menu-section">
-          <div className="menu-divider" role="separator" aria-label="Oddelovač kategórií">
-            <span>Slovenčina</span>
-          </div>
-
-          <div className="menu-cards">
+        <MenuSection categoryId="slovencina" title="Slovenčina">
             <div className="menu-card">
               <button className="btn-menu-yi menu-card-btn" onClick={() => navigate('/yi')}>
                 <span className="menu-title">Mäkké a Tvrdé</span>
@@ -274,15 +264,9 @@ function MenuPage() {
                 <span className="menu-stars">{`${doplnovackyFinished} z ${doplnovackyTotal}`}</span>
               </button>
             </div>
-          </div>
-        </div>
+        </MenuSection>
 
-        <div className="menu-section">
-          <div className="menu-divider" role="separator" aria-label="Oddelovač kategórií">
-            <span>Vybrané slová</span>
-          </div>
-
-          <div className="menu-cards">
+        <MenuSection categoryId="vybrane-slova" title="Vybrané slová">
             <div className="menu-card">
               <button
                 className="btn-menu-vybrane-opakovanie menu-card-btn"
@@ -385,23 +369,16 @@ function MenuPage() {
                 </span>
               </button>
             </div>
-          </div>
-        </div>
+        </MenuSection>
 
-        <div className="menu-section" style={{ display: 'none' }}>
-          <div className="menu-divider" role="separator" aria-label="Oddelovač kategórií">
-            <span>Hry za odmenu</span>
-          </div>
-
-          <div className="menu-cards">
+        <MenuSection categoryId="odmeny" title="Hry za odmenu" hidden>
             <div className="menu-card">
               <button className="btn-menu-blockout menu-card-btn" onClick={() => navigate('/block-out')}>
                 <span className="menu-title">Block Out!</span>
                 <span className="menu-stars">{`${blockOutFinished} z ${BLOCK_OUT_LEVELS.length}`}</span>
               </button>
             </div>
-          </div>
-        </div>
+        </MenuSection>
       </div>
     </>
   );
@@ -449,12 +426,6 @@ function isVybraneLetterUnlocked(letter) {
 }
 
 export default function App() {
-  // Temporary testing unlock: B is required to enter M. Remove after testing.
-  useState(() => {
-    unlockAllLevelsOnce('vybraneB', VYBRANE_B_GROUPS.length, 'vybraneM_test_prerequisite_B_2026-11-26');
-    unlockAllLevelsOnce('vybraneM', VYBRANE_M_GROUPS.length, 'vybraneM_test_all_2026-11-26');
-  });
-
   return (
     <div className="app-shell">
       <div className="app-container">
